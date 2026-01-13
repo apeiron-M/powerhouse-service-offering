@@ -1,0 +1,19 @@
+{
+    "name": "Resources and Services",
+    "description": "",
+    "category": "Productivity",
+    "publisher": {
+        "name": "",
+        "url": ""
+    },
+    "documentModels": [
+        {
+            "id": "powerhouse/service-offering",
+            "name": "ServiceOffering"
+        }
+    ],
+    "editors": [],
+    "apps": [],
+    "subgraphs": [],
+    "importScripts": []
+}

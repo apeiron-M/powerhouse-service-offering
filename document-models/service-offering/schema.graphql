@@ -1,0 +1,312 @@
+scalar Amount_Tokens
+scalar EthereumAddress
+scalar Amount_Percentage
+scalar EmailAddress
+scalar Date
+scalar DateTime
+scalar URL
+scalar Amount_Money
+scalar OLabel
+scalar Currency
+scalar PHID
+scalar OID
+scalar Amount_Fiat
+scalar Amount_Currency
+scalar Amount_Crypto
+scalar Amount
+scalar Upload
+enum ServiceStatus {
+    DRAFT
+    COMING_SOON
+    ACTIVE
+    DEPRECATED
+}
+
+enum ServiceLevel {
+    INCLUDED
+    NOT_INCLUDED
+    OPTIONAL
+    NOT_APPLICABLE
+    CUSTOM
+    VARIABLE
+}
+
+enum BillingCycle {
+    MONTHLY
+    QUARTERLY
+    SEMI_ANNUAL
+    ANNUAL
+    ONE_TIME
+}
+
+enum ResetPeriod {
+    HOURLY
+    DAILY
+    WEEKLY
+    MONTHLY
+    QUARTERLY
+    SEMI_ANNUAL
+    ANNUAL
+}
+
+type OptionGroup {
+    id: OID!
+    name: String!
+    description: String
+    isAddOn: Boolean!
+    defaultSelected: Boolean!
+}
+
+type Service {
+    id: OID!
+    title: String!
+    description: String
+    parentServiceId: OID
+    displayOrder: Int
+    isSetupFormation: Boolean!
+    facetBindings: [ResourceFacetBinding!]!
+}
+
+type ResourceFacetBinding {
+    id: OID!
+    facetName: String!
+    facetType: PHID!
+    supportedOptions: [OID!]!
+}
+
+type ServiceSubscriptionTier {
+    id: OID!
+    name: String!
+    description: String
+    serviceLevels: [ServiceLevelBinding!]!
+    usageLimits: [ServiceUsageLimit!]!
+    pricing: ServicePricing!
+    isCustomPricing: Boolean!
+}
+
+type ServiceLevelBinding {
+    id: OID!
+    serviceId: OID!
+    level: ServiceLevel!
+    optionGroupId: OID
+    variations: String
+    annexes: String
+    customValue: String
+    setupFee: Amount_Money
+}
+
+type ServiceUsageLimit {
+    id: OID!
+    serviceId: OID!
+    metric: String!
+    limit: Int
+    resetPeriod: ResetPeriod
+    notes: String
+}
+
+type ServicePricing {
+    amount: Amount_Money
+    currency: Currency!
+    billingCycle: BillingCycle!
+    setupFee: Amount_Money
+}
+
+type ServiceOfferingState {
+    id: PHID!
+    title: String!
+    summary: String!
+    status: ServiceStatus!
+    services: [Service!]!
+    tiers: [ServiceSubscriptionTier!]!
+    optionGroups: [OptionGroup!]!
+    infoLink: URL
+    operatorId: PHID!
+    lastModified: DateTime!
+}
+
+
+
+# Service Management
+
+input AddServiceInput {
+    id: OID!
+    title: String!
+    description: String
+    parentServiceId: OID
+    displayOrder: Int
+    isSetupFormation: Boolean
+    lastModified: DateTime!
+}
+
+input UpdateServiceInput {
+    id: OID!
+    title: String
+    description: String
+    parentServiceId: OID
+    displayOrder: Int
+    isSetupFormation: Boolean
+    lastModified: DateTime!
+}
+
+input DeleteServiceInput {
+    id: OID!
+    lastModified: DateTime!
+}
+
+input AddFacetBindingInput {
+    serviceId: OID!
+    bindingId: OID!
+    facetName: String!
+    facetType: PHID!
+    supportedOptions: [OID!]!
+    lastModified: DateTime!
+}
+
+input RemoveFacetBindingInput {
+    serviceId: OID!
+    bindingId: OID!
+    lastModified: DateTime!
+}
+
+# Tier Management
+
+input AddTierInput {
+    id: OID!
+    name: String!
+    description: String
+    amount: Amount_Money
+    currency: Currency!
+    billingCycle: BillingCycle!
+    setupFee: Amount_Money
+    isCustomPricing: Boolean
+    lastModified: DateTime!
+}
+
+input UpdateTierInput {
+    id: OID!
+    name: String
+    description: String
+    isCustomPricing: Boolean
+    lastModified: DateTime!
+}
+
+input UpdateTierPricingInput {
+    tierId: OID!
+    amount: Amount_Money
+    currency: Currency
+    billingCycle: BillingCycle
+    setupFee: Amount_Money
+    lastModified: DateTime!
+}
+
+input DeleteTierInput {
+    id: OID!
+    lastModified: DateTime!
+}
+
+input AddServiceLevelInput {
+    tierId: OID!
+    serviceLevelId: OID!
+    serviceId: OID!
+    level: ServiceLevel!
+    optionGroupId: OID
+    variations: String
+    annexes: String
+    customValue: String
+    setupFee: Amount_Money
+    lastModified: DateTime!
+}
+
+input UpdateServiceLevelInput {
+    tierId: OID!
+    serviceLevelId: OID!
+    level: ServiceLevel
+    optionGroupId: OID
+    variations: String
+    annexes: String
+    customValue: String
+    setupFee: Amount_Money
+    lastModified: DateTime!
+}
+
+input RemoveServiceLevelInput {
+    tierId: OID!
+    serviceLevelId: OID!
+    lastModified: DateTime!
+}
+
+input AddUsageLimitInput {
+    tierId: OID!
+    limitId: OID!
+    serviceId: OID!
+    metric: String!
+    limit: Int
+    resetPeriod: ResetPeriod
+    notes: String
+    lastModified: DateTime!
+}
+
+input UpdateUsageLimitInput {
+    tierId: OID!
+    limitId: OID!
+    metric: String
+    limit: Int
+    resetPeriod: ResetPeriod
+    notes: String
+    lastModified: DateTime!
+}
+
+input RemoveUsageLimitInput {
+    tierId: OID!
+    limitId: OID!
+    lastModified: DateTime!
+}
+
+# Offering Management
+
+input UpdateOfferingInfoInput {
+    title: String
+    summary: String
+    infoLink: URL
+    lastModified: DateTime!
+}
+
+input UpdateOfferingStatusInput {
+    status: ServiceStatus!
+    lastModified: DateTime!
+}
+
+input SetOperatorInput {
+    operatorId: PHID!
+    lastModified: DateTime!
+}
+
+input SetOfferingIdInput {
+    id: PHID!
+    lastModified: DateTime!
+}
+
+# Option Group Management
+
+input AddOptionGroupInput {
+    id: OID!
+    name: String!
+    description: String
+    isAddOn: Boolean!
+    defaultSelected: Boolean!
+    lastModified: DateTime!
+}
+
+input UpdateOptionGroupInput {
+    id: OID!
+    name: String
+    description: String
+    isAddOn: Boolean
+    defaultSelected: Boolean
+    lastModified: DateTime!
+}
+
+input DeleteOptionGroupInput {
+    id: OID!
+    lastModified: DateTime!
+}
