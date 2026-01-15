@@ -34,7 +34,7 @@ export function OfferingInfo({ document, dispatch }: OfferingInfoProps) {
         setOfferingId({
           id: formData.id,
           lastModified: new Date().toISOString(),
-        })
+        }),
       );
     }
 
@@ -49,7 +49,7 @@ export function OfferingInfo({ document, dispatch }: OfferingInfoProps) {
           summary: formData.summary || undefined,
           infoLink: formData.infoLink || undefined,
           lastModified: new Date().toISOString(),
-        })
+        }),
       );
     }
 
@@ -58,7 +58,7 @@ export function OfferingInfo({ document, dispatch }: OfferingInfoProps) {
         setOperator({
           operatorId: formData.operatorId,
           lastModified: new Date().toISOString(),
-        })
+        }),
       );
     }
 
@@ -117,9 +117,7 @@ export function OfferingInfo({ document, dispatch }: OfferingInfoProps) {
             <input
               type="text"
               value={formData.id}
-              onChange={(e) =>
-                setFormData({ ...formData, id: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, id: e.target.value })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="phid:offering-..."
               disabled={!!globalState.id}
@@ -211,7 +209,9 @@ export function OfferingInfo({ document, dispatch }: OfferingInfoProps) {
           {globalState.id && (
             <div>
               <span className="text-sm font-medium text-gray-500">ID:</span>
-              <p className="text-gray-900 font-mono text-sm">{globalState.id}</p>
+              <p className="text-gray-900 font-mono text-sm">
+                {globalState.id}
+              </p>
             </div>
           )}
 
@@ -242,9 +242,7 @@ export function OfferingInfo({ document, dispatch }: OfferingInfoProps) {
           )}
 
           <div>
-            <span className="text-sm font-medium text-gray-500">
-              Operator:
-            </span>
+            <span className="text-sm font-medium text-gray-500">Operator:</span>
             <p className="text-gray-900 font-mono text-sm">
               {globalState.operatorId || "Not set"}
             </p>
@@ -278,7 +276,7 @@ export function OfferingInfo({ document, dispatch }: OfferingInfoProps) {
                     updateOfferingStatus({
                       status: status as any,
                       lastModified: new Date().toISOString(),
-                    })
+                    }),
                   )
                 }
                 disabled={globalState.status === status}

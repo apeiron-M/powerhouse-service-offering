@@ -39,7 +39,7 @@ export function ServicesList({ document, dispatch }: ServicesListProps) {
         title: formData.title,
         description: formData.description || undefined,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
 
     setFormData({ title: "", description: "" });
@@ -53,7 +53,7 @@ export function ServicesList({ document, dispatch }: ServicesListProps) {
         title: formData.title || undefined,
         description: formData.description || undefined,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
 
     setFormData({ title: "", description: "" });
@@ -63,14 +63,14 @@ export function ServicesList({ document, dispatch }: ServicesListProps) {
   const handleDelete = (serviceId: string) => {
     if (
       confirm(
-        "Are you sure you want to delete this service? This will also remove all tier bindings for this service."
+        "Are you sure you want to delete this service? This will also remove all tier bindings for this service.",
       )
     ) {
       dispatch(
         deleteService({
           id: serviceId,
           lastModified: new Date().toISOString(),
-        })
+        }),
       );
     }
   };

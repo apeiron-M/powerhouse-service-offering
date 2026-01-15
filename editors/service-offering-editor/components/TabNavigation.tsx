@@ -1,19 +1,30 @@
 import type { ReactNode } from "react";
 
-export type TabId = "scope-facets" | "service-catalog" | "tier-definition" | "the-matrix";
+export type TabId =
+  | "scope-facets"
+  | "service-catalog"
+  | "tier-definition"
+  | "the-matrix";
 
 interface Tab {
   id: TabId;
   label: string;
   icon: ReactNode;
+  accentColor: string;
 }
 
 const tabs: Tab[] = [
   {
     id: "scope-facets",
     label: "Scope & Facets",
+    accentColor: "violet",
     icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
         <circle cx="12" cy="8" r="3" />
         <circle cx="6" cy="16" r="3" />
         <circle cx="18" cy="16" r="3" />
@@ -24,8 +35,14 @@ const tabs: Tab[] = [
   {
     id: "service-catalog",
     label: "Service Catalog",
+    accentColor: "emerald",
     icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
         <path d="M4 6h16M4 10h16M4 14h10M4 18h6" />
       </svg>
     ),
@@ -33,8 +50,14 @@ const tabs: Tab[] = [
   {
     id: "tier-definition",
     label: "Tier Definition",
+    accentColor: "amber",
     icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
         <rect x="3" y="3" width="18" height="18" rx="2" />
         <path d="M3 9h18M9 3v18" />
       </svg>
@@ -43,8 +66,14 @@ const tabs: Tab[] = [
   {
     id: "the-matrix",
     label: "The Matrix",
+    accentColor: "slate",
     icon: (
-      <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
         <circle cx="8" cy="8" r="2" />
         <circle cx="16" cy="8" r="2" />
         <circle cx="8" cy="16" r="2" />
@@ -61,91 +90,270 @@ interface TabNavigationProps {
   completedTabs?: TabId[];
 }
 
-export function TabNavigation({ activeTab, onTabChange, completedTabs = [] }: TabNavigationProps) {
+export function TabNavigation({
+  activeTab,
+  onTabChange,
+  completedTabs = [],
+}: TabNavigationProps) {
   const getTabIndex = (tabId: TabId) => tabs.findIndex((t) => t.id === tabId);
   const activeIndex = getTabIndex(activeTab);
 
-  const getTabColor = (tab: Tab, index: number) => {
-    if (tab.id === activeTab) {
-      switch (tab.id) {
-        case "scope-facets":
-          return "text-purple-600 border-purple-600";
-        case "service-catalog":
-          return "text-green-600 border-green-600";
-        case "tier-definition":
-          return "text-purple-600 border-purple-600";
-        case "the-matrix":
-          return "text-gray-600 border-gray-600";
-        default:
-          return "text-blue-600 border-blue-600";
-      }
-    }
-    if (index < activeIndex || completedTabs.includes(tab.id)) {
-      return "text-green-500 border-green-500";
-    }
-    return "text-gray-400 border-gray-200";
-  };
-
-  const getIconBgColor = (tab: Tab, index: number) => {
-    if (tab.id === activeTab) {
-      switch (tab.id) {
-        case "scope-facets":
-          return "bg-purple-100 text-purple-600";
-        case "service-catalog":
-          return "bg-green-100 text-green-600";
-        case "tier-definition":
-          return "bg-purple-100 text-purple-600";
-        case "the-matrix":
-          return "bg-gray-100 text-gray-600";
-        default:
-          return "bg-blue-100 text-blue-600";
-      }
-    }
-    if (index < activeIndex || completedTabs.includes(tab.id)) {
-      return "bg-green-100 text-green-500";
-    }
-    return "bg-gray-100 text-gray-400";
-  };
-
-  const getLineColor = (index: number) => {
-    if (index < activeIndex) {
-      return "bg-green-500";
-    }
-    if (index === activeIndex) {
-      switch (tabs[index].id) {
-        case "scope-facets":
-          return "bg-purple-600";
-        case "service-catalog":
-          return "bg-green-600";
-        case "tier-definition":
-          return "bg-purple-600";
-        default:
-          return "bg-gray-300";
-      }
-    }
-    return "bg-gray-200";
-  };
-
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
-      <div className="flex items-center justify-between">
-        {tabs.map((tab, index) => (
-          <div key={tab.id} className="flex items-center flex-1">
-            <button
-              onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center gap-2 px-4 py-2 transition-colors ${getTabColor(tab, index)}`}
-            >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getIconBgColor(tab, index)}`}>
-                {tab.icon}
+    <>
+      <style>{styles}</style>
+      <nav className="so-tabs" role="tablist">
+        <div className="so-tabs__track">
+          {tabs.map((tab, index) => {
+            const isActive = tab.id === activeTab;
+            const isPast =
+              index < activeIndex || completedTabs.includes(tab.id);
+
+            return (
+              <div key={tab.id} className="so-tabs__item-wrapper">
+                <button
+                  role="tab"
+                  aria-selected={isActive}
+                  onClick={() => onTabChange(tab.id)}
+                  className={`so-tabs__item ${isActive ? "so-tabs__item--active" : ""} ${isPast ? "so-tabs__item--completed" : ""}`}
+                  data-accent={tab.accentColor}
+                >
+                  <span className="so-tabs__icon-ring">
+                    <span className="so-tabs__icon">{tab.icon}</span>
+                    {isPast && !isActive && (
+                      <span className="so-tabs__check">
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                        >
+                          <path d="M5 12l5 5L20 7" />
+                        </svg>
+                      </span>
+                    )}
+                  </span>
+                  <span className="so-tabs__label">{tab.label}</span>
+                </button>
+                {index < tabs.length - 1 && (
+                  <div
+                    className={`so-tabs__connector ${index < activeIndex ? "so-tabs__connector--active" : ""}`}
+                  >
+                    <div className="so-tabs__connector-line" />
+                  </div>
+                )}
               </div>
-              <span className="text-sm font-medium whitespace-nowrap">{tab.label}</span>
-            </button>
-            {index < tabs.length - 1 && (
-              <div className={`flex-1 h-1 mx-2 rounded ${getLineColor(index)}`} />
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
+            );
+          })}
+        </div>
+      </nav>
+    </>
   );
 }
+
+const styles = `
+  .so-tabs {
+    background: white;
+    border-radius: var(--so-radius-xl);
+    box-shadow: var(--so-shadow-md);
+    padding: 20px 32px;
+    margin-bottom: 28px;
+    border: 1px solid var(--so-slate-100);
+  }
+
+  .so-tabs__track {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .so-tabs__item-wrapper {
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .so-tabs__item-wrapper:last-child {
+    flex: 0;
+  }
+
+  .so-tabs__item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: all var(--so-transition-base);
+    border-radius: var(--so-radius-lg);
+  }
+
+  .so-tabs__item:hover {
+    background: var(--so-slate-50);
+  }
+
+  .so-tabs__icon-ring {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--so-slate-100);
+    transition: all var(--so-transition-base);
+  }
+
+  .so-tabs__icon {
+    width: 24px;
+    height: 24px;
+    color: var(--so-slate-400);
+    transition: all var(--so-transition-base);
+  }
+
+  .so-tabs__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .so-tabs__check {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 20px;
+    height: 20px;
+    background: var(--so-emerald-500);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    animation: so-pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .so-tabs__check svg {
+    width: 12px;
+    height: 12px;
+    color: white;
+  }
+
+  @keyframes so-pop-in {
+    from {
+      transform: scale(0);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .so-tabs__label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--so-slate-500);
+    white-space: nowrap;
+    transition: all var(--so-transition-base);
+  }
+
+  .so-tabs__connector {
+    flex: 1;
+    height: 3px;
+    margin: 0 8px;
+    margin-bottom: 36px;
+    position: relative;
+    background: var(--so-slate-200);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .so-tabs__connector-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--so-emerald-500), var(--so-emerald-400));
+    border-radius: 2px;
+    transition: width var(--so-transition-slow);
+  }
+
+  .so-tabs__connector--active .so-tabs__connector-line {
+    width: 100%;
+  }
+
+  /* Completed state */
+  .so-tabs__item--completed .so-tabs__icon-ring {
+    background: var(--so-emerald-100);
+  }
+
+  .so-tabs__item--completed .so-tabs__icon {
+    color: var(--so-emerald-600);
+  }
+
+  .so-tabs__item--completed .so-tabs__label {
+    color: var(--so-emerald-600);
+  }
+
+  /* Active states with accent colors */
+  .so-tabs__item--active {
+    background: transparent;
+  }
+
+  .so-tabs__item--active[data-accent="violet"] .so-tabs__icon-ring {
+    background: var(--so-violet-100);
+    box-shadow: 0 0 0 4px var(--so-violet-50), 0 4px 12px rgba(139, 92, 246, 0.25);
+  }
+
+  .so-tabs__item--active[data-accent="violet"] .so-tabs__icon {
+    color: var(--so-violet-600);
+  }
+
+  .so-tabs__item--active[data-accent="violet"] .so-tabs__label {
+    color: var(--so-violet-700);
+    font-weight: 600;
+  }
+
+  .so-tabs__item--active[data-accent="emerald"] .so-tabs__icon-ring {
+    background: var(--so-emerald-100);
+    box-shadow: 0 0 0 4px var(--so-emerald-50), 0 4px 12px rgba(16, 185, 129, 0.25);
+  }
+
+  .so-tabs__item--active[data-accent="emerald"] .so-tabs__icon {
+    color: var(--so-emerald-600);
+  }
+
+  .so-tabs__item--active[data-accent="emerald"] .so-tabs__label {
+    color: var(--so-emerald-700);
+    font-weight: 600;
+  }
+
+  .so-tabs__item--active[data-accent="amber"] .so-tabs__icon-ring {
+    background: var(--so-amber-100);
+    box-shadow: 0 0 0 4px var(--so-amber-50), 0 4px 12px rgba(245, 158, 11, 0.25);
+  }
+
+  .so-tabs__item--active[data-accent="amber"] .so-tabs__icon {
+    color: var(--so-amber-600);
+  }
+
+  .so-tabs__item--active[data-accent="amber"] .so-tabs__label {
+    color: var(--so-amber-700);
+    font-weight: 600;
+  }
+
+  .so-tabs__item--active[data-accent="slate"] .so-tabs__icon-ring {
+    background: var(--so-slate-200);
+    box-shadow: 0 0 0 4px var(--so-slate-100), 0 4px 12px rgba(100, 116, 139, 0.25);
+  }
+
+  .so-tabs__item--active[data-accent="slate"] .so-tabs__icon {
+    color: var(--so-slate-700);
+  }
+
+  .so-tabs__item--active[data-accent="slate"] .so-tabs__label {
+    color: var(--so-slate-800);
+    font-weight: 600;
+  }
+`;

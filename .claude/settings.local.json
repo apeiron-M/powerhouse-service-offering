@@ -13,7 +13,8 @@
       "mcp__reactor-mcp__getDocumentModelSchema",
       "Bash(grep:*)",
       "Bash(find:*)",
-      "Bash(bun x tsc:*)"
+      "Bash(bun x tsc:*)",
+      "Bash(npm run lint:fix:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

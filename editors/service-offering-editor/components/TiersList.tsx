@@ -54,7 +54,7 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         currency: formData.currency,
         billingCycle: formData.billingCycle as any,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
 
     setFormData({
@@ -73,7 +73,7 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         deleteTier({
           id: tierId,
           lastModified: new Date().toISOString(),
-        })
+        }),
       );
     }
   };
@@ -87,14 +87,14 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         level: "INCLUDED",
         optionGroupId: undefined,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
   };
 
   const handleUpdateServiceLevel = (
     tierId: string,
     serviceLevelId: string,
-    level: string
+    level: string,
   ) => {
     dispatch(
       updateServiceLevel({
@@ -103,25 +103,24 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         level: level as any,
         optionGroupId: undefined,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
   };
 
-  const handleRemoveServiceLevel = (
-    tierId: string,
-    serviceLevelId: string
-  ) => {
+  const handleRemoveServiceLevel = (tierId: string, serviceLevelId: string) => {
     dispatch(
       removeServiceLevel({
         tierId,
         serviceLevelId,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
   };
 
   const handleAddUsageLimit = (tierId: string) => {
-    const metric = prompt("Enter metric name (e.g., 'Number of Contributors'):");
+    const metric = prompt(
+      "Enter metric name (e.g., 'Number of Contributors'):",
+    );
     if (!metric) return;
 
     const serviceId = services[0]?.id || "";
@@ -143,7 +142,7 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         resetPeriod: "MONTHLY",
         notes: undefined,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
   };
 
@@ -153,7 +152,7 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         tierId,
         limitId,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
   };
 
@@ -340,7 +339,7 @@ export function TiersList({ document, dispatch }: TiersListProps) {
                     <button
                       onClick={() =>
                         setExpandedTierId(
-                          expandedTierId === tier.id ? null : tier.id
+                          expandedTierId === tier.id ? null : tier.id,
                         )
                       }
                       className="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
@@ -382,8 +381,8 @@ export function TiersList({ document, dispatch }: TiersListProps) {
                             .filter(
                               (s) =>
                                 !(tier.serviceLevels ?? []).some(
-                                  (sl) => sl.serviceId === s.id
-                                )
+                                  (sl) => sl.serviceId === s.id,
+                                ),
                             )
                             .map((service: Service) => (
                               <option key={service.id} value={service.id}>
@@ -400,51 +399,53 @@ export function TiersList({ document, dispatch }: TiersListProps) {
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {(tier.serviceLevels ?? []).map((sl: ServiceLevelBinding) => {
-                          const service = services.find(
-                            (s: Service) => s.id === sl.serviceId
-                          );
-                          return (
-                            <div
-                              key={sl.id}
-                              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-                            >
-                              <div className="flex-1">
-                                <span className="text-sm font-medium text-gray-900">
-                                  {service?.title || "Unknown Service"}
-                                </span>
-                              </div>
+                        {(tier.serviceLevels ?? []).map(
+                          (sl: ServiceLevelBinding) => {
+                            const service = services.find(
+                              (s: Service) => s.id === sl.serviceId,
+                            );
+                            return (
+                              <div
+                                key={sl.id}
+                                className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+                              >
+                                <div className="flex-1">
+                                  <span className="text-sm font-medium text-gray-900">
+                                    {service?.title || "Unknown Service"}
+                                  </span>
+                                </div>
 
-                              <div className="flex items-center gap-2">
-                                <select
-                                  value={sl.level}
-                                  onChange={(e) =>
-                                    handleUpdateServiceLevel(
-                                      tier.id,
-                                      sl.id,
-                                      e.target.value
-                                    )
-                                  }
-                                  className={`text-sm px-2 py-1 rounded-md border-0 ${getServiceLevelColor(sl.level)}`}
-                                >
-                                  <option value="INCLUDED">Included</option>
-                                  <option value="OPTIONAL">Optional</option>
-                                  <option value="NOT_INCLUDED">
-                                    Not Included
-                                  </option>
-                                </select>
-                                <button
-                                  onClick={() =>
-                                    handleRemoveServiceLevel(tier.id, sl.id)
-                                  }
-                                  className="text-sm text-red-600 hover:bg-red-50 px-2 py-1 rounded-md"
-                                >
-                                  Remove
-                                </button>
+                                <div className="flex items-center gap-2">
+                                  <select
+                                    value={sl.level}
+                                    onChange={(e) =>
+                                      handleUpdateServiceLevel(
+                                        tier.id,
+                                        sl.id,
+                                        e.target.value,
+                                      )
+                                    }
+                                    className={`text-sm px-2 py-1 rounded-md border-0 ${getServiceLevelColor(sl.level)}`}
+                                  >
+                                    <option value="INCLUDED">Included</option>
+                                    <option value="OPTIONAL">Optional</option>
+                                    <option value="NOT_INCLUDED">
+                                      Not Included
+                                    </option>
+                                  </select>
+                                  <button
+                                    onClick={() =>
+                                      handleRemoveServiceLevel(tier.id, sl.id)
+                                    }
+                                    className="text-sm text-red-600 hover:bg-red-50 px-2 py-1 rounded-md"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          },
+                        )}
                       </div>
                     )}
                   </div>
@@ -469,35 +470,39 @@ export function TiersList({ document, dispatch }: TiersListProps) {
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {(tier.usageLimits ?? []).map((limit: ServiceUsageLimit) => (
-                          <div
-                            key={limit.id}
-                            className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-                          >
-                            <div className="flex-1">
-                              <span className="text-sm font-medium text-gray-900">
-                                {limit.metric}
-                              </span>
-                              <span className="text-sm text-gray-600 ml-2">
-                                {limit.limit ? `Up to ${limit.limit}` : "Unlimited"}
-                              </span>
-                              {limit.resetPeriod && (
-                                <span className="text-xs text-gray-500 ml-2">
-                                  / {limit.resetPeriod}
-                                </span>
-                              )}
-                            </div>
-
-                            <button
-                              onClick={() =>
-                                handleRemoveUsageLimit(tier.id, limit.id)
-                              }
-                              className="text-sm text-red-600 hover:bg-red-50 px-2 py-1 rounded-md"
+                        {(tier.usageLimits ?? []).map(
+                          (limit: ServiceUsageLimit) => (
+                            <div
+                              key={limit.id}
+                              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
                             >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
+                              <div className="flex-1">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {limit.metric}
+                                </span>
+                                <span className="text-sm text-gray-600 ml-2">
+                                  {limit.limit
+                                    ? `Up to ${limit.limit}`
+                                    : "Unlimited"}
+                                </span>
+                                {limit.resetPeriod && (
+                                  <span className="text-xs text-gray-500 ml-2">
+                                    / {limit.resetPeriod}
+                                  </span>
+                                )}
+                              </div>
+
+                              <button
+                                onClick={() =>
+                                  handleRemoveUsageLimit(tier.id, limit.id)
+                                }
+                                className="text-sm text-red-600 hover:bg-red-50 px-2 py-1 rounded-md"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          ),
+                        )}
                       </div>
                     )}
                   </div>

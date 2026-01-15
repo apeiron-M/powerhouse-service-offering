@@ -50,11 +50,11 @@ const FACET_CATEGORIES = {
 };
 
 const STATUS_OPTIONS = [
-  { value: "DRAFT", label: "Draft" },
-  { value: "COMING_SOON", label: "Coming Soon" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "DEPRECATED", label: "Deprecated" },
-];
+  { value: "DRAFT", label: "Draft", color: "slate" },
+  { value: "COMING_SOON", label: "Coming Soon", color: "sky" },
+  { value: "ACTIVE", label: "Active", color: "emerald" },
+  { value: "DEPRECATED", label: "Deprecated", color: "rose" },
+] as const;
 
 export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
   const { state } = document;
@@ -67,7 +67,9 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
   });
 
   // Local UI state for facet targeting (not persisted to document model)
-  const [selectedFacets, setSelectedFacets] = useState<Record<string, string[]>>({});
+  const [selectedFacets, setSelectedFacets] = useState<
+    Record<string, string[]>
+  >({});
 
   useEffect(() => {
     setFormData({
@@ -87,7 +89,7 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
         updateOfferingInfo({
           title: formData.title,
           lastModified: new Date().toISOString(),
-        })
+        }),
       );
     }
   };
@@ -102,7 +104,7 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
         setOperator({
           operatorId: formData.operatorId,
           lastModified: new Date().toISOString(),
-        })
+        }),
       );
     }
   };
@@ -114,12 +116,12 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
       updateOfferingStatus({
         status,
         lastModified: new Date().toISOString(),
-      })
+      }),
     );
   };
 
   const toggleFacet = (category: string, optionId: string) => {
-    setSelectedFacets(prev => {
+    setSelectedFacets((prev) => {
       const current = prev[category] || [];
       const isSelected = current.includes(optionId);
       const newSelected = isSelected
@@ -138,107 +140,425 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
     return (selectedFacets[category] || []).includes(optionId);
   };
 
-  return (
-    <div className="space-y-6">
-      {/* General Information Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">General Information</h2>
+  const currentStatus = STATUS_OPTIONS.find((s) => s.value === formData.status);
 
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-2">
-              Offering Title
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(e) => handleTitleChange(e.target.value)}
-              onBlur={handleTitleBlur}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-              placeholder="Enter offering title..."
-            />
+  return (
+    <>
+      <style>{styles}</style>
+      <div className="scope-facets">
+        {/* General Information Section */}
+        <section className="scope-facets__card">
+          <div className="scope-facets__header">
+            <div className="scope-facets__header-icon scope-facets__header-icon--violet">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="scope-facets__title">General Information</h2>
+              <p className="scope-facets__subtitle">
+                Define the core details of your service offering
+              </p>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Operator ID
-              </label>
+          <div className="scope-facets__form">
+            <div className="scope-facets__field scope-facets__field--full">
+              <label className="scope-facets__label">Offering Title</label>
               <input
                 type="text"
-                value={formData.operatorId}
-                onChange={(e) => handleOperatorChange(e.target.value)}
-                onBlur={handleOperatorBlur}
-                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
-                placeholder="op-123"
+                value={formData.title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                onBlur={handleTitleBlur}
+                className="scope-facets__input"
+                placeholder="Enter offering title..."
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-600 mb-2">
-                Status
-              </label>
-              <div className="relative">
-                <select
-                  value={formData.status}
-                  onChange={(e) => handleStatusChange(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 appearance-none bg-white"
-                >
-                  {STATUS_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                <svg
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+            <div className="scope-facets__row">
+              <div className="scope-facets__field">
+                <label className="scope-facets__label">Operator ID</label>
+                <input
+                  type="text"
+                  value={formData.operatorId}
+                  onChange={(e) => handleOperatorChange(e.target.value)}
+                  onBlur={handleOperatorBlur}
+                  className="scope-facets__input scope-facets__input--mono"
+                  placeholder="op-123"
+                />
+              </div>
+
+              <div className="scope-facets__field">
+                <label className="scope-facets__label">Status</label>
+                <div className="scope-facets__select-wrapper">
+                  <select
+                    value={formData.status}
+                    onChange={(e) => handleStatusChange(e.target.value)}
+                    className="scope-facets__select"
+                    data-status={currentStatus?.color}
+                  >
+                    {STATUS_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <span
+                    className={`scope-facets__status-dot scope-facets__status-dot--${currentStatus?.color}`}
+                  />
+                  <svg
+                    className="scope-facets__select-chevron"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* Facet Targeting Section */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-2">Facet Targeting</h2>
-        <p className="text-gray-500 text-sm mb-6">
-          Select the resource characteristics this offering is available for.
-        </p>
-
-        <div className="space-y-6">
-          {Object.entries(FACET_CATEGORIES).map(([categoryKey, category]) => (
-            <div key={categoryKey}>
-              <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
-                {category.label}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {category.options.map((option) => {
-                  const isSelected = isFacetSelected(categoryKey, option.id);
-                  return (
-                    <button
-                      key={option.id}
-                      onClick={() => toggleFacet(categoryKey, option.id)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        isSelected
-                          ? "bg-blue-100 text-blue-700 border-2 border-blue-500"
-                          : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
+        {/* Facet Targeting Section */}
+        <section className="scope-facets__card">
+          <div className="scope-facets__header">
+            <div className="scope-facets__header-icon scope-facets__header-icon--amber">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path d="M12 2v4m0 12v4m10-10h-4M6 12H2m15.07-7.07l-2.83 2.83M9.76 14.24l-2.83 2.83m11.14 0l-2.83-2.83M9.76 9.76L6.93 6.93" />
+              </svg>
             </div>
-          ))}
-        </div>
+            <div>
+              <h2 className="scope-facets__title">Facet Targeting</h2>
+              <p className="scope-facets__subtitle">
+                Select the resource characteristics this offering is available
+                for
+              </p>
+            </div>
+          </div>
+
+          <div className="scope-facets__facets">
+            {Object.entries(FACET_CATEGORIES).map(([categoryKey, category]) => (
+              <div key={categoryKey} className="scope-facets__category">
+                <h3 className="scope-facets__category-label">
+                  {category.label}
+                </h3>
+                <div className="scope-facets__options">
+                  {category.options.map((option) => {
+                    const isSelected = isFacetSelected(categoryKey, option.id);
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => toggleFacet(categoryKey, option.id)}
+                        className={`scope-facets__option ${isSelected ? "scope-facets__option--selected" : ""}`}
+                      >
+                        <span className="scope-facets__option-check">
+                          {isSelected && (
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                            >
+                              <path d="M5 12l5 5L20 7" />
+                            </svg>
+                          )}
+                        </span>
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
       </div>
-    </div>
+    </>
   );
 }
+
+const styles = `
+  .scope-facets {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .scope-facets__card {
+    background: white;
+    border-radius: var(--so-radius-lg);
+    box-shadow: var(--so-shadow-md);
+    border: 1px solid var(--so-slate-100);
+    padding: 28px;
+    animation: so-scale-in var(--so-transition-slow) ease-out;
+  }
+
+  .scope-facets__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .scope-facets__header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--so-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .scope-facets__header-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .scope-facets__header-icon--violet {
+    background: var(--so-violet-100);
+    color: var(--so-violet-600);
+  }
+
+  .scope-facets__header-icon--amber {
+    background: var(--so-amber-100);
+    color: var(--so-amber-600);
+  }
+
+  .scope-facets__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--so-slate-800);
+    margin: 0 0 4px;
+    letter-spacing: -0.02em;
+  }
+
+  .scope-facets__subtitle {
+    font-size: 0.875rem;
+    color: var(--so-slate-500);
+    margin: 0;
+  }
+
+  .scope-facets__form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .scope-facets__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .scope-facets__field {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .scope-facets__field--full {
+    grid-column: 1 / -1;
+  }
+
+  .scope-facets__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--so-slate-500);
+    margin-bottom: 8px;
+  }
+
+  .scope-facets__input {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: var(--so-font-sans);
+    font-size: 0.9375rem;
+    color: var(--so-slate-800);
+    background: var(--so-slate-50);
+    border: 1.5px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    transition: all var(--so-transition-fast);
+  }
+
+  .scope-facets__input:hover {
+    border-color: var(--so-slate-300);
+    background: white;
+  }
+
+  .scope-facets__input:focus {
+    outline: none;
+    border-color: var(--so-violet-500);
+    background: white;
+    box-shadow: 0 0 0 3px var(--so-violet-100);
+  }
+
+  .scope-facets__input::placeholder {
+    color: var(--so-slate-400);
+  }
+
+  .scope-facets__input--mono {
+    font-family: var(--so-font-mono);
+    font-size: 0.875rem;
+  }
+
+  .scope-facets__select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .scope-facets__select {
+    width: 100%;
+    padding: 14px 16px;
+    padding-left: 36px;
+    font-family: var(--so-font-sans);
+    font-size: 0.9375rem;
+    color: var(--so-slate-800);
+    background: var(--so-slate-50);
+    border: 1.5px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    appearance: none;
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .scope-facets__select:hover {
+    border-color: var(--so-slate-300);
+    background: white;
+  }
+
+  .scope-facets__select:focus {
+    outline: none;
+    border-color: var(--so-violet-500);
+    background: white;
+    box-shadow: 0 0 0 3px var(--so-violet-100);
+  }
+
+  .scope-facets__status-dot {
+    position: absolute;
+    left: 14px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .scope-facets__status-dot--slate {
+    background: var(--so-slate-400);
+  }
+
+  .scope-facets__status-dot--sky {
+    background: var(--so-sky-500);
+  }
+
+  .scope-facets__status-dot--emerald {
+    background: var(--so-emerald-500);
+  }
+
+  .scope-facets__status-dot--rose {
+    background: var(--so-rose-500);
+  }
+
+  .scope-facets__select-chevron {
+    position: absolute;
+    right: 14px;
+    width: 18px;
+    height: 18px;
+    color: var(--so-slate-400);
+    pointer-events: none;
+  }
+
+  .scope-facets__facets {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .scope-facets__category {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .scope-facets__category-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--so-slate-600);
+    margin: 0;
+  }
+
+  .scope-facets__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .scope-facets__option {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-family: var(--so-font-sans);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--so-slate-600);
+    background: var(--so-slate-50);
+    border: 1.5px solid var(--so-slate-200);
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .scope-facets__option:hover {
+    border-color: var(--so-slate-300);
+    background: white;
+  }
+
+  .scope-facets__option--selected {
+    background: var(--so-violet-50);
+    border-color: var(--so-violet-400);
+    color: var(--so-violet-700);
+  }
+
+  .scope-facets__option--selected:hover {
+    background: var(--so-violet-100);
+    border-color: var(--so-violet-500);
+  }
+
+  .scope-facets__option-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--so-slate-200);
+    transition: all var(--so-transition-fast);
+  }
+
+  .scope-facets__option--selected .scope-facets__option-check {
+    background: var(--so-violet-500);
+  }
+
+  .scope-facets__option-check svg {
+    width: 12px;
+    height: 12px;
+    color: white;
+  }
+`;
