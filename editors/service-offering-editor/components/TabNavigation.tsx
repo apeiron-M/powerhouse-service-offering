@@ -33,21 +33,6 @@ const tabs: Tab[] = [
     ),
   },
   {
-    id: "service-catalog",
-    label: "Service Catalog",
-    accentColor: "emerald",
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-      >
-        <path d="M4 6h16M4 10h16M4 14h10M4 18h6" />
-      </svg>
-    ),
-  },
-  {
     id: "tier-definition",
     label: "Tier Definition",
     accentColor: "amber",
@@ -60,6 +45,21 @@ const tabs: Tab[] = [
       >
         <rect x="3" y="3" width="18" height="18" rx="2" />
         <path d="M3 9h18M9 3v18" />
+      </svg>
+    ),
+  },
+  {
+    id: "service-catalog",
+    label: "Service Catalog",
+    accentColor: "emerald",
+    icon: (
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.75"
+      >
+        <path d="M4 6h16M4 10h16M4 14h10M4 18h6" />
       </svg>
     ),
   },

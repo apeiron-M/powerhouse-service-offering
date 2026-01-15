@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { generateId } from "document-model/core";
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
@@ -315,6 +315,33 @@ const matrixStyles = `
     border-bottom: 1px solid var(--so-slate-200);
   }
 
+  /* Category Header */
+  .matrix__category-header {
+    background: var(--so-slate-50);
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--so-slate-700);
+    border-bottom: 1px solid var(--so-slate-200);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .matrix__category-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--so-slate-500);
+  }
+
+  .matrix__category-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
   /* Group Header */
   .matrix__group-header {
     padding: 0.75rem 1rem;
@@ -624,18 +651,31 @@ const matrixStyles = `
   .matrix__panel-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: flex-end;
     z-index: 50;
+    animation: panel-overlay-fade 0.2s ease-out;
+  }
+
+  @keyframes panel-overlay-fade {
+    from {
+      opacity: 0;
+      backdrop-filter: blur(0px);
+    }
+    to {
+      opacity: 1;
+      backdrop-filter: blur(4px);
+    }
   }
 
   .matrix__panel {
     width: 24rem;
     height: 100%;
-    background: var(--so-white);
-    box-shadow: var(--so-shadow-xl);
+    background: #ffffff;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     overflow-y: auto;
     animation: panel-slide-in 0.2s ease-out;
   }
@@ -650,8 +690,8 @@ const matrixStyles = `
   }
 
   .matrix__panel-header {
-    background: var(--so-violet-600);
-    color: var(--so-white);
+    background: #7c3aed;
+    color: #ffffff;
     padding: 1rem;
   }
 
@@ -674,7 +714,7 @@ const matrixStyles = `
     padding: 0.25rem;
     background: transparent;
     border: none;
-    color: var(--so-white);
+    color: #ffffff;
     cursor: pointer;
     border-radius: var(--so-radius-sm);
     transition: var(--so-transition-fast);
@@ -706,8 +746,8 @@ const matrixStyles = `
     display: block;
     font-family: var(--so-font-sans);
     font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--so-slate-700);
+    font-weight: 600;
+    color: #334155;
     margin-bottom: 0.75rem;
   }
 
@@ -722,30 +762,33 @@ const matrixStyles = `
     font-family: var(--so-font-sans);
     font-size: 0.8125rem;
     font-weight: 500;
+    color: #1e293b;
     border-radius: var(--so-radius-md);
-    border: 2px solid var(--so-slate-200);
-    background: var(--so-white);
+    border: 2px solid #cbd5e1;
+    background: #ffffff;
     cursor: pointer;
     transition: var(--so-transition-fast);
   }
 
   .matrix__panel-level-btn:hover:not(.matrix__panel-level-btn--active) {
-    border-color: var(--so-slate-300);
+    border-color: #94a3b8;
+    background: #f8fafc;
   }
 
   .matrix__panel-level-btn--active {
-    border-color: var(--so-violet-500);
-    background: var(--so-violet-50);
-    color: var(--so-violet-700);
+    border-color: #8b5cf6;
+    background: #f5f3ff;
+    color: #6d28d9;
+    font-weight: 600;
   }
 
   .matrix__panel-input {
     width: 100%;
     font-family: var(--so-font-sans);
     font-size: 0.8125rem;
-    color: var(--so-slate-900);
-    background: var(--so-white);
-    border: 1px solid var(--so-slate-200);
+    color: #0f172a;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
     border-radius: var(--so-radius-md);
     padding: 0.625rem 0.875rem;
     outline: none;
@@ -753,8 +796,8 @@ const matrixStyles = `
   }
 
   .matrix__panel-input:focus {
-    border-color: var(--so-violet-400);
-    box-shadow: 0 0 0 3px var(--so-violet-100);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
   }
 
   .matrix__panel-limits-header {
@@ -767,8 +810,8 @@ const matrixStyles = `
   .matrix__panel-add-btn {
     font-family: var(--so-font-sans);
     font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--so-violet-600);
+    font-weight: 600;
+    color: #7c3aed;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -776,13 +819,13 @@ const matrixStyles = `
   }
 
   .matrix__panel-add-btn:hover {
-    color: var(--so-violet-700);
+    color: #6d28d9;
   }
 
   .matrix__panel-empty-text {
     font-size: 0.8125rem;
     font-style: italic;
-    color: var(--so-slate-500);
+    color: #64748b;
   }
 
   .matrix__panel-limit-item {
@@ -790,7 +833,8 @@ const matrixStyles = `
     align-items: center;
     gap: 0.75rem;
     padding: 0.75rem;
-    background: var(--so-slate-50);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: var(--so-radius-md);
     margin-bottom: 0.75rem;
   }
@@ -809,19 +853,19 @@ const matrixStyles = `
   }
 
   .matrix__panel-limit-content:hover {
-    background: var(--so-slate-100);
+    background: #e2e8f0;
   }
 
   .matrix__panel-limit-metric {
     font-family: var(--so-font-sans);
     font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--so-slate-900);
+    font-weight: 600;
+    color: #0f172a;
   }
 
   .matrix__panel-limit-value {
     font-size: 0.8125rem;
-    color: var(--so-slate-500);
+    color: #64748b;
   }
 
   .matrix__panel-limit-actions {
@@ -835,22 +879,22 @@ const matrixStyles = `
     padding: 0.25rem;
     background: transparent;
     border: none;
-    color: var(--so-slate-400);
+    color: #94a3b8;
     cursor: pointer;
     border-radius: var(--so-radius-sm);
     transition: var(--so-transition-fast);
   }
 
   .matrix__panel-limit-btn:hover {
-    background: var(--so-slate-100);
+    background: #e2e8f0;
   }
 
   .matrix__panel-limit-btn--edit:hover {
-    color: var(--so-violet-600);
+    color: #7c3aed;
   }
 
   .matrix__panel-limit-btn--remove:hover {
-    color: var(--so-rose-500);
+    color: #e11d48;
   }
 
   .matrix__panel-limit-icon {
@@ -861,7 +905,7 @@ const matrixStyles = `
   /* Edit Form */
   .matrix__panel-edit-form {
     padding: 0.75rem;
-    background: var(--so-violet-50);
+    background: #f5f3ff;
     border-radius: var(--so-radius-md);
     margin-bottom: 0.75rem;
   }
@@ -878,16 +922,16 @@ const matrixStyles = `
     display: block;
     font-family: var(--so-font-mono);
     font-size: 0.625rem;
-    font-weight: 500;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: var(--so-slate-500);
+    color: #64748b;
     margin-bottom: 0.25rem;
   }
 
   .matrix__panel-edit-hint {
     font-size: 0.6875rem;
-    color: var(--so-slate-400);
+    color: #94a3b8;
     margin-top: 0.25rem;
   }
 
@@ -901,35 +945,36 @@ const matrixStyles = `
     padding: 0.5rem 0.75rem;
     font-family: var(--so-font-sans);
     font-size: 0.8125rem;
-    font-weight: 500;
+    font-weight: 600;
     border-radius: var(--so-radius-md);
     cursor: pointer;
     transition: var(--so-transition-fast);
   }
 
   .matrix__panel-edit-btn--primary {
-    background: var(--so-violet-600);
-    color: var(--so-white);
+    background: #7c3aed;
+    color: #ffffff;
     border: none;
   }
 
   .matrix__panel-edit-btn--primary:hover {
-    background: var(--so-violet-700);
+    background: #6d28d9;
   }
 
   .matrix__panel-edit-btn--secondary {
-    background: var(--so-slate-200);
-    color: var(--so-slate-700);
+    background: #e2e8f0;
+    color: #334155;
     border: none;
   }
 
   .matrix__panel-edit-btn--secondary:hover {
-    background: var(--so-slate-300);
+    background: #cbd5e1;
   }
 
   .matrix__panel-footer {
     padding: 1rem;
-    border-top: 1px solid var(--so-slate-200);
+    border-top: 1px solid #e2e8f0;
+    background: #ffffff;
   }
 
   .matrix__panel-done-btn {
@@ -938,8 +983,8 @@ const matrixStyles = `
     font-family: var(--so-font-sans);
     font-size: 0.875rem;
     font-weight: 600;
-    background: var(--so-violet-600);
-    color: var(--so-white);
+    background: #7c3aed;
+    color: #ffffff;
     border: none;
     border-radius: var(--so-radius-md);
     cursor: pointer;
@@ -954,51 +999,67 @@ const matrixStyles = `
   .matrix__modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 50;
+    z-index: 100;
+    animation: modal-backdrop 0.2s ease-out;
+  }
+
+  @keyframes modal-backdrop {
+    from {
+      opacity: 0;
+      backdrop-filter: blur(0px);
+    }
+    to {
+      opacity: 1;
+      backdrop-filter: blur(4px);
+    }
   }
 
   .matrix__modal {
     width: 24rem;
-    background: var(--so-white);
+    background: #ffffff;
     border-radius: var(--so-radius-lg);
-    box-shadow: var(--so-shadow-xl);
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(0, 0, 0, 0.08);
     padding: 1.5rem;
-    animation: modal-pop 0.2s ease-out;
+    animation: modal-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   @keyframes modal-pop {
     from {
       opacity: 0;
-      transform: scale(0.95);
+      transform: scale(0.9) translateY(10px);
     }
     to {
       opacity: 1;
-      transform: scale(1);
+      transform: scale(1) translateY(0);
     }
   }
 
   .matrix__modal-title {
     font-family: var(--so-font-sans);
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--so-slate-900);
-    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 1.25rem;
+    letter-spacing: -0.02em;
   }
 
   .matrix__modal-field {
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
   }
 
   .matrix__modal-label {
     display: block;
     font-family: var(--so-font-sans);
     font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--so-slate-700);
+    font-weight: 600;
+    color: #334155;
     margin-bottom: 0.5rem;
   }
 
@@ -1006,65 +1067,216 @@ const matrixStyles = `
     width: 100%;
     font-family: var(--so-font-sans);
     font-size: 0.875rem;
-    color: var(--so-slate-900);
-    background: var(--so-white);
-    border: 1px solid var(--so-slate-200);
+    color: #0f172a;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
     border-radius: var(--so-radius-md);
-    padding: 0.625rem 0.875rem;
+    padding: 0.75rem 1rem;
     outline: none;
     transition: var(--so-transition-fast);
   }
 
   .matrix__modal-input:focus {
-    border-color: var(--so-violet-400);
-    box-shadow: 0 0 0 3px var(--so-violet-100);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  }
+
+  .matrix__modal-input::placeholder {
+    color: #94a3b8;
   }
 
   .matrix__modal-hint {
     font-size: 0.8125rem;
-    color: var(--so-slate-500);
-    margin-bottom: 1rem;
+    color: #475569;
+    margin-bottom: 1.25rem;
+    line-height: 1.5;
   }
 
   .matrix__modal-actions {
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
+    padding-top: 0.5rem;
   }
 
   .matrix__modal-btn {
-    padding: 0.5rem 1rem;
+    padding: 0.625rem 1.25rem;
     font-family: var(--so-font-sans);
-    font-size: 0.8125rem;
-    font-weight: 500;
+    font-size: 0.875rem;
+    font-weight: 600;
     border-radius: var(--so-radius-md);
     cursor: pointer;
-    transition: var(--so-transition-fast);
+    transition: all var(--so-transition-fast);
   }
 
   .matrix__modal-btn--cancel {
-    background: transparent;
-    color: var(--so-slate-600);
+    background: #e2e8f0;
+    color: #475569;
     border: none;
   }
 
   .matrix__modal-btn--cancel:hover {
-    color: var(--so-slate-800);
+    background: #cbd5e1;
+    color: #1e293b;
   }
 
   .matrix__modal-btn--primary {
-    background: var(--so-violet-600);
-    color: var(--so-white);
+    background: #7c3aed;
+    color: #ffffff;
     border: none;
+    box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);
   }
 
   .matrix__modal-btn--primary:hover:not(:disabled) {
-    background: var(--so-violet-700);
+    background: #6d28d9;
+    box-shadow: 0 4px 8px rgba(124, 58, 237, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .matrix__modal-btn--primary:active:not(:disabled) {
+    transform: translateY(0);
   }
 
   .matrix__modal-btn--primary:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .matrix__modal--wide {
+    width: 32rem;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+
+  .matrix__modal-textarea {
+    width: 100%;
+    font-family: var(--so-font-sans);
+    font-size: 0.875rem;
+    color: #0f172a;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: var(--so-radius-md);
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: var(--so-transition-fast);
+    resize: vertical;
+    min-height: 80px;
+  }
+
+  .matrix__modal-textarea:focus {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  }
+
+  .matrix__modal-textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  .matrix__modal-tier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .matrix__modal-tier-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: var(--so-radius-lg);
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .matrix__modal-tier-option:hover {
+    border-color: #a78bfa;
+    background: #f5f3ff;
+  }
+
+  .matrix__modal-tier-option--selected {
+    border-color: #8b5cf6;
+    background: #f5f3ff;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  }
+
+  .matrix__modal-tier-option--selected:hover {
+    border-color: #7c3aed;
+    background: #f5f3ff;
+  }
+
+  /* Custom checkbox styling */
+  .matrix__modal-tier-checkbox {
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #ffffff;
+    border: 2px solid #94a3b8;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .matrix__modal-tier-checkbox:checked {
+    background: #7c3aed;
+    border-color: #7c3aed;
+  }
+
+  .matrix__modal-tier-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.375rem;
+    height: 0.625rem;
+    border: 2px solid white;
+    border-top: none;
+    border-left: none;
+    transform: translate(-50%, -60%) rotate(45deg);
+  }
+
+  .matrix__modal-tier-option:hover .matrix__modal-tier-checkbox:not(:checked) {
+    border-color: #a78bfa;
+  }
+
+  .matrix__modal-tier-name {
+    flex: 1;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  .matrix__modal-tier-price {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  .matrix__modal-tier-option--selected .matrix__modal-tier-name {
+    color: #4c1d95;
+  }
+
+  .matrix__modal-tier-option--selected .matrix__modal-tier-price {
+    color: #7c3aed;
+  }
+
+  .matrix__modal-tier-hint {
+    font-size: 0.8125rem;
+    color: #64748b;
+    margin: 0.75rem 0 0;
+    font-style: italic;
+  }
+
+  .matrix__modal-hint strong {
+    color: #334155;
+    font-weight: 600;
   }
 `;
 
@@ -1092,6 +1304,10 @@ export function TheMatrix({
     isSetupFormation: boolean;
   } | null>(null);
   const [newServiceName, setNewServiceName] = useState("");
+  const [newServiceDescription, setNewServiceDescription] = useState("");
+  const [newServiceSelectedTiers, setNewServiceSelectedTiers] = useState<
+    Set<string>
+  >(new Set());
 
   const [selectedTierIdx, setSelectedTierIdx] = useState<number>(0);
 
@@ -1103,15 +1319,8 @@ export function TheMatrix({
   });
 
   const getServiceGroup = (service: Service): string | null => {
-    for (const tier of tiers) {
-      const binding = tier.serviceLevels.find(
-        (sl) => sl.serviceId === service.id,
-      );
-      if (binding?.optionGroupId) {
-        return binding.optionGroupId;
-      }
-    }
-    return null;
+    // Services now have optionGroupId directly on them
+    return service.optionGroupId || null;
   };
 
   const groupedServices = useMemo(() => {
@@ -1130,18 +1339,16 @@ export function TheMatrix({
   }, [services, tiers, optionGroups]);
 
   const setupGroups = useMemo(() => {
-    return optionGroups.filter((g) => {
-      const groupServices = groupedServices.get(g.id) || [];
-      return groupServices.some((s) => s.isSetupFormation);
-    });
-  }, [optionGroups, groupedServices]);
+    // Groups are setup groups if they're in groupSetupFees (passed from parent)
+    return optionGroups.filter((g) => groupSetupFees && g.id in groupSetupFees);
+  }, [optionGroups, groupSetupFees]);
 
   const regularGroups = useMemo(() => {
-    return optionGroups.filter((g) => {
-      const groupServices = groupedServices.get(g.id) || [];
-      return !groupServices.some((s) => s.isSetupFormation) && !g.isAddOn;
-    });
-  }, [optionGroups, groupedServices]);
+    // Regular groups are not setup groups and not add-ons
+    const isSetupGroup = (groupId: string) =>
+      groupSetupFees && groupId in groupSetupFees;
+    return optionGroups.filter((g) => !isSetupGroup(g.id) && !g.isAddOn);
+  }, [optionGroups, groupSetupFees]);
 
   const addonGroups = useMemo(() => {
     return optionGroups.filter((g) => g.isAddOn);
@@ -1232,42 +1439,56 @@ export function TheMatrix({
     if (!addServiceModal || !newServiceName.trim()) return;
 
     const newServiceId = generateId();
+    const now = new Date().toISOString();
 
+    // Add the service with optionGroupId directly on the service
     dispatch(
       addService({
         id: newServiceId,
         title: newServiceName.trim(),
-        description: null,
+        description: newServiceDescription.trim() || null,
         isSetupFormation: addServiceModal.isSetupFormation,
-        lastModified: new Date().toISOString(),
+        optionGroupId:
+          addServiceModal.groupId !== UNGROUPED_ID
+            ? addServiceModal.groupId
+            : undefined,
+        lastModified: now,
       }),
     );
 
-    tiers.forEach((tier) => {
+    // Create ServiceLevelBindings for each selected tier
+    newServiceSelectedTiers.forEach((tierId) => {
       dispatch(
         addServiceLevel({
-          tierId: tier.id,
+          tierId,
           serviceLevelId: generateId(),
           serviceId: newServiceId,
           level: "INCLUDED",
-          optionGroupId: addServiceModal.groupId,
-          lastModified: new Date().toISOString(),
+          optionGroupId:
+            addServiceModal.groupId !== UNGROUPED_ID
+              ? addServiceModal.groupId
+              : undefined,
+          lastModified: now,
         }),
       );
     });
 
     setNewServiceName("");
+    setNewServiceDescription("");
+    setNewServiceSelectedTiers(new Set());
     setAddServiceModal(null);
   };
 
   const openAddServiceModal = (groupId: string, isSetupFormation: boolean) => {
     setAddServiceModal({ groupId, isSetupFormation });
     setNewServiceName("");
+    setNewServiceDescription("");
+    setNewServiceSelectedTiers(new Set());
   };
 
   const getLevelDisplay = (
     serviceLevel:
-      | { level: ServiceLevel | `${ServiceLevel}`; customValue?: string | null }
+      | { level: ServiceLevel; customValue?: string | null }
       | undefined,
   ) => {
     if (!serviceLevel) return { label: "—", color: "var(--so-slate-300)" };
@@ -1422,6 +1643,31 @@ export function TheMatrix({
                 </td>
               </tr>
 
+              {/* Setup & Formation category header */}
+              {(setupGroups.length > 0 ||
+                ungroupedSetupServices.length > 0) && (
+                <tr>
+                  <td
+                    colSpan={tiers.length + 1}
+                    className="matrix__category-header"
+                  >
+                    <span className="matrix__category-icon">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                      >
+                        <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16" />
+                        <path d="M9 21v-6h6v6" />
+                        <path d="M9 7h.01M9 11h.01M15 7h.01M15 11h.01" />
+                      </svg>
+                    </span>
+                    Setup & Formation
+                  </td>
+                </tr>
+              )}
+
               {setupGroups.map((group) => (
                 <ServiceGroupSection
                   key={group.id}
@@ -1475,6 +1721,29 @@ export function TheMatrix({
                 />
               )}
 
+              {/* Recurring Services category header */}
+              {(regularGroups.length > 0 ||
+                ungroupedRegularServices.length > 0) && (
+                <tr>
+                  <td
+                    colSpan={tiers.length + 1}
+                    className="matrix__category-header"
+                  >
+                    <span className="matrix__category-icon">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.75"
+                      >
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                      </svg>
+                    </span>
+                    Recurring Services
+                  </td>
+                </tr>
+              )}
+
               {regularGroups.map((group) => (
                 <ServiceGroupSection
                   key={group.id}
@@ -1503,7 +1772,7 @@ export function TheMatrix({
                   key="ungrouped-regular"
                   group={{
                     id: UNGROUPED_ID,
-                    name: "Recurring Operational Services",
+                    name: "Recurring Services",
                     description: null,
                     isAddOn: false,
                     defaultSelected: true,
@@ -1599,8 +1868,10 @@ export function TheMatrix({
 
         {addServiceModal && (
           <div className="matrix__modal-overlay">
-            <div className="matrix__modal">
+            <div className="matrix__modal matrix__modal--wide">
               <h3 className="matrix__modal-title">Add New Service</h3>
+
+              {/* Service Name */}
               <div className="matrix__modal-field">
                 <label className="matrix__modal-label">Service Name</label>
                 <input
@@ -1612,23 +1883,102 @@ export function TheMatrix({
                   autoFocus
                 />
               </div>
+
+              {/* Description */}
+              <div className="matrix__modal-field">
+                <label className="matrix__modal-label">
+                  Description (optional)
+                </label>
+                <textarea
+                  value={newServiceDescription}
+                  onChange={(e) => setNewServiceDescription(e.target.value)}
+                  placeholder="Enter description..."
+                  rows={2}
+                  className="matrix__modal-textarea"
+                />
+              </div>
+
+              {/* Tier Selection */}
+              {tiers.length > 0 && (
+                <div className="matrix__modal-field">
+                  <label className="matrix__modal-label">
+                    Include in Tiers
+                  </label>
+                  <div className="matrix__modal-tier-grid">
+                    {tiers.map((tier) => {
+                      const isSelected = newServiceSelectedTiers.has(tier.id);
+                      return (
+                        <label
+                          key={tier.id}
+                          className={`matrix__modal-tier-option ${isSelected ? "matrix__modal-tier-option--selected" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const newSet = new Set(newServiceSelectedTiers);
+                              if (e.target.checked) {
+                                newSet.add(tier.id);
+                              } else {
+                                newSet.delete(tier.id);
+                              }
+                              setNewServiceSelectedTiers(newSet);
+                            }}
+                            className="matrix__modal-tier-checkbox"
+                          />
+                          <span className="matrix__modal-tier-name">
+                            {tier.name}
+                          </span>
+                          {tier.pricing.amount !== null && (
+                            <span className="matrix__modal-tier-price">
+                              ${tier.pricing.amount}/
+                              {tier.pricing.billingCycle.toLowerCase()}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {newServiceSelectedTiers.size === 0 && (
+                    <p className="matrix__modal-tier-hint">
+                      Select at least one tier to include this service
+                    </p>
+                  )}
+                </div>
+              )}
+
               <p className="matrix__modal-hint">
-                This service will be added as{" "}
+                This service will be added to{" "}
+                <strong>
+                  {addServiceModal.groupId !== UNGROUPED_ID
+                    ? optionGroups.find((g) => g.id === addServiceModal.groupId)
+                        ?.name || "Unknown Group"
+                    : "Ungrouped Services"}
+                </strong>{" "}
+                as a{" "}
                 {addServiceModal.isSetupFormation
                   ? "Setup/Formation"
-                  : "Recurring"}
-                .
+                  : "Recurring"}{" "}
+                service.
               </p>
+
               <div className="matrix__modal-actions">
                 <button
-                  onClick={() => setAddServiceModal(null)}
+                  onClick={() => {
+                    setAddServiceModal(null);
+                    setNewServiceName("");
+                    setNewServiceDescription("");
+                    setNewServiceSelectedTiers(new Set());
+                  }}
                   className="matrix__modal-btn matrix__modal-btn--cancel"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleAddService}
-                  disabled={!newServiceName.trim()}
+                  disabled={
+                    !newServiceName.trim() || newServiceSelectedTiers.size === 0
+                  }
                   className="matrix__modal-btn matrix__modal-btn--primary"
                 >
                   Add Service
@@ -1962,21 +2312,87 @@ function ServiceLevelDetailPanel({
 }: ServiceLevelDetailPanelProps) {
   const service = services.find((s) => s.id === serviceId);
   const tier = tiers.find((t) => t.id === tierId);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
-  if (!service || !tier) return null;
+  // Scroll lock when modal is open
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
-  const serviceLevel = tier.serviceLevels.find(
-    (sl) => sl.serviceId === serviceId,
+  // Handle Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
+  // Focus trap - keep focus inside the panel
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const focusableElements = panel.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+    );
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+
+    // Focus the first element
+    firstElement?.focus();
+
+    const handleTabKey = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+
+      if (e.shiftKey) {
+        if (document.activeElement === firstElement) {
+          e.preventDefault();
+          lastElement?.focus();
+        }
+      } else {
+        if (document.activeElement === lastElement) {
+          e.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleTabKey);
+    return () => document.removeEventListener("keydown", handleTabKey);
+  }, []);
+
+  // Click outside to close
+  const handleOverlayClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.target === overlayRef.current) {
+        onClose();
+      }
+    },
+    [onClose],
   );
-  const usageLimits = tier.usageLimits.filter(
-    (ul) => ul.serviceId === serviceId,
-  );
+
+  const serviceLevel = service
+    ? tier?.serviceLevels.find((sl) => sl.serviceId === serviceId)
+    : undefined;
+  const usageLimits = service
+    ? tier?.usageLimits.filter((ul) => ul.serviceId === serviceId) || []
+    : [];
 
   const [newMetric, setNewMetric] = useState("");
   const [newLimit, setNewLimit] = useState("");
   const [customValue, setCustomValue] = useState(
     serviceLevel?.customValue || "",
   );
+
+  if (!service || !tier) return null;
 
   const handleAddLimit = () => {
     if (!newMetric.trim()) return;
@@ -2044,8 +2460,15 @@ function ServiceLevelDetailPanel({
   };
 
   return (
-    <div className="matrix__panel-overlay">
-      <div className="matrix__panel">
+    <div
+      ref={overlayRef}
+      className="matrix__panel-overlay"
+      onClick={handleOverlayClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="panel-title"
+    >
+      <div ref={panelRef} className="matrix__panel">
         <div className="matrix__panel-header">
           <div className="matrix__panel-header-top">
             <span className="matrix__panel-tier">{tier.name} Tier</span>
@@ -2065,7 +2488,9 @@ function ServiceLevelDetailPanel({
               </svg>
             </button>
           </div>
-          <h3 className="matrix__panel-title">{service.title}</h3>
+          <h3 id="panel-title" className="matrix__panel-title">
+            {service.title}
+          </h3>
         </div>
 
         <div className="matrix__panel-body">

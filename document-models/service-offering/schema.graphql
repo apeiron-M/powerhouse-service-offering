@@ -15,6 +15,25 @@ scalar Amount_Currency
 scalar Amount_Crypto
 scalar Amount
 scalar Upload
+type ServiceOfferingState {
+    id: PHID!
+    operatorId: PHID!
+    title: String!
+    summary: String!
+    description: String
+    thumbnailUrl: URL
+    infoLink: URL
+    status: ServiceStatus!
+    lastModified: DateTime!
+    targetAudiences: [TargetAudience!]!
+    setupServices: [String!]!
+    recurringServices: [String!]!
+    facetTargets: [FacetTarget!]!
+    services: [Service!]!
+    tiers: [ServiceSubscriptionTier!]!
+    optionGroups: [OptionGroup!]!
+}
+
 enum ServiceStatus {
     DRAFT
     COMING_SOON
@@ -22,13 +41,52 @@ enum ServiceStatus {
     DEPRECATED
 }
 
-enum ServiceLevel {
-    INCLUDED
-    NOT_INCLUDED
-    OPTIONAL
-    NOT_APPLICABLE
-    CUSTOM
-    VARIABLE
+type TargetAudience {
+    id: OID!
+    label: String!
+    color: String
+}
+
+type FacetTarget {
+    id: OID!
+    categoryKey: String!
+    categoryLabel: String!
+    selectedOptions: [String!]!
+}
+
+type Service {
+    id: OID!
+    title: String!
+    description: String
+    displayOrder: Int
+    parentServiceId: OID
+    isSetupFormation: Boolean!
+    optionGroupId: OID
+    facetBindings: [ResourceFacetBinding!]!
+}
+
+type ResourceFacetBinding {
+    id: OID!
+    facetName: String!
+    facetType: PHID!
+    supportedOptions: [OID!]!
+}
+
+type ServiceSubscriptionTier {
+    id: OID!
+    name: String!
+    description: String
+    isCustomPricing: Boolean!
+    pricing: ServicePricing!
+    serviceLevels: [ServiceLevelBinding!]!
+    usageLimits: [ServiceUsageLimit!]!
+}
+
+type ServicePricing {
+    amount: Amount_Money
+    currency: Currency!
+    billingCycle: BillingCycle!
+    setupFee: Amount_Money
 }
 
 enum BillingCycle {
@@ -37,6 +95,35 @@ enum BillingCycle {
     SEMI_ANNUAL
     ANNUAL
     ONE_TIME
+}
+
+type ServiceLevelBinding {
+    id: OID!
+    serviceId: OID!
+    level: ServiceLevel!
+    customValue: String
+    variations: String
+    annexes: String
+    setupFee: Amount_Money
+    optionGroupId: OID
+}
+
+enum ServiceLevel {
+    INCLUDED
+    NOT_INCLUDED
+    OPTIONAL
+    CUSTOM
+    VARIABLE
+    NOT_APPLICABLE
+}
+
+type ServiceUsageLimit {
+    id: OID!
+    serviceId: OID!
+    metric: String!
+    limit: Int
+    resetPeriod: ResetPeriod
+    notes: String
 }
 
 enum ResetPeriod {
@@ -57,73 +144,6 @@ type OptionGroup {
     defaultSelected: Boolean!
 }
 
-type Service {
-    id: OID!
-    title: String!
-    description: String
-    parentServiceId: OID
-    displayOrder: Int
-    isSetupFormation: Boolean!
-    facetBindings: [ResourceFacetBinding!]!
-}
-
-type ResourceFacetBinding {
-    id: OID!
-    facetName: String!
-    facetType: PHID!
-    supportedOptions: [OID!]!
-}
-
-type ServiceSubscriptionTier {
-    id: OID!
-    name: String!
-    description: String
-    serviceLevels: [ServiceLevelBinding!]!
-    usageLimits: [ServiceUsageLimit!]!
-    pricing: ServicePricing!
-    isCustomPricing: Boolean!
-}
-
-type ServiceLevelBinding {
-    id: OID!
-    serviceId: OID!
-    level: ServiceLevel!
-    optionGroupId: OID
-    variations: String
-    annexes: String
-    customValue: String
-    setupFee: Amount_Money
-}
-
-type ServiceUsageLimit {
-    id: OID!
-    serviceId: OID!
-    metric: String!
-    limit: Int
-    resetPeriod: ResetPeriod
-    notes: String
-}
-
-type ServicePricing {
-    amount: Amount_Money
-    currency: Currency!
-    billingCycle: BillingCycle!
-    setupFee: Amount_Money
-}
-
-type ServiceOfferingState {
-    id: PHID!
-    title: String!
-    summary: String!
-    status: ServiceStatus!
-    services: [Service!]!
-    tiers: [ServiceSubscriptionTier!]!
-    optionGroups: [OptionGroup!]!
-    infoLink: URL
-    operatorId: PHID!
-    lastModified: DateTime!
-}
-
 
 
 # Service Management
@@ -135,6 +155,7 @@ input AddServiceInput {
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    optionGroupId: OID
     lastModified: DateTime!
 }
 
@@ -145,6 +166,7 @@ input UpdateServiceInput {
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    optionGroupId: OID
     lastModified: DateTime!
 }
 
@@ -267,6 +289,8 @@ input RemoveUsageLimitInput {
 input UpdateOfferingInfoInput {
     title: String
     summary: String
+    description: String
+    thumbnailUrl: URL
     infoLink: URL
     lastModified: DateTime!
 }
@@ -283,6 +307,53 @@ input SetOperatorInput {
 
 input SetOfferingIdInput {
     id: PHID!
+    lastModified: DateTime!
+}
+
+input AddTargetAudienceInput {
+    id: OID!
+    label: String!
+    color: String
+    lastModified: DateTime!
+}
+
+input RemoveTargetAudienceInput {
+    id: OID!
+    lastModified: DateTime!
+}
+
+input SetFacetTargetInput {
+    id: OID!
+    categoryKey: String!
+    categoryLabel: String!
+    selectedOptions: [String!]!
+    lastModified: DateTime!
+}
+
+input RemoveFacetTargetInput {
+    categoryKey: String!
+    lastModified: DateTime!
+}
+
+input AddFacetOptionInput {
+    categoryKey: String!
+    optionId: String!
+    lastModified: DateTime!
+}
+
+input RemoveFacetOptionInput {
+    categoryKey: String!
+    optionId: String!
+    lastModified: DateTime!
+}
+
+input SetSetupServicesInput {
+    services: [String!]!
+    lastModified: DateTime!
+}
+
+input SetRecurringServicesInput {
+    services: [String!]!
     lastModified: DateTime!
 }
 

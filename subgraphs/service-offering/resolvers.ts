@@ -27,6 +27,14 @@ import type {
   UpdateOfferingStatusInput,
   SetOperatorInput,
   SetOfferingIdInput,
+  AddTargetAudienceInput,
+  RemoveTargetAudienceInput,
+  SetFacetTargetInput,
+  RemoveFacetTargetInput,
+  AddFacetOptionInput,
+  RemoveFacetOptionInput,
+  SetSetupServicesInput,
+  SetRecurringServicesInput,
   AddOptionGroupInput,
   UpdateOptionGroupInput,
   DeleteOptionGroupInput,
@@ -549,6 +557,194 @@ export const getResolvers = (
 
         if (result.status !== "SUCCESS") {
           throw new Error(result.error?.message ?? "Failed to setOfferingId");
+        }
+
+        return true;
+      },
+
+      ServiceOffering_addTargetAudience: async (
+        _: unknown,
+        args: { docId: string; input: AddTargetAudienceInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.addTargetAudience(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to addTargetAudience",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_removeTargetAudience: async (
+        _: unknown,
+        args: { docId: string; input: RemoveTargetAudienceInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.removeTargetAudience(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to removeTargetAudience",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_setFacetTarget: async (
+        _: unknown,
+        args: { docId: string; input: SetFacetTargetInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.setFacetTarget(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to setFacetTarget");
+        }
+
+        return true;
+      },
+
+      ServiceOffering_removeFacetTarget: async (
+        _: unknown,
+        args: { docId: string; input: RemoveFacetTargetInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.removeFacetTarget(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to removeFacetTarget",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_addFacetOption: async (
+        _: unknown,
+        args: { docId: string; input: AddFacetOptionInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.addFacetOption(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(result.error?.message ?? "Failed to addFacetOption");
+        }
+
+        return true;
+      },
+
+      ServiceOffering_removeFacetOption: async (
+        _: unknown,
+        args: { docId: string; input: RemoveFacetOptionInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.removeFacetOption(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to removeFacetOption",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_setSetupServices: async (
+        _: unknown,
+        args: { docId: string; input: SetSetupServicesInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.setSetupServices(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to setSetupServices",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_setRecurringServices: async (
+        _: unknown,
+        args: { docId: string; input: SetRecurringServicesInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.setRecurringServices(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to setRecurringServices",
+          );
         }
 
         return true;

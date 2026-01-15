@@ -115,6 +115,46 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: ServiceOffering_SetOfferingIdInput
     ): Int
+    ServiceOffering_addTargetAudience(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_AddTargetAudienceInput
+    ): Int
+    ServiceOffering_removeTargetAudience(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_RemoveTargetAudienceInput
+    ): Int
+    ServiceOffering_setFacetTarget(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_SetFacetTargetInput
+    ): Int
+    ServiceOffering_removeFacetTarget(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_RemoveFacetTargetInput
+    ): Int
+    ServiceOffering_addFacetOption(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_AddFacetOptionInput
+    ): Int
+    ServiceOffering_removeFacetOption(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_RemoveFacetOptionInput
+    ): Int
+    ServiceOffering_setSetupServices(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_SetSetupServicesInput
+    ): Int
+    ServiceOffering_setRecurringServices(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_SetRecurringServicesInput
+    ): Int
     ServiceOffering_addOptionGroup(
       driveId: String
       docId: PHID
@@ -142,6 +182,7 @@ export const schema: DocumentNode = gql`
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    optionGroupId: OID
     lastModified: DateTime!
   }
   input ServiceOffering_UpdateServiceInput {
@@ -151,6 +192,7 @@ export const schema: DocumentNode = gql`
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    optionGroupId: OID
     lastModified: DateTime!
   }
   input ServiceOffering_DeleteServiceInput {
@@ -263,6 +305,8 @@ export const schema: DocumentNode = gql`
   input ServiceOffering_UpdateOfferingInfoInput {
     title: String
     summary: String
+    description: String
+    thumbnailUrl: URL
     infoLink: URL
     lastModified: DateTime!
   }
@@ -276,6 +320,45 @@ export const schema: DocumentNode = gql`
   }
   input ServiceOffering_SetOfferingIdInput {
     id: PHID!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_AddTargetAudienceInput {
+    id: OID!
+    label: String!
+    color: String
+    lastModified: DateTime!
+  }
+  input ServiceOffering_RemoveTargetAudienceInput {
+    id: OID!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_SetFacetTargetInput {
+    id: OID!
+    categoryKey: String!
+    categoryLabel: String!
+    selectedOptions: [String!]!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_RemoveFacetTargetInput {
+    categoryKey: String!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_AddFacetOptionInput {
+    categoryKey: String!
+    optionId: String!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_RemoveFacetOptionInput {
+    categoryKey: String!
+    optionId: String!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_SetSetupServicesInput {
+    services: [String!]!
+    lastModified: DateTime!
+  }
+  input ServiceOffering_SetRecurringServicesInput {
+    services: [String!]!
     lastModified: DateTime!
   }
 

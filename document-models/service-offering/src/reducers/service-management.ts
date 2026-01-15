@@ -10,6 +10,7 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         parentServiceId: action.input.parentServiceId || null,
         displayOrder: action.input.displayOrder || null,
         isSetupFormation: action.input.isSetupFormation || false,
+        optionGroupId: action.input.optionGroupId || null,
         facetBindings: [],
       });
       state.lastModified = action.input.lastModified;
@@ -40,6 +41,9 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
           action.input.isSetupFormation !== null
         ) {
           service.isSetupFormation = action.input.isSetupFormation;
+        }
+        if (action.input.optionGroupId !== undefined) {
+          service.optionGroupId = action.input.optionGroupId || null;
         }
       }
       state.lastModified = action.input.lastModified;

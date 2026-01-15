@@ -30,6 +30,14 @@ import {
   UpdateOfferingStatusInputSchema,
   SetOperatorInputSchema,
   SetOfferingIdInputSchema,
+  AddTargetAudienceInputSchema,
+  RemoveTargetAudienceInputSchema,
+  SetFacetTargetInputSchema,
+  RemoveFacetTargetInputSchema,
+  AddFacetOptionInputSchema,
+  RemoveFacetOptionInputSchema,
+  SetSetupServicesInputSchema,
+  SetRecurringServicesInputSchema,
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
@@ -210,6 +218,78 @@ const stateReducer: StateReducer<ServiceOfferingPHState> = (
     case "SET_OFFERING_ID":
       SetOfferingIdInputSchema().parse(action.input);
       serviceOfferingOfferingManagementOperations.setOfferingIdOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "ADD_TARGET_AUDIENCE":
+      AddTargetAudienceInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.addTargetAudienceOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "REMOVE_TARGET_AUDIENCE":
+      RemoveTargetAudienceInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.removeTargetAudienceOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SET_FACET_TARGET":
+      SetFacetTargetInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.setFacetTargetOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "REMOVE_FACET_TARGET":
+      RemoveFacetTargetInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.removeFacetTargetOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "ADD_FACET_OPTION":
+      AddFacetOptionInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.addFacetOptionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "REMOVE_FACET_OPTION":
+      RemoveFacetOptionInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.removeFacetOptionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SET_SETUP_SERVICES":
+      SetSetupServicesInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.setSetupServicesOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "SET_RECURRING_SERVICES":
+      SetRecurringServicesInputSchema().parse(action.input);
+      serviceOfferingOfferingManagementOperations.setRecurringServicesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

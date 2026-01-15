@@ -1,18 +1,24 @@
 import { z } from "zod";
 import type {
   AddFacetBindingInput,
+  AddFacetOptionInput,
   AddOptionGroupInput,
   AddServiceInput,
   AddServiceLevelInput,
+  AddTargetAudienceInput,
   AddTierInput,
   AddUsageLimitInput,
   BillingCycle,
   DeleteOptionGroupInput,
   DeleteServiceInput,
   DeleteTierInput,
+  FacetTarget,
   OptionGroup,
   RemoveFacetBindingInput,
+  RemoveFacetOptionInput,
+  RemoveFacetTargetInput,
   RemoveServiceLevelInput,
+  RemoveTargetAudienceInput,
   RemoveUsageLimitInput,
   ResetPeriod,
   ResourceFacetBinding,
@@ -24,8 +30,12 @@ import type {
   ServiceStatus,
   ServiceSubscriptionTier,
   ServiceUsageLimit,
+  SetFacetTargetInput,
   SetOfferingIdInput,
   SetOperatorInput,
+  SetRecurringServicesInput,
+  SetSetupServicesInput,
+  TargetAudience,
   UpdateOfferingInfoInput,
   UpdateOfferingStatusInput,
   UpdateOptionGroupInput,
@@ -96,6 +106,16 @@ export function AddFacetBindingInputSchema(): z.ZodObject<
   });
 }
 
+export function AddFacetOptionInputSchema(): z.ZodObject<
+  Properties<AddFacetOptionInput>
+> {
+  return z.object({
+    categoryKey: z.string(),
+    lastModified: z.string().datetime(),
+    optionId: z.string(),
+  });
+}
+
 export function AddOptionGroupInputSchema(): z.ZodObject<
   Properties<AddOptionGroupInput>
 > {
@@ -118,6 +138,7 @@ export function AddServiceInputSchema(): z.ZodObject<
     id: z.string(),
     isSetupFormation: z.boolean().nullish(),
     lastModified: z.string().datetime(),
+    optionGroupId: z.string().nullish(),
     parentServiceId: z.string().nullish(),
     title: z.string(),
   });
@@ -137,6 +158,17 @@ export function AddServiceLevelInputSchema(): z.ZodObject<
     setupFee: z.number().nullish(),
     tierId: z.string(),
     variations: z.string().nullish(),
+  });
+}
+
+export function AddTargetAudienceInputSchema(): z.ZodObject<
+  Properties<AddTargetAudienceInput>
+> {
+  return z.object({
+    color: z.string().nullish(),
+    id: z.string(),
+    label: z.string(),
+    lastModified: z.string().datetime(),
   });
 }
 
@@ -196,6 +228,16 @@ export function DeleteTierInputSchema(): z.ZodObject<
   });
 }
 
+export function FacetTargetSchema(): z.ZodObject<Properties<FacetTarget>> {
+  return z.object({
+    __typename: z.literal("FacetTarget").optional(),
+    categoryKey: z.string(),
+    categoryLabel: z.string(),
+    id: z.string(),
+    selectedOptions: z.array(z.string()),
+  });
+}
+
 export function OptionGroupSchema(): z.ZodObject<Properties<OptionGroup>> {
   return z.object({
     __typename: z.literal("OptionGroup").optional(),
@@ -217,6 +259,25 @@ export function RemoveFacetBindingInputSchema(): z.ZodObject<
   });
 }
 
+export function RemoveFacetOptionInputSchema(): z.ZodObject<
+  Properties<RemoveFacetOptionInput>
+> {
+  return z.object({
+    categoryKey: z.string(),
+    lastModified: z.string().datetime(),
+    optionId: z.string(),
+  });
+}
+
+export function RemoveFacetTargetInputSchema(): z.ZodObject<
+  Properties<RemoveFacetTargetInput>
+> {
+  return z.object({
+    categoryKey: z.string(),
+    lastModified: z.string().datetime(),
+  });
+}
+
 export function RemoveServiceLevelInputSchema(): z.ZodObject<
   Properties<RemoveServiceLevelInput>
 > {
@@ -224,6 +285,15 @@ export function RemoveServiceLevelInputSchema(): z.ZodObject<
     lastModified: z.string().datetime(),
     serviceLevelId: z.string(),
     tierId: z.string(),
+  });
+}
+
+export function RemoveTargetAudienceInputSchema(): z.ZodObject<
+  Properties<RemoveTargetAudienceInput>
+> {
+  return z.object({
+    id: z.string(),
+    lastModified: z.string().datetime(),
   });
 }
 
@@ -257,6 +327,7 @@ export function ServiceSchema(): z.ZodObject<Properties<Service>> {
     facetBindings: z.array(ResourceFacetBindingSchema()),
     id: z.string(),
     isSetupFormation: z.boolean(),
+    optionGroupId: z.string().nullable(),
     parentServiceId: z.string().nullable(),
     title: z.string(),
   });
@@ -283,14 +354,20 @@ export function ServiceOfferingStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceOfferingState").optional(),
+    description: z.string().nullable(),
+    facetTargets: z.array(FacetTargetSchema()),
     id: z.string(),
     infoLink: z.string().url().nullable(),
     lastModified: z.string().datetime(),
     operatorId: z.string(),
     optionGroups: z.array(OptionGroupSchema()),
+    recurringServices: z.array(z.string()),
     services: z.array(ServiceSchema()),
+    setupServices: z.array(z.string()),
     status: ServiceStatusSchema,
     summary: z.string(),
+    targetAudiences: z.array(TargetAudienceSchema()),
+    thumbnailUrl: z.string().url().nullable(),
     tiers: z.array(ServiceSubscriptionTierSchema()),
     title: z.string(),
   });
@@ -337,6 +414,18 @@ export function ServiceUsageLimitSchema(): z.ZodObject<
   });
 }
 
+export function SetFacetTargetInputSchema(): z.ZodObject<
+  Properties<SetFacetTargetInput>
+> {
+  return z.object({
+    categoryKey: z.string(),
+    categoryLabel: z.string(),
+    id: z.string(),
+    lastModified: z.string().datetime(),
+    selectedOptions: z.array(z.string()),
+  });
+}
+
 export function SetOfferingIdInputSchema(): z.ZodObject<
   Properties<SetOfferingIdInput>
 > {
@@ -355,13 +444,44 @@ export function SetOperatorInputSchema(): z.ZodObject<
   });
 }
 
+export function SetRecurringServicesInputSchema(): z.ZodObject<
+  Properties<SetRecurringServicesInput>
+> {
+  return z.object({
+    lastModified: z.string().datetime(),
+    services: z.array(z.string()),
+  });
+}
+
+export function SetSetupServicesInputSchema(): z.ZodObject<
+  Properties<SetSetupServicesInput>
+> {
+  return z.object({
+    lastModified: z.string().datetime(),
+    services: z.array(z.string()),
+  });
+}
+
+export function TargetAudienceSchema(): z.ZodObject<
+  Properties<TargetAudience>
+> {
+  return z.object({
+    __typename: z.literal("TargetAudience").optional(),
+    color: z.string().nullable(),
+    id: z.string(),
+    label: z.string(),
+  });
+}
+
 export function UpdateOfferingInfoInputSchema(): z.ZodObject<
   Properties<UpdateOfferingInfoInput>
 > {
   return z.object({
+    description: z.string().nullish(),
     infoLink: z.string().url().nullish(),
     lastModified: z.string().datetime(),
     summary: z.string().nullish(),
+    thumbnailUrl: z.string().url().nullish(),
     title: z.string().nullish(),
   });
 }
@@ -397,6 +517,7 @@ export function UpdateServiceInputSchema(): z.ZodObject<
     id: z.string(),
     isSetupFormation: z.boolean().nullish(),
     lastModified: z.string().datetime(),
+    optionGroupId: z.string().nullish(),
     parentServiceId: z.string().nullish(),
     title: z.string().nullish(),
   });

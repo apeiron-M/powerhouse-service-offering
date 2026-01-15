@@ -30,8 +30,8 @@
                             "examples": [],
                             "id": "add-service",
                             "name": "ADD_SERVICE",
-                            "reducer": "state.services.push({\n    id: action.input.id,\n    title: action.input.title,\n    description: action.input.description || null,\n    parentServiceId: action.input.parentServiceId || null,\n    displayOrder: action.input.displayOrder || null,\n    isSetupFormation: action.input.isSetupFormation || false,\n    facetBindings: []\n});\nstate.lastModified = action.input.lastModified;",
-                            "schema": "input AddServiceInput {\n    id: OID!\n    title: String!\n    description: String\n    parentServiceId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    lastModified: DateTime!\n}",
+                            "reducer": "state.services.push({\n    id: action.input.id,\n    title: action.input.title,\n    description: action.input.description || null,\n    parentServiceId: action.input.parentServiceId || null,\n    displayOrder: action.input.displayOrder || null,\n    isSetupFormation: action.input.isSetupFormation || false,\n    optionGroupId: action.input.optionGroupId || null,\n    facetBindings: []\n});\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input AddServiceInput {\n    id: OID!\n    title: String!\n    description: String\n    parentServiceId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    optionGroupId: OID\n    lastModified: DateTime!\n}",
                             "scope": "global",
                             "template": "Adds a new service to the offering"
                         },
@@ -49,8 +49,8 @@
                             "examples": [],
                             "id": "update-service",
                             "name": "UPDATE_SERVICE",
-                            "reducer": "const service = state.services.find(s => s.id === action.input.id);\nif (service) {\n    if (action.input.title) {\n        service.title = action.input.title;\n    }\n    if (action.input.description !== undefined && action.input.description !== null) {\n        service.description = action.input.description;\n    }\n    if (action.input.parentServiceId !== undefined) {\n        service.parentServiceId = action.input.parentServiceId || null;\n    }\n    if (action.input.displayOrder !== undefined && action.input.displayOrder !== null) {\n        service.displayOrder = action.input.displayOrder;\n    }\n    if (action.input.isSetupFormation !== undefined && action.input.isSetupFormation !== null) {\n        service.isSetupFormation = action.input.isSetupFormation;\n    }\n}\nstate.lastModified = action.input.lastModified;",
-                            "schema": "input UpdateServiceInput {\n    id: OID!\n    title: String\n    description: String\n    parentServiceId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    lastModified: DateTime!\n}",
+                            "reducer": "const service = state.services.find(s => s.id === action.input.id);\nif (service) {\n    if (action.input.title) {\n        service.title = action.input.title;\n    }\n    if (action.input.description !== undefined && action.input.description !== null) {\n        service.description = action.input.description;\n    }\n    if (action.input.parentServiceId !== undefined) {\n        service.parentServiceId = action.input.parentServiceId || null;\n    }\n    if (action.input.displayOrder !== undefined && action.input.displayOrder !== null) {\n        service.displayOrder = action.input.displayOrder;\n    }\n    if (action.input.isSetupFormation !== undefined && action.input.isSetupFormation !== null) {\n        service.isSetupFormation = action.input.isSetupFormation;\n    }\n    if (action.input.optionGroupId !== undefined) {\n        service.optionGroupId = action.input.optionGroupId || null;\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input UpdateServiceInput {\n    id: OID!\n    title: String\n    description: String\n    parentServiceId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    optionGroupId: OID\n    lastModified: DateTime!\n}",
                             "scope": "global",
                             "template": "Updates an existing service"
                         },
@@ -377,8 +377,8 @@
                             "examples": [],
                             "id": "update-offering-info",
                             "name": "UPDATE_OFFERING_INFO",
-                            "reducer": "if (action.input.title) {\n    state.title = action.input.title;\n}\nif (action.input.summary) {\n    state.summary = action.input.summary;\n}\nif (action.input.infoLink !== undefined && action.input.infoLink !== null) {\n    state.infoLink = action.input.infoLink;\n}\nstate.lastModified = action.input.lastModified;",
-                            "schema": "input UpdateOfferingInfoInput {\n    title: String\n    summary: String\n    infoLink: URL\n    lastModified: DateTime!\n}",
+                            "reducer": "if (action.input.title) {\n    state.title = action.input.title;\n}\nif (action.input.summary) {\n    state.summary = action.input.summary;\n}\nif (action.input.description !== undefined) {\n    state.description = action.input.description || null;\n}\nif (action.input.thumbnailUrl !== undefined) {\n    state.thumbnailUrl = action.input.thumbnailUrl || null;\n}\nif (action.input.infoLink !== undefined) {\n    state.infoLink = action.input.infoLink || null;\n}\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input UpdateOfferingInfoInput {\n    title: String\n    summary: String\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    lastModified: DateTime!\n}",
                             "scope": "global",
                             "template": "Updates offering title, summary, and info link"
                         },
@@ -414,6 +414,126 @@
                             "schema": "input SetOfferingIdInput {\n    id: PHID!\n    lastModified: DateTime!\n}",
                             "scope": "global",
                             "template": "Sets the unique identifier for the offering"
+                        },
+                        {
+                            "description": "Adds a target audience tag to the offering",
+                            "errors": [
+                                {
+                                    "code": "DUPLICATE_TARGET_AUDIENCE_ID",
+                                    "description": "A target audience with this ID already exists",
+                                    "id": "duplicate-target-audience-id",
+                                    "name": "DuplicateTargetAudienceIdError",
+                                    "template": ""
+                                }
+                            ],
+                            "examples": [],
+                            "id": "add-target-audience",
+                            "name": "ADD_TARGET_AUDIENCE",
+                            "reducer": "state.targetAudiences.push({\n    id: action.input.id,\n    label: action.input.label,\n    color: action.input.color || null\n});\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input AddTargetAudienceInput {\n    id: OID!\n    label: String!\n    color: String\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": "Adds a target audience tag to the offering"
+                        },
+                        {
+                            "description": "Removes a target audience tag from the offering",
+                            "errors": [
+                                {
+                                    "code": "TARGET_AUDIENCE_NOT_FOUND",
+                                    "description": "Target audience with the specified ID does not exist",
+                                    "id": "target-audience-not-found",
+                                    "name": "TargetAudienceNotFoundError",
+                                    "template": ""
+                                }
+                            ],
+                            "examples": [],
+                            "id": "remove-target-audience",
+                            "name": "REMOVE_TARGET_AUDIENCE",
+                            "reducer": "const audienceIndex = state.targetAudiences.findIndex(a => a.id === action.input.id);\nif (audienceIndex !== -1) {\n    state.targetAudiences.splice(audienceIndex, 1);\n}\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input RemoveTargetAudienceInput {\n    id: OID!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": "Removes a target audience tag from the offering"
+                        },
+                        {
+                            "description": "Sets or updates facet targeting for a category",
+                            "errors": [],
+                            "examples": [],
+                            "id": "set-facet-target",
+                            "name": "SET_FACET_TARGET",
+                            "reducer": "const existingIndex = state.facetTargets.findIndex(ft => ft.categoryKey === action.input.categoryKey);\nif (existingIndex !== -1) {\n    state.facetTargets[existingIndex] = {\n        id: action.input.id,\n        categoryKey: action.input.categoryKey,\n        categoryLabel: action.input.categoryLabel,\n        selectedOptions: action.input.selectedOptions\n    };\n} else {\n    state.facetTargets.push({\n        id: action.input.id,\n        categoryKey: action.input.categoryKey,\n        categoryLabel: action.input.categoryLabel,\n        selectedOptions: action.input.selectedOptions\n    });\n}\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input SetFacetTargetInput {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": "Sets or updates facet targeting for a category"
+                        },
+                        {
+                            "description": "Removes facet targeting for a category",
+                            "errors": [
+                                {
+                                    "code": "FACET_TARGET_NOT_FOUND",
+                                    "description": "Facet target for the specified category does not exist",
+                                    "id": "facet-target-not-found",
+                                    "name": "FacetTargetNotFoundError",
+                                    "template": ""
+                                }
+                            ],
+                            "examples": [],
+                            "id": "remove-facet-target",
+                            "name": "REMOVE_FACET_TARGET",
+                            "reducer": "const targetIndex = state.facetTargets.findIndex(ft => ft.categoryKey === action.input.categoryKey);\nif (targetIndex !== -1) {\n    state.facetTargets.splice(targetIndex, 1);\n}\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input RemoveFacetTargetInput {\n    categoryKey: String!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": "Removes facet targeting for a category"
+                        },
+                        {
+                            "description": "Adds an option to a facet target",
+                            "errors": [
+                                {
+                                    "code": "FACET_TARGET_NOT_FOUND_ADD_OPTION",
+                                    "description": "Facet target for the specified category does not exist",
+                                    "id": "add-facet-option-not-found",
+                                    "name": "AddFacetOptionTargetNotFoundError",
+                                    "template": ""
+                                }
+                            ],
+                            "examples": [],
+                            "id": "add-facet-option",
+                            "name": "ADD_FACET_OPTION",
+                            "reducer": "const facetTarget = state.facetTargets.find(ft => ft.categoryKey === action.input.categoryKey);\nif (facetTarget && !facetTarget.selectedOptions.includes(action.input.optionId)) {\n    facetTarget.selectedOptions.push(action.input.optionId);\n}\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input AddFacetOptionInput {\n    categoryKey: String!\n    optionId: String!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": "Adds an option to a facet target"
+                        },
+                        {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
+                            "id": "remove-facet-option",
+                            "name": "REMOVE_FACET_OPTION",
+                            "reducer": "const facetTarget = state.facetTargets.find(\n  (ft) => ft.categoryKey === action.input.categoryKey\n);\n\nif (facetTarget) {\n  const optionIndex = facetTarget.selectedOptions.indexOf(action.input.optionId);\n  if (optionIndex !== -1) {\n    facetTarget.selectedOptions.splice(optionIndex, 1);\n  }\n}\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input RemoveFacetOptionInput {\n    categoryKey: String!\n    optionId: String!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": ""
+                        },
+                        {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
+                            "id": "set-setup-services",
+                            "name": "SET_SETUP_SERVICES",
+                            "reducer": "state.setupServices = action.input.services;\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input SetSetupServicesInput {\n    services: [String!]!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": ""
+                        },
+                        {
+                            "description": "",
+                            "errors": [],
+                            "examples": [],
+                            "id": "set-recurring-services",
+                            "name": "SET_RECURRING_SERVICES",
+                            "reducer": "state.recurringServices = action.input.services;\nstate.lastModified = action.input.lastModified;",
+                            "schema": "input SetRecurringServicesInput {\n    services: [String!]!\n    lastModified: DateTime!\n}",
+                            "scope": "global",
+                            "template": ""
                         }
                     ]
                 },
@@ -485,8 +605,8 @@
             "state": {
                 "global": {
                     "examples": [],
-                    "initialValue": "{\n    \"id\": \"\",\n    \"title\": \"\",\n    \"summary\": \"\",\n    \"status\": \"DRAFT\",\n    \"services\": [],\n    \"tiers\": [],\n    \"optionGroups\": [],\n    \"infoLink\": null,\n    \"operatorId\": \"\",\n    \"lastModified\": \"1970-01-01T00:00:00.000Z\"\n}",
-                    "schema": "enum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    NOT_APPLICABLE\n    CUSTOM\n    VARIABLE\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    parentServiceId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean!\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n    pricing: ServicePricing!\n    isCustomPricing: Boolean!\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    optionGroupId: OID\n    variations: String\n    annexes: String\n    customValue: String\n    setupFee: Amount_Money\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\ntype ServiceOfferingState {\n    id: PHID!\n    title: String!\n    summary: String!\n    status: ServiceStatus!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n    infoLink: URL\n    operatorId: PHID!\n    lastModified: DateTime!\n}"
+                    "initialValue": "{\n    \"id\": \"\",\n    \"operatorId\": \"\",\n    \"title\": \"\",\n    \"summary\": \"\",\n    \"description\": null,\n    \"thumbnailUrl\": null,\n    \"infoLink\": null,\n    \"status\": \"DRAFT\",\n    \"lastModified\": \"1970-01-01T00:00:00.000Z\",\n    \"targetAudiences\": [],\n    \"setupServices\": [],\n    \"recurringServices\": [],\n    \"facetTargets\": [],\n    \"services\": [],\n    \"tiers\": [],\n    \"optionGroups\": []\n}",
+                    "schema": "type ServiceOfferingState {\n    id: PHID!\n    operatorId: PHID!\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: ServiceStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    isCustomPricing: Boolean!\n    pricing: ServicePricing!\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    customValue: String\n    variations: String\n    annexes: String\n    setupFee: Amount_Money\n    optionGroupId: OID\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    CUSTOM\n    VARIABLE\n    NOT_APPLICABLE\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}"
                 },
                 "local": {
                     "examples": [],

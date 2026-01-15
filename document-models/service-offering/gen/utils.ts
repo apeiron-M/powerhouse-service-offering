@@ -22,15 +22,21 @@ import {
 
 export const initialGlobalState: ServiceOfferingGlobalState = {
   id: "",
+  operatorId: "",
   title: "",
   summary: "",
+  description: null,
+  thumbnailUrl: null,
+  infoLink: null,
   status: "DRAFT",
+  lastModified: "1970-01-01T00:00:00.000Z",
+  targetAudiences: [],
+  setupServices: [],
+  recurringServices: [],
+  facetTargets: [],
   services: [],
   tiers: [],
   optionGroups: [],
-  infoLink: null,
-  operatorId: "",
-  lastModified: "1970-01-01T00:00:00.000Z",
 };
 export const initialLocalState: ServiceOfferingLocalState = {};
 

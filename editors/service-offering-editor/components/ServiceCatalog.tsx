@@ -12,9 +12,15 @@ import {
   updateService,
   deleteService,
   addOptionGroup,
+  updateOptionGroup,
   deleteOptionGroup,
   addServiceLevel,
+  removeServiceLevel,
 } from "../../../document-models/service-offering/gen/creators.js";
+import type {
+  ServiceSubscriptionTier,
+  ServiceLevelBinding,
+} from "../../../document-models/service-offering/gen/schema/types.js";
 
 // Extended group info for UI (tracks setup status and fee locally since schema doesn't support it yet)
 export interface GroupMetadata {
@@ -52,6 +58,17 @@ export function ServiceCatalog({
   >("recurring");
   const [newGroupSetupFee, setNewGroupSetupFee] = useState("");
   const [newService, setNewService] = useState({ title: "", description: "" });
+  const [selectedTierIds, setSelectedTierIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  // Edit group modal state
+  const [editingGroup, setEditingGroup] = useState<OptionGroup | null>(null);
+  const [editGroupName, setEditGroupName] = useState("");
+  const [editGroupType, setEditGroupType] = useState<
+    "setup" | "recurring" | "addon"
+  >("recurring");
+  const [editGroupSetupFee, setEditGroupSetupFee] = useState("");
 
   // Initialize metadata from existing services in groups when optionGroups change
   useEffect(() => {
@@ -68,31 +85,15 @@ export function ServiceCatalog({
     setGroupMetadata(metadata);
   }, [optionGroups.length]);
 
-  // Get services that belong to a specific group (via service level binding optionGroupId)
+  // Get services that belong to a specific group (via service.optionGroupId)
   const getServicesForGroup = (groupId: string): Service[] => {
-    const serviceIds = new Set<string>();
-    tiers.forEach((tier) => {
-      tier.serviceLevels.forEach((sl) => {
-        if (sl.optionGroupId === groupId) {
-          serviceIds.add(sl.serviceId);
-        }
-      });
-    });
-    return services.filter((s) => serviceIds.has(s.id));
+    return services.filter((s) => s.optionGroupId === groupId);
   };
 
-  // Get ungrouped services
+  // Get ungrouped services (services without an optionGroupId)
   const ungroupedServices = useMemo(() => {
-    const groupedServiceIds = new Set<string>();
-    tiers.forEach((tier) => {
-      tier.serviceLevels.forEach((sl) => {
-        if (sl.optionGroupId) {
-          groupedServiceIds.add(sl.serviceId);
-        }
-      });
-    });
-    return services.filter((s) => !groupedServiceIds.has(s.id));
-  }, [services, tiers]);
+    return services.filter((s) => !s.optionGroupId);
+  }, [services]);
 
   // Categorize option groups based on metadata
   const setupGroups = useMemo(() => {
@@ -166,51 +167,110 @@ export function ServiceCatalog({
     }
   };
 
+  const handleOpenEditGroup = (group: OptionGroup) => {
+    const meta = groupMetadata[group.id];
+    setEditingGroup(group);
+    setEditGroupName(group.name);
+    setEditGroupType(
+      meta?.isSetupFormation ? "setup" : group.isAddOn ? "addon" : "recurring",
+    );
+    setEditGroupSetupFee(meta?.setupFee?.toString() || "");
+  };
+
+  const handleSaveGroupEdit = () => {
+    if (!editingGroup || !editGroupName.trim()) return;
+
+    const isSetup = editGroupType === "setup";
+    const isAddOn = editGroupType === "addon";
+    const setupFee =
+      isSetup && editGroupSetupFee ? parseFloat(editGroupSetupFee) : null;
+
+    // Update the option group in the document
+    dispatch(
+      updateOptionGroup({
+        id: editingGroup.id,
+        name: editGroupName.trim(),
+        isAddOn,
+        defaultSelected: !isAddOn,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+
+    // Update local metadata
+    setGroupMetadata((prev) => ({
+      ...prev,
+      [editingGroup.id]: {
+        isSetupFormation: isSetup,
+        setupFee,
+      },
+    }));
+
+    // Update all services in this group to reflect the new setup status
+    const groupServices = getServicesForGroup(editingGroup.id);
+    groupServices.forEach((service) => {
+      if (service.isSetupFormation !== isSetup) {
+        dispatch(
+          updateService({
+            id: service.id,
+            isSetupFormation: isSetup,
+            lastModified: new Date().toISOString(),
+          }),
+        );
+      }
+    });
+
+    setEditingGroup(null);
+  };
+
   const handleAddService = () => {
     if (!newService.title.trim()) return;
 
     const serviceId = generateId();
+    const now = new Date().toISOString();
 
     // Determine if this is a setup service based on the selected group's metadata
     const isSetupFormation = selectedGroupId
       ? (groupMetadata[selectedGroupId]?.isSetupFormation ?? false)
       : false;
 
-    // First, add the service
+    // Add the service with optionGroupId directly on the service
     dispatch(
       addService({
         id: serviceId,
         title: newService.title.trim(),
         description: newService.description.trim() || undefined,
         isSetupFormation,
-        lastModified: new Date().toISOString(),
+        optionGroupId: selectedGroupId || undefined,
+        lastModified: now,
       }),
     );
 
-    // If a group is selected, create service level bindings for all tiers to link the service to the group
-    if (selectedGroupId && tiers.length > 0) {
-      tiers.forEach((tier) => {
-        dispatch(
-          addServiceLevel({
-            tierId: tier.id,
-            serviceLevelId: generateId(),
-            serviceId,
-            level: "INCLUDED",
-            optionGroupId: selectedGroupId,
-            lastModified: new Date().toISOString(),
-          }),
-        );
-      });
-    }
+    // Create ServiceLevelBindings for each selected tier
+    selectedTierIds.forEach((tierId) => {
+      dispatch(
+        addServiceLevel({
+          serviceLevelId: generateId(),
+          serviceId,
+          tierId,
+          level: "INCLUDED",
+          optionGroupId: selectedGroupId || undefined,
+          lastModified: now,
+        }),
+      );
+    });
 
     setNewService({ title: "", description: "" });
+    setSelectedTierIds(new Set());
     setIsAddingService(false);
   };
 
   const handleUpdateService = (
     service: Service,
     updates: Partial<
-      Pick<Service, "title" | "description" | "isSetupFormation">
+      Pick<
+        Service,
+        "title" | "description" | "isSetupFormation" | "optionGroupId"
+      >
     >,
   ) => {
     dispatch(
@@ -220,6 +280,53 @@ export function ServiceCatalog({
         lastModified: new Date().toISOString(),
       }),
     );
+  };
+
+  const handleToggleTier = (
+    serviceId: string,
+    tierId: string,
+    isIncluded: boolean,
+  ) => {
+    const now = new Date().toISOString();
+    const tier = tiers.find((t) => t.id === tierId);
+    if (!tier) return;
+
+    // Find existing service level binding for this service-tier combo
+    const existingBinding = tier.serviceLevels.find(
+      (sl) => sl.serviceId === serviceId,
+    );
+
+    if (isIncluded) {
+      // Add or update service level binding
+      if (existingBinding) {
+        // Service level exists, might need to update it if level changed
+        // (for now we just use INCLUDED)
+      } else {
+        // Create new service level binding
+        const service = services.find((s) => s.id === serviceId);
+        dispatch(
+          addServiceLevel({
+            serviceLevelId: generateId(),
+            serviceId,
+            tierId,
+            level: "INCLUDED",
+            optionGroupId: service?.optionGroupId || undefined,
+            lastModified: now,
+          }),
+        );
+      }
+    } else {
+      // Remove service level binding
+      if (existingBinding) {
+        dispatch(
+          removeServiceLevel({
+            serviceLevelId: existingBinding.id,
+            tierId,
+            lastModified: now,
+          }),
+        );
+      }
+    }
   };
 
   const handleDeleteService = (serviceId: string) => {
@@ -238,7 +345,7 @@ export function ServiceCatalog({
       return getServicesForGroup(selectedGroupId);
     }
     return ungroupedServices;
-  }, [selectedGroupId, services, tiers, ungroupedServices]);
+  }, [selectedGroupId, services, ungroupedServices]);
 
   // Get selected group info
   const selectedGroup = selectedGroupId
@@ -251,6 +358,105 @@ export function ServiceCatalog({
   return (
     <>
       <style>{styles}</style>
+
+      {/* Edit Group Modal */}
+      {editingGroup && (
+        <div
+          className="catalog__modal-overlay"
+          onClick={() => setEditingGroup(null)}
+        >
+          <div className="catalog__modal" onClick={(e) => e.stopPropagation()}>
+            <div className="catalog__modal-header">
+              <h3 className="catalog__modal-title">Edit Group</h3>
+              <button
+                onClick={() => setEditingGroup(null)}
+                className="catalog__modal-close"
+                aria-label="Close"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="catalog__modal-body">
+              <div className="catalog__field">
+                <label className="catalog__label">Group Name</label>
+                <input
+                  type="text"
+                  value={editGroupName}
+                  onChange={(e) => setEditGroupName(e.target.value)}
+                  className="catalog__input"
+                  autoFocus
+                />
+              </div>
+              <div className="catalog__type-selector">
+                <span className="catalog__type-label">Category</span>
+                <div className="catalog__type-buttons">
+                  {[
+                    { type: "setup" as const, label: "Setup", color: "amber" },
+                    {
+                      type: "recurring" as const,
+                      label: "Recurring",
+                      color: "emerald",
+                    },
+                    {
+                      type: "addon" as const,
+                      label: "Add-on",
+                      color: "violet",
+                    },
+                  ].map(({ type, label, color }) => (
+                    <button
+                      key={type}
+                      onClick={() => setEditGroupType(type)}
+                      className={`catalog__type-btn catalog__type-btn--${color} ${editGroupType === type ? "catalog__type-btn--active" : ""}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {editGroupType === "setup" && (
+                <div className="catalog__fee-field">
+                  <span className="catalog__fee-label">One-time Fee</span>
+                  <div className="catalog__fee-input-wrapper">
+                    <span className="catalog__fee-prefix">$</span>
+                    <input
+                      type="number"
+                      value={editGroupSetupFee}
+                      onChange={(e) => setEditGroupSetupFee(e.target.value)}
+                      placeholder="0"
+                      className="catalog__fee-input"
+                      step="0.01"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="catalog__modal-footer">
+              <button
+                onClick={() => setEditingGroup(null)}
+                className="catalog__btn catalog__btn--secondary"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveGroupEdit}
+                disabled={!editGroupName.trim()}
+                className="catalog__btn catalog__btn--primary"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="catalog">
         {/* Service Groups Sidebar */}
         <aside className="catalog__sidebar">
@@ -360,6 +566,7 @@ export function ServiceCatalog({
                 groupMetadata={groupMetadata}
                 getServicesForGroup={getServicesForGroup}
                 onSelect={setSelectedGroupId}
+                onEdit={handleOpenEditGroup}
                 onDelete={handleDeleteGroup}
               />
             )}
@@ -374,6 +581,7 @@ export function ServiceCatalog({
                 groupMetadata={groupMetadata}
                 getServicesForGroup={getServicesForGroup}
                 onSelect={setSelectedGroupId}
+                onEdit={handleOpenEditGroup}
                 onDelete={handleDeleteGroup}
               />
             )}
@@ -388,6 +596,7 @@ export function ServiceCatalog({
                 groupMetadata={groupMetadata}
                 getServicesForGroup={getServicesForGroup}
                 onSelect={setSelectedGroupId}
+                onEdit={handleOpenEditGroup}
                 onDelete={handleDeleteGroup}
               />
             )}
@@ -513,6 +722,54 @@ export function ServiceCatalog({
                   className="catalog__textarea"
                 />
               </div>
+
+              {/* Tier Selection */}
+              {tiers.length > 0 && (
+                <div className="catalog__field">
+                  <label className="catalog__label">Include in Tiers</label>
+                  <div className="catalog__tier-grid">
+                    {tiers.map((tier) => {
+                      const isSelected = selectedTierIds.has(tier.id);
+                      return (
+                        <label
+                          key={tier.id}
+                          className={`catalog__tier-option ${isSelected ? "catalog__tier-option--selected" : ""}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={(e) => {
+                              const newSet = new Set(selectedTierIds);
+                              if (e.target.checked) {
+                                newSet.add(tier.id);
+                              } else {
+                                newSet.delete(tier.id);
+                              }
+                              setSelectedTierIds(newSet);
+                            }}
+                            className="catalog__tier-checkbox"
+                          />
+                          <span className="catalog__tier-name">
+                            {tier.name}
+                          </span>
+                          {tier.pricing.amount !== null && (
+                            <span className="catalog__tier-price">
+                              ${tier.pricing.amount}/
+                              {tier.pricing.billingCycle.toLowerCase()}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {selectedTierIds.size === 0 && (
+                    <p className="catalog__tier-hint">
+                      Select at least one tier to include this service
+                    </p>
+                  )}
+                </div>
+              )}
+
               {tiers.length === 0 && (
                 <div className="catalog__notice catalog__notice--warning">
                   <svg
@@ -521,14 +778,15 @@ export function ServiceCatalog({
                     stroke="currentColor"
                     strokeWidth="1.75"
                   >
-                    <path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                   <p>
-                    Note: No subscription tiers exist yet. Create tiers in "Tier
-                    Definition" first to fully link services to groups.
+                    No tiers defined yet. Define tiers in the Tier Definition
+                    tab first to specify which tiers include this service.
                   </p>
                 </div>
               )}
+
               <div className="catalog__form-actions">
                 <button
                   onClick={handleAddService}
@@ -541,6 +799,7 @@ export function ServiceCatalog({
                   onClick={() => {
                     setIsAddingService(false);
                     setNewService({ title: "", description: "" });
+                    setSelectedTierIds(new Set());
                   }}
                   className="catalog__btn catalog__btn--secondary"
                 >
@@ -577,8 +836,12 @@ export function ServiceCatalog({
                 <ServiceCard
                   key={service.id}
                   service={service}
+                  tiers={tiers}
+                  optionGroups={optionGroups}
+                  groupMetadata={groupMetadata}
                   onUpdate={handleUpdateService}
                   onDelete={() => handleDeleteService(service.id)}
+                  onToggleTier={handleToggleTier}
                 />
               ))}
             </div>
@@ -597,6 +860,7 @@ interface GroupSectionProps {
   groupMetadata: Record<string, GroupMetadata>;
   getServicesForGroup: (groupId: string) => Service[];
   onSelect: (groupId: string) => void;
+  onEdit: (group: OptionGroup) => void;
   onDelete: (groupId: string) => void;
 }
 
@@ -608,6 +872,7 @@ function GroupSection({
   groupMetadata,
   getServicesForGroup,
   onSelect,
+  onEdit,
   onDelete,
 }: GroupSectionProps) {
   return (
@@ -626,6 +891,7 @@ function GroupSection({
             serviceCount={getServicesForGroup(group.id).length}
             isSelected={selectedGroupId === group.id}
             onSelect={() => onSelect(group.id)}
+            onEdit={() => onEdit(group)}
             onDelete={() => onDelete(group.id)}
             setupFee={groupMetadata[group.id]?.setupFee}
             isSetup={groupMetadata[group.id]?.isSetupFormation}
@@ -642,6 +908,7 @@ interface GroupButtonProps {
   serviceCount: number;
   isSelected: boolean;
   onSelect: () => void;
+  onEdit: () => void;
   onDelete: () => void;
   setupFee?: number | null;
   isSetup?: boolean;
@@ -653,6 +920,7 @@ function GroupButton({
   serviceCount,
   isSelected,
   onSelect,
+  onEdit,
   onDelete,
   setupFee,
   isSetup,
@@ -691,23 +959,46 @@ function GroupButton({
         </div>
       </button>
       {isHovered && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="catalog__group-delete"
-          aria-label="Delete group"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
+        <div className="catalog__group-actions">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+            className="catalog__group-action catalog__group-action--edit"
+            aria-label="Edit group"
           >
-            <path d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+            </svg>
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="catalog__group-action catalog__group-action--delete"
+            aria-label="Delete group"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
+            </svg>
+          </button>
+        </div>
       )}
     </div>
   );
@@ -715,20 +1006,40 @@ function GroupButton({
 
 interface ServiceCardProps {
   service: Service;
+  tiers: ServiceSubscriptionTier[];
+  optionGroups: OptionGroup[];
+  groupMetadata: Record<string, GroupMetadata>;
   onUpdate: (
     service: Service,
     updates: Partial<
-      Pick<Service, "title" | "description" | "isSetupFormation">
+      Pick<
+        Service,
+        "title" | "description" | "isSetupFormation" | "optionGroupId"
+      >
     >,
   ) => void;
   onDelete: () => void;
+  onToggleTier: (
+    serviceId: string,
+    tierId: string,
+    isIncluded: boolean,
+  ) => void;
 }
 
-function ServiceCard({ service, onUpdate, onDelete }: ServiceCardProps) {
+function ServiceCard({
+  service,
+  tiers,
+  optionGroups,
+  groupMetadata,
+  onUpdate,
+  onDelete,
+  onToggleTier,
+}: ServiceCardProps) {
   const [localTitle, setLocalTitle] = useState(service.title);
   const [localDescription, setLocalDescription] = useState(
     service.description || "",
   );
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Sync local state when service changes
   useEffect(() => {
@@ -736,56 +1047,177 @@ function ServiceCard({ service, onUpdate, onDelete }: ServiceCardProps) {
     setLocalDescription(service.description || "");
   }, [service.title, service.description]);
 
+  // Get tiers this service is included in
+  const includedTierIds = useMemo(() => {
+    const ids = new Set<string>();
+    tiers.forEach((tier) => {
+      const hasService = tier.serviceLevels.some(
+        (sl) => sl.serviceId === service.id && sl.level === "INCLUDED",
+      );
+      if (hasService) {
+        ids.add(tier.id);
+      }
+    });
+    return ids;
+  }, [tiers, service.id]);
+
   return (
     <div
-      className={`catalog__service-card ${service.isSetupFormation ? "catalog__service-card--setup" : ""}`}
+      className={`catalog__service-card ${service.isSetupFormation ? "catalog__service-card--setup" : ""} ${isExpanded ? "catalog__service-card--expanded" : ""}`}
     >
-      <div className="catalog__service-content">
-        <div className="catalog__service-header">
-          <input
-            type="text"
-            value={localTitle}
-            onChange={(e) => setLocalTitle(e.target.value)}
+      <div className="catalog__service-main">
+        <div className="catalog__service-content">
+          <div className="catalog__service-header">
+            <input
+              type="text"
+              value={localTitle}
+              onChange={(e) => setLocalTitle(e.target.value)}
+              onBlur={() => {
+                if (localTitle !== service.title && localTitle.trim()) {
+                  onUpdate(service, { title: localTitle.trim() });
+                }
+              }}
+              className="catalog__service-title-input"
+            />
+            {service.isSetupFormation && (
+              <span className="catalog__badge catalog__badge--amber">
+                Setup Service
+              </span>
+            )}
+          </div>
+          <textarea
+            value={localDescription}
+            onChange={(e) => setLocalDescription(e.target.value)}
             onBlur={() => {
-              if (localTitle !== service.title && localTitle.trim()) {
-                onUpdate(service, { title: localTitle.trim() });
+              if (localDescription !== (service.description || "")) {
+                onUpdate(service, { description: localDescription });
               }
             }}
-            className="catalog__service-title-input"
+            placeholder="Add a description..."
+            rows={2}
+            className="catalog__service-desc-input"
           />
-          {service.isSetupFormation && (
-            <span className="catalog__badge catalog__badge--amber">
-              Setup Service
-            </span>
+
+          {/* Tier badges - quick view */}
+          {tiers.length > 0 && (
+            <div className="catalog__service-tiers-preview">
+              {tiers.map((tier) => (
+                <span
+                  key={tier.id}
+                  className={`catalog__service-tier-badge ${includedTierIds.has(tier.id) ? "catalog__service-tier-badge--included" : "catalog__service-tier-badge--excluded"}`}
+                >
+                  {tier.name}
+                </span>
+              ))}
+            </div>
           )}
         </div>
-        <textarea
-          value={localDescription}
-          onChange={(e) => setLocalDescription(e.target.value)}
-          onBlur={() => {
-            if (localDescription !== (service.description || "")) {
-              onUpdate(service, { description: localDescription });
-            }
-          }}
-          placeholder="Add a description..."
-          rows={2}
-          className="catalog__service-desc-input"
-        />
+        <div className="catalog__service-actions">
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="catalog__service-expand"
+            aria-label={isExpanded ? "Collapse" : "Expand"}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              style={{ transform: isExpanded ? "rotate(180deg)" : "none" }}
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          <button
+            onClick={onDelete}
+            className="catalog__service-delete"
+            aria-label="Delete service"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <button
-        onClick={onDelete}
-        className="catalog__service-delete"
-        aria-label="Delete service"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        >
-          <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-      </button>
+
+      {/* Expanded section for editing group and tier inclusion */}
+      {isExpanded && (
+        <div className="catalog__service-expanded">
+          {/* Group assignment */}
+          <div className="catalog__service-section">
+            <label className="catalog__label">Assign to Group</label>
+            <select
+              value={service.optionGroupId || ""}
+              onChange={(e) => {
+                const newGroupId = e.target.value || null;
+                const isSetupGroup = newGroupId
+                  ? (groupMetadata[newGroupId]?.isSetupFormation ?? false)
+                  : false;
+
+                onUpdate(service, {
+                  optionGroupId: newGroupId,
+                  isSetupFormation: isSetupGroup,
+                });
+              }}
+              className="catalog__select"
+            >
+              <option value="">No group (ungrouped)</option>
+              {optionGroups.map((group) => {
+                const meta = groupMetadata[group.id];
+                const label = meta?.isSetupFormation
+                  ? `${group.name} (Setup)`
+                  : group.isAddOn
+                    ? `${group.name} (Add-on)`
+                    : `${group.name} (Recurring)`;
+                return (
+                  <option key={group.id} value={group.id}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          {/* Tier inclusion */}
+          {tiers.length > 0 && (
+            <div className="catalog__service-section">
+              <label className="catalog__label">Include in Tiers</label>
+              <div className="catalog__tier-grid catalog__tier-grid--compact">
+                {tiers.map((tier) => {
+                  const isIncluded = includedTierIds.has(tier.id);
+                  return (
+                    <label
+                      key={tier.id}
+                      className={`catalog__tier-option ${isIncluded ? "catalog__tier-option--selected" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isIncluded}
+                        onChange={(e) => {
+                          onToggleTier(service.id, tier.id, e.target.checked);
+                        }}
+                        className="catalog__tier-checkbox"
+                      />
+                      <span className="catalog__tier-name">{tier.name}</span>
+                      {tier.pricing.amount !== null && (
+                        <span className="catalog__tier-price">
+                          ${tier.pricing.amount}/
+                          {tier.pricing.billingCycle.toLowerCase()}
+                        </span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -1146,35 +1578,6 @@ const styles = `
     color: var(--so-amber-600);
   }
 
-  .catalog__group-delete {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 24px;
-    height: 24px;
-    border-radius: var(--so-radius-sm);
-    background: transparent;
-    border: none;
-    color: var(--so-slate-400);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all var(--so-transition-fast);
-    animation: so-fade-in var(--so-transition-fast) ease-out;
-  }
-
-  .catalog__group-delete:hover {
-    background: var(--so-rose-100);
-    color: var(--so-rose-600);
-  }
-
-  .catalog__group-delete svg {
-    width: 14px;
-    height: 14px;
-  }
-
   /* Ungrouped Button */
   .catalog__ungrouped-btn {
     width: 100%;
@@ -1524,5 +1927,322 @@ const styles = `
   .catalog__service-delete svg {
     width: 18px;
     height: 18px;
+  }
+
+  /* Tier Selection */
+  .catalog__tier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+
+  .catalog__tier-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    background: white;
+    border: 1.5px solid var(--so-slate-200);
+    border-radius: var(--so-radius-md);
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .catalog__tier-option:hover {
+    border-color: var(--so-slate-300);
+    background: var(--so-slate-50);
+  }
+
+  .catalog__tier-option--selected {
+    border-color: var(--so-emerald-500);
+    background: var(--so-emerald-50);
+  }
+
+  .catalog__tier-option--selected:hover {
+    border-color: var(--so-emerald-600);
+    background: var(--so-emerald-50);
+  }
+
+  .catalog__tier-checkbox {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: var(--so-emerald-600);
+    cursor: pointer;
+  }
+
+  .catalog__tier-name {
+    flex: 1;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--so-slate-800);
+  }
+
+  .catalog__tier-price {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--so-slate-500);
+    white-space: nowrap;
+  }
+
+  .catalog__tier-option--selected .catalog__tier-name {
+    color: var(--so-emerald-800);
+  }
+
+  .catalog__tier-option--selected .catalog__tier-price {
+    color: var(--so-emerald-600);
+  }
+
+  .catalog__tier-hint {
+    font-size: 0.75rem;
+    color: var(--so-slate-500);
+    margin: 8px 0 0;
+    font-style: italic;
+  }
+
+  .catalog__tier-grid--compact {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+  }
+
+  .catalog__tier-grid--compact .catalog__tier-option {
+    padding: 10px 12px;
+  }
+
+  /* Modal Overlay */
+  .catalog__modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: so-fade-in var(--so-transition-fast) ease-out;
+  }
+
+  .catalog__modal {
+    background: white;
+    border-radius: var(--so-radius-lg);
+    box-shadow: var(--so-shadow-xl);
+    width: 100%;
+    max-width: 420px;
+    animation: so-scale-in var(--so-transition-base) ease-out;
+  }
+
+  .catalog__modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--so-slate-100);
+  }
+
+  .catalog__modal-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--so-slate-800);
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .catalog__modal-close {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--so-radius-md);
+    background: transparent;
+    border: none;
+    color: var(--so-slate-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--so-transition-fast);
+  }
+
+  .catalog__modal-close:hover {
+    background: var(--so-slate-100);
+    color: var(--so-slate-600);
+  }
+
+  .catalog__modal-close svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .catalog__modal-body {
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .catalog__modal-footer {
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid var(--so-slate-100);
+  }
+
+  /* Group Actions */
+  .catalog__group-actions {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 2px;
+    animation: so-fade-in var(--so-transition-fast) ease-out;
+  }
+
+  .catalog__group-action {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--so-radius-md);
+    background: white;
+    border: 1px solid var(--so-slate-200);
+    color: var(--so-slate-400);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--so-transition-fast);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .catalog__group-action:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .catalog__group-action:active {
+    transform: scale(0.95);
+  }
+
+  .catalog__group-action svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .catalog__group-action--edit:hover {
+    background: var(--so-violet-50);
+    border-color: var(--so-violet-300);
+    color: var(--so-violet-600);
+  }
+
+  .catalog__group-action--delete:hover {
+    background: var(--so-rose-50);
+    border-color: var(--so-rose-300);
+    color: var(--so-rose-600);
+  }
+
+  /* Select element */
+  .catalog__select {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--so-font-sans);
+    font-size: 0.875rem;
+    color: var(--so-slate-800);
+    background: white;
+    border: 1.5px solid var(--so-slate-200);
+    border-radius: var(--so-radius-sm);
+    cursor: pointer;
+    transition: all var(--so-transition-fast);
+  }
+
+  .catalog__select:hover {
+    border-color: var(--so-slate-300);
+  }
+
+  .catalog__select:focus {
+    outline: none;
+    border-color: var(--so-violet-500);
+    box-shadow: 0 0 0 2px var(--so-violet-100);
+  }
+
+  /* Service Card Updates */
+  .catalog__service-card--expanded {
+    border-color: var(--so-violet-300);
+  }
+
+  .catalog__service-main {
+    display: flex;
+    gap: 16px;
+  }
+
+  .catalog__service-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .catalog__service-expand {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--so-radius-md);
+    background: var(--so-slate-100);
+    border: none;
+    color: var(--so-slate-500);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--so-transition-fast);
+  }
+
+  .catalog__service-expand:hover {
+    background: var(--so-violet-100);
+    color: var(--so-violet-600);
+  }
+
+  .catalog__service-expand svg {
+    width: 18px;
+    height: 18px;
+    transition: transform var(--so-transition-fast);
+  }
+
+  .catalog__service-tiers-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .catalog__service-tier-badge {
+    padding: 3px 8px;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 4px;
+  }
+
+  .catalog__service-tier-badge--included {
+    background: var(--so-emerald-100);
+    color: var(--so-emerald-700);
+  }
+
+  .catalog__service-tier-badge--excluded {
+    background: var(--so-slate-100);
+    color: var(--so-slate-400);
+  }
+
+  .catalog__service-expanded {
+    border-top: 1px solid var(--so-slate-200);
+    margin-top: 16px;
+    padding-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: so-fade-in var(--so-transition-fast) ease-out;
+  }
+
+  .catalog__service-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
 `;

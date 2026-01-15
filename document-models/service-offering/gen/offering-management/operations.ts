@@ -4,6 +4,14 @@ import {
   type UpdateOfferingStatusAction,
   type SetOperatorAction,
   type SetOfferingIdAction,
+  type AddTargetAudienceAction,
+  type RemoveTargetAudienceAction,
+  type SetFacetTargetAction,
+  type RemoveFacetTargetAction,
+  type AddFacetOptionAction,
+  type RemoveFacetOptionAction,
+  type SetSetupServicesAction,
+  type SetRecurringServicesAction,
 } from "./actions.js";
 import { type ServiceOfferingState } from "../types.js";
 
@@ -26,6 +34,46 @@ export interface ServiceOfferingOfferingManagementOperations {
   setOfferingIdOperation: (
     state: ServiceOfferingState,
     action: SetOfferingIdAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  addTargetAudienceOperation: (
+    state: ServiceOfferingState,
+    action: AddTargetAudienceAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  removeTargetAudienceOperation: (
+    state: ServiceOfferingState,
+    action: RemoveTargetAudienceAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setFacetTargetOperation: (
+    state: ServiceOfferingState,
+    action: SetFacetTargetAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  removeFacetTargetOperation: (
+    state: ServiceOfferingState,
+    action: RemoveFacetTargetAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  addFacetOptionOperation: (
+    state: ServiceOfferingState,
+    action: AddFacetOptionAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  removeFacetOptionOperation: (
+    state: ServiceOfferingState,
+    action: RemoveFacetOptionAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setSetupServicesOperation: (
+    state: ServiceOfferingState,
+    action: SetSetupServicesAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setRecurringServicesOperation: (
+    state: ServiceOfferingState,
+    action: SetRecurringServicesAction,
     dispatch?: SignalDispatch,
   ) => void;
 }
