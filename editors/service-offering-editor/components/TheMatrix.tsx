@@ -7,19 +7,17 @@ import type {
   Service,
   ServiceSubscriptionTier,
   ServiceLevel,
+  ServiceLevelBinding,
   OptionGroup,
   ServiceUsageLimit,
 } from "resourceServices/document-models/service-offering";
 import {
   addServiceLevel,
   updateServiceLevel,
-  removeServiceLevel,
   addUsageLimit,
   updateUsageLimit,
   removeUsageLimit,
   addService,
-  addOptionGroup,
-  updateOptionGroup,
 } from "../../../document-models/service-offering/gen/creators.js";
 
 interface TheMatrixProps {
@@ -957,8 +955,13 @@ const matrixStyles = `
     border: none;
   }
 
-  .matrix__panel-edit-btn--primary:hover {
+  .matrix__panel-edit-btn--primary:hover:not(:disabled) {
     background: #6d28d9;
+  }
+
+  .matrix__panel-edit-btn--primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .matrix__panel-edit-btn--secondary {
@@ -1487,10 +1490,8 @@ export function TheMatrix({
   };
 
   const getLevelDisplay = (
-    serviceLevel:
-      | { level: ServiceLevel; customValue?: string | null }
-      | undefined,
-  ) => {
+    serviceLevel: ServiceLevelBinding | undefined,
+  ): { label: string; color: string } => {
     if (!serviceLevel) return { label: "—", color: "var(--so-slate-300)" };
 
     const level = serviceLevel.level;
@@ -2003,14 +2004,17 @@ interface ServiceGroupSectionProps {
   getServiceLevelForTier: (
     serviceId: string,
     tier: ServiceSubscriptionTier,
-  ) => any;
+  ) => ServiceLevelBinding | undefined;
   getUniqueMetricsForService: (serviceId: string) => string[];
   getUsageLimitForMetric: (
     serviceId: string,
     metric: string,
     tier: ServiceSubscriptionTier,
   ) => ServiceUsageLimit | undefined;
-  getLevelDisplay: (serviceLevel: any) => { label: string; color: string };
+  getLevelDisplay: (serviceLevel: ServiceLevelBinding | undefined) => {
+    label: string;
+    color: string;
+  };
   selectedCell: { serviceId: string; tierId: string } | null;
   setSelectedCell: (cell: { serviceId: string; tierId: string } | null) => void;
   handleSetServiceLevel: (
@@ -2193,13 +2197,16 @@ interface ServiceRowWithMetricsProps {
   getServiceLevelForTier: (
     serviceId: string,
     tier: ServiceSubscriptionTier,
-  ) => any;
+  ) => ServiceLevelBinding | undefined;
   getUsageLimitForMetric: (
     serviceId: string,
     metric: string,
     tier: ServiceSubscriptionTier,
   ) => ServiceUsageLimit | undefined;
-  getLevelDisplay: (serviceLevel: any) => { label: string; color: string };
+  getLevelDisplay: (serviceLevel: ServiceLevelBinding | undefined) => {
+    label: string;
+    color: string;
+  };
   selectedCell: { serviceId: string; tierId: string } | null;
   setSelectedCell: (cell: { serviceId: string; tierId: string } | null) => void;
   selectedTierIdx: number;
@@ -2306,7 +2313,7 @@ function ServiceLevelDetailPanel({
   tierId,
   services,
   tiers,
-  optionGroups,
+  optionGroups: _optionGroups,
   dispatch,
   onClose,
 }: ServiceLevelDetailPanelProps) {
@@ -2386,6 +2393,7 @@ function ServiceLevelDetailPanel({
     ? tier?.usageLimits.filter((ul) => ul.serviceId === serviceId) || []
     : [];
 
+  const [isAddingMetric, setIsAddingMetric] = useState(false);
   const [newMetric, setNewMetric] = useState("");
   const [newLimit, setNewLimit] = useState("");
   const [customValue, setCustomValue] = useState(
@@ -2409,6 +2417,7 @@ function ServiceLevelDetailPanel({
     );
     setNewMetric("");
     setNewLimit("");
+    setIsAddingMetric(false);
   };
 
   const handleRemoveLimit = (limitId: string) => {
@@ -2538,10 +2547,10 @@ function ServiceLevelDetailPanel({
                 Usage Limits / Metrics
               </label>
               <button
-                onClick={() => setNewMetric("New Metric")}
+                onClick={() => setIsAddingMetric(true)}
                 className="matrix__panel-add-btn"
               >
-                + Add Limit
+                + Add Metric
               </button>
             </div>
 
@@ -2555,45 +2564,56 @@ function ServiceLevelDetailPanel({
               />
             ))}
 
-            {usageLimits.length === 0 && !newMetric && (
+            {usageLimits.length === 0 && !isAddingMetric && (
               <p className="matrix__panel-empty-text">
                 No metrics added yet. Metrics will appear as nested rows under
                 this service in the matrix.
               </p>
             )}
 
-            {newMetric && (
+            {isAddingMetric && (
               <div className="matrix__panel-edit-form">
                 <div>
+                  <label className="matrix__panel-edit-label">
+                    Metric Name
+                  </label>
                   <input
                     type="text"
                     value={newMetric}
                     onChange={(e) => setNewMetric(e.target.value)}
-                    placeholder="Metric name (e.g., API Calls, Storage)"
+                    placeholder="e.g., API Calls, Storage, Users"
                     className="matrix__panel-input"
                     autoFocus
                   />
                 </div>
                 <div>
+                  <label className="matrix__panel-edit-label">
+                    Limit Value
+                  </label>
                   <input
                     type="text"
                     value={newLimit}
                     onChange={(e) => setNewLimit(e.target.value)}
-                    placeholder="e.g., 3, Unlimited, As needed"
+                    placeholder="e.g., 100, 5, leave empty for Unlimited"
                     className="matrix__panel-input"
                   />
+                  <p className="matrix__panel-edit-hint">
+                    Enter a number or leave empty for &quot;Unlimited&quot;
+                  </p>
                 </div>
                 <div className="matrix__panel-edit-actions">
                   <button
                     onClick={handleAddLimit}
+                    disabled={!newMetric.trim()}
                     className="matrix__panel-edit-btn matrix__panel-edit-btn--primary"
                   >
-                    Add
+                    Add Metric
                   </button>
                   <button
                     onClick={() => {
                       setNewMetric("");
                       setNewLimit("");
+                      setIsAddingMetric(false);
                     }}
                     className="matrix__panel-edit-btn matrix__panel-edit-btn--secondary"
                   >
