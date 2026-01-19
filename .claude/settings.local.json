@@ -15,7 +15,8 @@
       "Bash(find:*)",
       "Bash(bun x tsc:*)",
       "Bash(npm run lint:fix:*)",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(npm run generate:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

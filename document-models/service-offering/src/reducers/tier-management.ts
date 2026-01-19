@@ -146,8 +146,8 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
           if (action.input.metric) {
             usageLimit.metric = action.input.metric;
           }
-          if (action.input.limit !== undefined) {
-            usageLimit.limit = action.input.limit ?? null;
+          if (action.input.limit !== undefined && action.input.limit !== null) {
+            usageLimit.limit = action.input.limit;
           }
           if (action.input.resetPeriod) {
             usageLimit.resetPeriod = action.input.resetPeriod;
