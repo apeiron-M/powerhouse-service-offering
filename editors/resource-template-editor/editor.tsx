@@ -1,6 +1,7 @@
 import { DocumentToolbar } from "@powerhousedao/design-system/connect";
 import { useSelectedResourceTemplateDocument } from "../../document-models/resource-template/hooks.js";
 import { TemplateInfo } from "./components/TemplateInfo.js";
+import { FacetTargeting } from "./components/FacetTargeting.js";
 
 export default function ResourceTemplateEditor() {
   const [document, dispatch] = useSelectedResourceTemplateDocument();
@@ -59,6 +60,7 @@ export default function ResourceTemplateEditor() {
         </div>
         <div className="rt-editor__content">
           <TemplateInfo document={document} dispatch={dispatch} />
+          <FacetTargeting document={document} dispatch={dispatch} />
         </div>
       </div>
     </div>
@@ -149,6 +151,9 @@ const editorStyles = `
 
   .rt-editor__content {
     min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     animation: rt-fade-in var(--rt-transition-slow) ease-out;
   }
 

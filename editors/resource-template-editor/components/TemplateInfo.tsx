@@ -14,10 +14,6 @@ import {
   removeTargetAudience,
   setSetupServices,
   setRecurringServices,
-  setFacetTarget,
-  removeFacetTarget,
-  addFacetOption,
-  removeFacetOption,
 } from "../../../document-models/resource-template/gen/creators.js";
 
 interface TemplateInfoProps {
@@ -39,52 +35,6 @@ const AUDIENCE_PRESETS = [
   { label: "Operators", color: "#f97316" },
   { label: "Contributors", color: "#10b981" },
   { label: "Investors", color: "#6366f1" },
-];
-
-const FACET_CATEGORIES = [
-  {
-    key: "sno-function",
-    label: "SNO Function",
-    description: "Service node operator function type",
-    options: [
-      { id: "operational-hub", label: "Operational Hub" },
-      { id: "embryonic-hub", label: "Embryonic Hub" },
-      { id: "ip-spv", label: "IP SPV" },
-      { id: "revenue-generating-hub", label: "Revenue Generating Hub" },
-      {
-        id: "operational-collateral-fund",
-        label: "Operational Collateral Fund",
-      },
-    ],
-  },
-  {
-    key: "legal-entity",
-    label: "Legal Entity",
-    description: "Required legal structure",
-    options: [
-      { id: "swiss-association", label: "Swiss Association" },
-      { id: "bvi", label: "BVI" },
-    ],
-  },
-  {
-    key: "team",
-    label: "Team",
-    description: "Team location type",
-    options: [
-      { id: "remote", label: "Remote" },
-      { id: "local", label: "Local" },
-      { id: "hybrid", label: "Hybrid" },
-    ],
-  },
-  {
-    key: "anonymity",
-    label: "Anonymity",
-    description: "Identity disclosure level",
-    options: [
-      { id: "high", label: "High" },
-      { id: "highest", label: "Highest" },
-    ],
-  },
 ];
 
 export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
@@ -266,63 +216,6 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
         lastModified: new Date().toISOString(),
       }),
     );
-  };
-
-  const handleFacetOptionToggle = (
-    categoryKey: string,
-    categoryLabel: string,
-    optionId: string,
-  ) => {
-    const existingTarget = globalState.facetTargets.find(
-      (ft) => ft.categoryKey === categoryKey,
-    );
-    const isSelected = existingTarget?.selectedOptions.includes(optionId);
-
-    if (isSelected) {
-      dispatch(
-        removeFacetOption({
-          categoryKey,
-          optionId,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    } else {
-      if (existingTarget) {
-        dispatch(
-          addFacetOption({
-            categoryKey,
-            optionId,
-            lastModified: new Date().toISOString(),
-          }),
-        );
-      } else {
-        dispatch(
-          setFacetTarget({
-            id: generateId(),
-            categoryKey,
-            categoryLabel,
-            selectedOptions: [optionId],
-            lastModified: new Date().toISOString(),
-          }),
-        );
-      }
-    }
-  };
-
-  const handleClearFacetCategory = (categoryKey: string) => {
-    dispatch(
-      removeFacetTarget({
-        categoryKey,
-        lastModified: new Date().toISOString(),
-      }),
-    );
-  };
-
-  const getFacetSelectedOptions = (categoryKey: string): string[] => {
-    const target = globalState.facetTargets.find(
-      (ft) => ft.categoryKey === categoryKey,
-    );
-    return target?.selectedOptions || [];
   };
 
   const currentStatus = STATUS_OPTIONS.find((s) => s.value === formData.status);
@@ -692,90 +585,6 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
             </div>
           </section>
         </div>
-
-        {/* Facet Targeting Section */}
-        <section className="template-editor__facets">
-          <div className="template-editor__facets-header">
-            <div className="template-editor__card-icon template-editor__card-icon--sky">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.75"
-              >
-                <path d="M3 6h18M7 12h10M10 18h4" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="template-editor__card-title">Facet Targeting</h3>
-              <p className="template-editor__card-subtitle">
-                Define which resource combinations can use this template
-              </p>
-            </div>
-          </div>
-          <div className="template-editor__facets-grid">
-            {FACET_CATEGORIES.map((category) => {
-              const selectedOptions = getFacetSelectedOptions(category.key);
-              return (
-                <div key={category.key} className="template-editor__facet-card">
-                  <div className="template-editor__facet-header">
-                    <span className="template-editor__facet-label">
-                      {category.label}
-                    </span>
-                    {selectedOptions.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => handleClearFacetCategory(category.key)}
-                        className="template-editor__facet-clear"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                  <p className="template-editor__facet-desc">
-                    {category.description}
-                  </p>
-                  <div className="template-editor__facet-options">
-                    {category.options.map((option) => {
-                      const isSelected = selectedOptions.includes(option.id);
-                      return (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onClick={() =>
-                            handleFacetOptionToggle(
-                              category.key,
-                              category.label,
-                              option.id,
-                            )
-                          }
-                          className={`template-editor__facet-option ${
-                            isSelected
-                              ? "template-editor__facet-option--selected"
-                              : ""
-                          }`}
-                        >
-                          <span className="template-editor__facet-checkbox">
-                            {isSelected && (
-                              <svg
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                              >
-                                <path d="M5 12l5 5L20 7" strokeWidth="2.5" />
-                              </svg>
-                            )}
-                          </span>
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
 
         {/* Metadata Row */}
         <section className="template-editor__metadata">

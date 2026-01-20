@@ -25,13 +25,17 @@
       "Bash(node:*)",
       "Bash(python3:*)",
       "Bash(ls:*)",
-      "Bash(npx @anthropic-ai/mcp-server-document-models:*)"
+      "Bash(npx @anthropic-ai/mcp-server-document-models:*)",
+      "mcp__reactor-mcp__createDocument"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
       "Write(./.ph/**)",
       "Edit(./document-models/*/gen/**)",
       "Edit(./.ph/**)"
+    ],
+    "additionalDirectories": [
+      "/home/apeiron/2026/resourceServices/editors/facet-editor"
     ]
   },
   "enableAllProjectMcpServers": true,
