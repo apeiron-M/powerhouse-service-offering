@@ -358,6 +358,17 @@ input SetRecurringServicesInput {
     lastModified: DateTime!
 }
 
+input SelectResourceTemplateInput {
+    resourceTemplateId: PHID!
+    lastModified: DateTime!
+}
+
+input ChangeResourceTemplateInput {
+    previousTemplateId: PHID!
+    newTemplateId: PHID!
+    lastModified: DateTime!
+}
+
 # Option Group Management
 
 input AddOptionGroupInput {
@@ -380,18 +391,5 @@ input UpdateOptionGroupInput {
 
 input DeleteOptionGroupInput {
     id: OID!
-    lastModified: DateTime!
-}
-
-# Resource Template Selection
-
-input SelectResourceTemplateInput {
-    resourceTemplateId: PHID!
-    lastModified: DateTime!
-}
-
-input ChangeResourceTemplateInput {
-    previousTemplateId: PHID!
-    newTemplateId: PHID!
     lastModified: DateTime!
 }

@@ -1,9 +1,9 @@
-import type { ServiceOfferingOfferingManagementOperations } from "resourceServices/document-models/service-offering";
 import {
   TemplateAlreadySelectedError,
   NoTemplateSelectedError,
   TemplateMismatchError,
 } from "../../gen/offering-management/error.js";
+import type { ServiceOfferingOfferingManagementOperations } from "resourceServices/document-models/service-offering";
 
 export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferingManagementOperations =
   {
