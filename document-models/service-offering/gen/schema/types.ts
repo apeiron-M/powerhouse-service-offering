@@ -141,6 +141,12 @@ export type BillingCycle =
   | "QUARTERLY"
   | "SEMI_ANNUAL";
 
+export type ChangeResourceTemplateInput = {
+  lastModified: Scalars["DateTime"]["input"];
+  newTemplateId: Scalars["PHID"]["input"];
+  previousTemplateId: Scalars["PHID"]["input"];
+};
+
 export type DeleteOptionGroupInput = {
   id: Scalars["OID"]["input"];
   lastModified: Scalars["DateTime"]["input"];
@@ -221,6 +227,11 @@ export type ResourceFacetBinding = {
   supportedOptions: Array<Scalars["OID"]["output"]>;
 };
 
+export type SelectResourceTemplateInput = {
+  lastModified: Scalars["DateTime"]["input"];
+  resourceTemplateId: Scalars["PHID"]["input"];
+};
+
 export type Service = {
   description: Maybe<Scalars["String"]["output"]>;
   displayOrder: Maybe<Scalars["Int"]["output"]>;
@@ -260,6 +271,7 @@ export type ServiceOfferingState = {
   operatorId: Scalars["PHID"]["output"];
   optionGroups: Array<OptionGroup>;
   recurringServices: Array<Scalars["String"]["output"]>;
+  resourceTemplateId: Maybe<Scalars["PHID"]["output"]>;
   services: Array<Service>;
   setupServices: Array<Scalars["String"]["output"]>;
   status: ServiceStatus;

@@ -1,4 +1,9 @@
 import type { ServiceOfferingOfferingManagementOperations } from "resourceServices/document-models/service-offering";
+import {
+  TemplateAlreadySelectedError,
+  NoTemplateSelectedError,
+  TemplateMismatchError,
+} from "../../gen/offering-management/error.js";
 
 export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferingManagementOperations =
   {
@@ -112,6 +117,29 @@ export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferin
           facetTarget.selectedOptions.splice(optionIndex, 1);
         }
       }
+      state.lastModified = action.input.lastModified;
+    },
+    selectResourceTemplateOperation(state, action) {
+      if (state.resourceTemplateId) {
+        throw new TemplateAlreadySelectedError(
+          "A resource template has already been selected. Use CHANGE_RESOURCE_TEMPLATE to change it.",
+        );
+      }
+      state.resourceTemplateId = action.input.resourceTemplateId;
+      state.lastModified = action.input.lastModified;
+    },
+    changeResourceTemplateOperation(state, action) {
+      if (!state.resourceTemplateId) {
+        throw new NoTemplateSelectedError(
+          "No resource template has been selected yet. Use SELECT_RESOURCE_TEMPLATE first.",
+        );
+      }
+      if (state.resourceTemplateId !== action.input.previousTemplateId) {
+        throw new TemplateMismatchError(
+          "The previous template ID does not match the currently selected template.",
+        );
+      }
+      state.resourceTemplateId = action.input.newTemplateId;
       state.lastModified = action.input.lastModified;
     },
   };

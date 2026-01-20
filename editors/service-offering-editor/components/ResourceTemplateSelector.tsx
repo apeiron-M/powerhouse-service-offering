@@ -1,11 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
 } from "resourceServices/document-models/service-offering";
+import {
+  selectResourceTemplate,
+  changeResourceTemplate,
+} from "../../../document-models/service-offering/gen/offering-management/creators.js";
 import { useResourceTemplateDocumentsInSelectedDrive } from "../../../document-models/resource-template/hooks.js";
-import type { ResourceTemplateDocument } from "resourceServices/document-models/resource-template";
+import type {
+  ResourceTemplateDocument,
+  ResourceTemplateGlobalState,
+} from "resourceServices/document-models/resource-template";
 
 interface ResourceTemplateSelectorProps {
   document: ServiceOfferingDocument;
@@ -18,12 +25,10 @@ export function ResourceTemplateSelector({
 }: ResourceTemplateSelectorProps) {
   const templates = useResourceTemplateDocumentsInSelectedDrive();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-    null,
-  );
+  const [showingSelector, setShowingSelector] = useState(false);
 
-  // Get the currently linked template from document state
-  const globalState = document.state.global;
+  // Get the currently selected template ID from document state
+  const currentTemplateId = document.state.global.resourceTemplateId;
 
   const filteredTemplates = useMemo(() => {
     if (!templates) return [];
@@ -37,18 +42,63 @@ export function ResourceTemplateSelector({
     );
   }, [templates, searchQuery]);
 
-  const handleSelectTemplate = (template: ResourceTemplateDocument) => {
-    setSelectedTemplateId(template.header.id);
-    // In the future, this would dispatch an action to link the template
-    // For now, we just show the selection visually
-  };
+  const selectedTemplate = useMemo(() => {
+    if (!currentTemplateId || !templates) return null;
+    return templates.find((t) => t.header.id === currentTemplateId) || null;
+  }, [currentTemplateId, templates]);
 
-  const activeTemplates = filteredTemplates?.filter(
+  const handleSelectTemplate = useCallback(
+    (template: ResourceTemplateDocument) => {
+      const now = new Date().toISOString();
+
+      if (currentTemplateId) {
+        // If a template is already selected, use change operation
+        dispatch(
+          changeResourceTemplate({
+            previousTemplateId: currentTemplateId,
+            newTemplateId: template.header.id,
+            lastModified: now,
+          }),
+        );
+      } else {
+        // First time selection
+        dispatch(
+          selectResourceTemplate({
+            resourceTemplateId: template.header.id,
+            lastModified: now,
+          }),
+        );
+      }
+      setShowingSelector(false);
+    },
+    [currentTemplateId, dispatch],
+  );
+
+  const handleChangeTemplate = useCallback(() => {
+    setShowingSelector(true);
+  }, []);
+
+  const activeTemplates = filteredTemplates.filter(
     (t) => t.state.global.status === "ACTIVE",
   );
-  const otherTemplates = filteredTemplates?.filter(
+  const otherTemplates = filteredTemplates.filter(
     (t) => t.state.global.status !== "ACTIVE",
   );
+
+  // If a template is selected and user is not changing, show the read-only detail view
+  if (selectedTemplate && !showingSelector) {
+    return (
+      <>
+        <style>{styles}</style>
+        <div className="rts-container">
+          <TemplateDetailView
+            template={selectedTemplate}
+            onChangeTemplate={handleChangeTemplate}
+          />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -75,27 +125,6 @@ export function ResourceTemplateSelector({
             </p>
           </div>
         </div>
-
-        {/* Current Selection Info */}
-        {globalState.title && (
-          <div className="rts-current">
-            <div className="rts-current__badge">Current Configuration</div>
-            <div className="rts-current__info">
-              <h3 className="rts-current__title">{globalState.title}</h3>
-              <p className="rts-current__summary">{globalState.summary}</p>
-              <div className="rts-current__meta">
-                <span className="rts-current__audiences">
-                  {globalState.targetAudiences.length} target audience
-                  {globalState.targetAudiences.length !== 1 ? "s" : ""}
-                </span>
-                <span className="rts-current__services">
-                  {globalState.services.length} service
-                  {globalState.services.length !== 1 ? "s" : ""} defined
-                </span>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Search */}
         <div className="rts-search">
@@ -152,7 +181,7 @@ export function ResourceTemplateSelector({
           ) : (
             <>
               {/* Active Templates Section */}
-              {activeTemplates && activeTemplates.length > 0 && (
+              {activeTemplates.length > 0 && (
                 <div className="rts-section">
                   <h3 className="rts-section__title">
                     <span className="rts-section__dot rts-section__dot--active" />
@@ -163,7 +192,7 @@ export function ResourceTemplateSelector({
                       <TemplateCard
                         key={template.header.id}
                         template={template}
-                        isSelected={selectedTemplateId === template.header.id}
+                        isSelected={currentTemplateId === template.header.id}
                         onSelect={() => handleSelectTemplate(template)}
                       />
                     ))}
@@ -172,7 +201,7 @@ export function ResourceTemplateSelector({
               )}
 
               {/* Other Templates Section */}
-              {otherTemplates && otherTemplates.length > 0 && (
+              {otherTemplates.length > 0 && (
                 <div className="rts-section">
                   <h3 className="rts-section__title">
                     <span className="rts-section__dot" />
@@ -183,7 +212,7 @@ export function ResourceTemplateSelector({
                       <TemplateCard
                         key={template.header.id}
                         template={template}
-                        isSelected={selectedTemplateId === template.header.id}
+                        isSelected={currentTemplateId === template.header.id}
                         onSelect={() => handleSelectTemplate(template)}
                       />
                     ))}
@@ -208,33 +237,7 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
   const { state } = template;
   const globalState = state.global;
 
-  const statusColors: Record<
-    string,
-    { bg: string; text: string; dot: string }
-  > = {
-    ACTIVE: {
-      bg: "var(--rts-emerald-light)",
-      text: "var(--rts-emerald)",
-      dot: "var(--rts-emerald)",
-    },
-    DRAFT: {
-      bg: "var(--rts-slate-light)",
-      text: "var(--rts-slate)",
-      dot: "var(--rts-slate)",
-    },
-    COMING_SOON: {
-      bg: "var(--rts-sky-light)",
-      text: "var(--rts-sky)",
-      dot: "var(--rts-sky)",
-    },
-    DEPRECATED: {
-      bg: "var(--rts-rose-light)",
-      text: "var(--rts-rose)",
-      dot: "var(--rts-rose)",
-    },
-  };
-
-  const statusStyle = statusColors[globalState.status] || statusColors.DRAFT;
+  const statusStyle = getStatusStyle(globalState.status);
 
   return (
     <button
@@ -327,6 +330,369 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
   );
 }
 
+interface TemplateDetailViewProps {
+  template: ResourceTemplateDocument;
+  onChangeTemplate: () => void;
+}
+
+function TemplateDetailView({
+  template,
+  onChangeTemplate,
+}: TemplateDetailViewProps) {
+  const globalState = template.state.global;
+  const statusStyle = getStatusStyle(globalState.status);
+
+  return (
+    <div className="rtd-container">
+      {/* Selected Template Header */}
+      <div className="rtd-selected-header">
+        <div className="rtd-selected-header__info">
+          <span className="rtd-selected-header__badge">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M5 12l5 5L20 7" />
+            </svg>
+            Selected Template
+          </span>
+          <button
+            type="button"
+            onClick={onChangeTemplate}
+            className="rtd-selected-header__change"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Change Template
+          </button>
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <section className="rtd-hero">
+        <div className="rtd-hero__thumbnail-area">
+          <div
+            className="rtd-hero__thumbnail"
+            style={{
+              backgroundImage: globalState.thumbnailUrl
+                ? `url(${globalState.thumbnailUrl})`
+                : undefined,
+            }}
+          >
+            {!globalState.thumbnailUrl && (
+              <div className="rtd-hero__thumbnail-placeholder">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <path d="M21 15l-5-5L5 21" />
+                </svg>
+              </div>
+            )}
+            <span
+              className="rtd-hero__status"
+              style={{
+                backgroundColor: statusStyle.bg,
+                color: statusStyle.text,
+              }}
+            >
+              <span
+                className="rtd-hero__status-dot"
+                style={{ backgroundColor: statusStyle.dot }}
+              />
+              {globalState.status.replace("_", " ")}
+            </span>
+          </div>
+        </div>
+
+        <div className="rtd-hero__identity">
+          <h1 className="rtd-hero__title">
+            {globalState.title || "Untitled Template"}
+          </h1>
+
+          {/* Target Audiences */}
+          {globalState.targetAudiences.length > 0 && (
+            <div className="rtd-hero__audiences">
+              {globalState.targetAudiences.map((audience) => (
+                <span
+                  key={audience.id}
+                  className="rtd-hero__audience-tag"
+                  style={
+                    audience.color
+                      ? {
+                          backgroundColor: `${audience.color}15`,
+                          borderColor: `${audience.color}40`,
+                          color: audience.color,
+                        }
+                      : undefined
+                  }
+                >
+                  {audience.label}
+                </span>
+              ))}
+            </div>
+          )}
+
+          <p className="rtd-hero__summary">
+            {globalState.summary || "No summary provided"}
+          </p>
+        </div>
+      </section>
+
+      {/* Description */}
+      {globalState.description && (
+        <section className="rtd-card">
+          <div className="rtd-card__header">
+            <div className="rtd-card__icon rtd-card__icon--violet">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M4 6h16M4 12h16M4 18h10" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="rtd-card__title">Description</h3>
+            </div>
+          </div>
+          <p className="rtd-card__text">{globalState.description}</p>
+        </section>
+      )}
+
+      {/* Services Grid */}
+      <div className="rtd-grid">
+        {/* Setup Services */}
+        <section className="rtd-card">
+          <div className="rtd-card__header">
+            <div className="rtd-card__icon rtd-card__icon--emerald">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="rtd-card__title">Formation & Setup</h3>
+              <p className="rtd-card__subtitle">One-time setup services</p>
+            </div>
+          </div>
+          {globalState.setupServices.length > 0 ? (
+            <div className="rtd-services">
+              {globalState.setupServices.map((service, index) => (
+                <div key={index} className="rtd-service">
+                  <span className="rtd-service__bullet" />
+                  <span className="rtd-service__text">{service}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rtd-card__empty">No setup services defined</p>
+          )}
+        </section>
+
+        {/* Recurring Services */}
+        <section className="rtd-card">
+          <div className="rtd-card__header">
+            <div className="rtd-card__icon rtd-card__icon--amber">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M12 8v4l3 3" />
+                <circle cx="12" cy="12" r="9" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="rtd-card__title">Recurring Services</h3>
+              <p className="rtd-card__subtitle">Ongoing services included</p>
+            </div>
+          </div>
+          {globalState.recurringServices.length > 0 ? (
+            <div className="rtd-services">
+              {globalState.recurringServices.map((service, index) => (
+                <div key={index} className="rtd-service">
+                  <span className="rtd-service__bullet rtd-service__bullet--recurring" />
+                  <span className="rtd-service__text">{service}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="rtd-card__empty">No recurring services defined</p>
+          )}
+        </section>
+      </div>
+
+      {/* Facet Targeting */}
+      {globalState.facetTargets.length > 0 && (
+        <section className="rtd-card">
+          <div className="rtd-card__header">
+            <div className="rtd-card__icon rtd-card__icon--sky">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M3 6h18M7 12h10M10 18h4" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="rtd-card__title">Facet Targeting</h3>
+              <p className="rtd-card__subtitle">
+                Resource combinations that can use this template
+              </p>
+            </div>
+          </div>
+          <div className="rtd-facets">
+            {globalState.facetTargets.map((facet) => (
+              <div key={facet.id} className="rtd-facet">
+                <span className="rtd-facet__label">{facet.categoryLabel}</span>
+                <div className="rtd-facet__options">
+                  {facet.selectedOptions.map((option) => (
+                    <span key={option} className="rtd-facet__option">
+                      {option.replace(/-/g, " ")}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Services Catalog */}
+      {globalState.services.length > 0 && (
+        <section className="rtd-card">
+          <div className="rtd-card__header">
+            <div className="rtd-card__icon rtd-card__icon--teal">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M4 6h16M4 10h16M4 14h10M4 18h6" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="rtd-card__title">Services Defined</h3>
+              <p className="rtd-card__subtitle">
+                {globalState.services.length} service
+                {globalState.services.length !== 1 ? "s" : ""} available
+              </p>
+            </div>
+          </div>
+          <div className="rtd-services-list">
+            {globalState.services.map((service) => (
+              <div key={service.id} className="rtd-service-item">
+                <div className="rtd-service-item__main">
+                  <span className="rtd-service-item__title">
+                    {service.title}
+                  </span>
+                  {service.isSetupFormation && (
+                    <span className="rtd-service-item__badge">Setup</span>
+                  )}
+                </div>
+                {service.description && (
+                  <p className="rtd-service-item__desc">
+                    {service.description}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Metadata */}
+      <section className="rtd-metadata">
+        {globalState.operatorId && (
+          <div className="rtd-meta-field">
+            <span className="rtd-meta-field__label">Operator ID</span>
+            <span className="rtd-meta-field__value rtd-meta-field__value--mono">
+              {globalState.operatorId}
+            </span>
+          </div>
+        )}
+        {globalState.infoLink && (
+          <div className="rtd-meta-field">
+            <span className="rtd-meta-field__label">More Info</span>
+            <a
+              href={globalState.infoLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rtd-meta-field__link"
+            >
+              {globalState.infoLink}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </a>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+}
+
+function getStatusStyle(status: ResourceTemplateGlobalState["status"]) {
+  const statusColors: Record<
+    string,
+    { bg: string; text: string; dot: string }
+  > = {
+    ACTIVE: {
+      bg: "var(--rts-emerald-light)",
+      text: "var(--rts-emerald)",
+      dot: "var(--rts-emerald)",
+    },
+    DRAFT: {
+      bg: "var(--rts-slate-light)",
+      text: "var(--rts-slate)",
+      dot: "var(--rts-slate)",
+    },
+    COMING_SOON: {
+      bg: "var(--rts-sky-light)",
+      text: "var(--rts-sky)",
+      dot: "var(--rts-sky)",
+    },
+    DEPRECATED: {
+      bg: "var(--rts-rose-light)",
+      text: "var(--rts-rose)",
+      dot: "var(--rts-rose)",
+    },
+  };
+
+  return statusColors[status] || statusColors.DRAFT;
+}
+
 const styles = `
   .rts-container {
     --rts-font: 'Instrument Sans', system-ui, sans-serif;
@@ -408,60 +774,6 @@ const styles = `
     margin: 0;
     line-height: 1.6;
     max-width: 600px;
-  }
-
-  /* Current Selection */
-  .rts-current {
-    padding: 20px;
-    background: var(--rts-violet-light);
-    border: 1px solid rgba(124, 92, 255, 0.2);
-    border-radius: 12px;
-  }
-
-  .rts-current__badge {
-    display: inline-block;
-    padding: 4px 10px;
-    background: var(--rts-violet);
-    color: white;
-    font-size: 0.6875rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    border-radius: 100px;
-    margin-bottom: 12px;
-  }
-
-  .rts-current__info {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .rts-current__title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--rts-ink);
-    margin: 0;
-  }
-
-  .rts-current__summary {
-    font-size: 0.875rem;
-    color: var(--rts-ink-light);
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  .rts-current__meta {
-    display: flex;
-    gap: 16px;
-    margin-top: 8px;
-  }
-
-  .rts-current__audiences,
-  .rts-current__services {
-    font-size: 0.8125rem;
-    color: var(--rts-violet);
-    font-weight: 500;
   }
 
   /* Search */
@@ -752,7 +1064,464 @@ const styles = `
     line-height: 1.6;
   }
 
+  /* ========================================
+     Template Detail View (Read-Only)
+     ======================================== */
+
+  .rtd-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Selected Header */
+  .rtd-selected-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--rts-teal-light);
+    border: 2px solid var(--rts-teal);
+    border-radius: 12px;
+  }
+
+  .rtd-selected-header__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .rtd-selected-header__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--rts-teal);
+  }
+
+  .rtd-selected-header__badge svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .rtd-selected-header__change {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-family: var(--rts-font);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--rts-teal);
+    background: white;
+    border: 1.5px solid var(--rts-teal);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .rtd-selected-header__change:hover {
+    background: var(--rts-teal);
+    color: white;
+  }
+
+  .rtd-selected-header__change svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Hero Section */
+  .rtd-hero {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: 24px;
+    background: var(--rts-surface);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(26, 31, 54, 0.04), 0 4px 16px rgba(26, 31, 54, 0.06);
+  }
+
+  .rtd-hero__thumbnail-area {
+    position: relative;
+  }
+
+  .rtd-hero__thumbnail {
+    width: 180px;
+    height: 135px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--rts-border-light) 0%, var(--rts-border) 100%);
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .rtd-hero__thumbnail-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--rts-ink-muted);
+  }
+
+  .rtd-hero__thumbnail-placeholder svg {
+    width: 40px;
+    height: 40px;
+    opacity: 0.5;
+  }
+
+  .rtd-hero__status {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: 100px;
+    backdrop-filter: blur(8px);
+  }
+
+  .rtd-hero__status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+  }
+
+  .rtd-hero__identity {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .rtd-hero__title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--rts-ink);
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .rtd-hero__audiences {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .rtd-hero__audience-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border-radius: 100px;
+    background: var(--rts-teal-light);
+    border: 1px solid rgba(20, 184, 166, 0.2);
+    color: var(--rts-teal);
+  }
+
+  .rtd-hero__summary {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--rts-ink-light);
+    margin: 0;
+  }
+
+  /* Cards */
+  .rtd-card {
+    background: var(--rts-surface);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(26, 31, 54, 0.04), 0 4px 16px rgba(26, 31, 54, 0.06);
+  }
+
+  .rtd-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+
+  .rtd-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rtd-card__icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .rtd-card__icon--violet {
+    background: var(--rts-violet-light);
+    color: var(--rts-violet);
+  }
+
+  .rtd-card__icon--emerald {
+    background: var(--rts-emerald-light);
+    color: var(--rts-emerald);
+  }
+
+  .rtd-card__icon--amber {
+    background: var(--rts-amber-light);
+    color: var(--rts-amber);
+  }
+
+  .rtd-card__icon--sky {
+    background: var(--rts-sky-light);
+    color: var(--rts-sky);
+  }
+
+  .rtd-card__icon--teal {
+    background: var(--rts-teal-light);
+    color: var(--rts-teal);
+  }
+
+  .rtd-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--rts-ink);
+    margin: 0;
+  }
+
+  .rtd-card__subtitle {
+    font-size: 0.8125rem;
+    color: var(--rts-ink-muted);
+    margin: 2px 0 0;
+  }
+
+  .rtd-card__text {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--rts-ink-light);
+    margin: 0;
+  }
+
+  .rtd-card__empty {
+    font-size: 0.875rem;
+    color: var(--rts-ink-muted);
+    font-style: italic;
+    margin: 0;
+  }
+
+  .rtd-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* Services */
+  .rtd-services {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .rtd-service {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--rts-surface-raised);
+    border-radius: 8px;
+  }
+
+  .rtd-service__bullet {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--rts-emerald);
+    flex-shrink: 0;
+  }
+
+  .rtd-service__bullet--recurring {
+    background: var(--rts-amber);
+  }
+
+  .rtd-service__text {
+    font-size: 0.875rem;
+    color: var(--rts-ink);
+  }
+
+  /* Facets */
+  .rtd-facets {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .rtd-facet {
+    padding: 14px;
+    background: var(--rts-surface-raised);
+    border-radius: 10px;
+    border: 1px solid var(--rts-border-light);
+  }
+
+  .rtd-facet__label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--rts-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  .rtd-facet__options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .rtd-facet__option {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--rts-sky);
+    background: var(--rts-sky-light);
+    border-radius: 6px;
+    text-transform: capitalize;
+  }
+
+  /* Services List */
+  .rtd-services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .rtd-service-item {
+    padding: 14px 16px;
+    background: var(--rts-surface-raised);
+    border-radius: 10px;
+    border: 1px solid var(--rts-border-light);
+  }
+
+  .rtd-service-item__main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .rtd-service-item__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--rts-ink);
+  }
+
+  .rtd-service-item__badge {
+    padding: 2px 8px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--rts-emerald);
+    background: var(--rts-emerald-light);
+    border-radius: 4px;
+  }
+
+  .rtd-service-item__desc {
+    font-size: 0.8125rem;
+    color: var(--rts-ink-light);
+    margin: 6px 0 0;
+    line-height: 1.5;
+  }
+
+  /* Metadata */
+  .rtd-metadata {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 20px;
+    background: var(--rts-surface);
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(26, 31, 54, 0.04);
+  }
+
+  .rtd-meta-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .rtd-meta-field__label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rts-ink-muted);
+  }
+
+  .rtd-meta-field__value {
+    font-size: 0.9375rem;
+    color: var(--rts-ink);
+  }
+
+  .rtd-meta-field__value--mono {
+    font-family: var(--rts-mono);
+    font-size: 0.875rem;
+  }
+
+  .rtd-meta-field__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: var(--rts-teal);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .rtd-meta-field__link:hover {
+    color: #0d9488;
+  }
+
+  .rtd-meta-field__link svg {
+    width: 14px;
+    height: 14px;
+  }
+
   /* Responsive */
+  @media (max-width: 900px) {
+    .rtd-hero {
+      grid-template-columns: 1fr;
+    }
+
+    .rtd-hero__thumbnail-area {
+      order: -1;
+    }
+
+    .rtd-hero__thumbnail {
+      width: 100%;
+      height: 160px;
+    }
+
+    .rtd-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .rtd-facets {
+      grid-template-columns: 1fr;
+    }
+
+    .rtd-metadata {
+      grid-template-columns: 1fr;
+    }
+  }
+
   @media (max-width: 768px) {
     .rts-header {
       flex-direction: column;
