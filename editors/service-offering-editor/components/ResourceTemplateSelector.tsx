@@ -7,7 +7,11 @@ import type {
 import {
   selectResourceTemplate,
   changeResourceTemplate,
+  addFacetOption,
+  removeFacetOption,
+  setFacetTarget,
 } from "../../../document-models/service-offering/gen/offering-management/creators.js";
+import { generateId } from "document-model/core";
 import { useResourceTemplateDocumentsInSelectedDrive } from "../../../document-models/resource-template/hooks.js";
 import type {
   ResourceTemplateDocument,
@@ -85,7 +89,7 @@ export function ResourceTemplateSelector({
     (t) => t.state.global.status !== "ACTIVE",
   );
 
-  // If a template is selected and user is not changing, show the read-only detail view
+  // If a template is selected and user is not changing, show the detail view with facet selection
   if (selectedTemplate && !showingSelector) {
     return (
       <>
@@ -93,6 +97,8 @@ export function ResourceTemplateSelector({
         <div className="rts-container">
           <TemplateDetailView
             template={selectedTemplate}
+            offeringDocument={document}
+            dispatch={dispatch}
             onChangeTemplate={handleChangeTemplate}
           />
         </div>
@@ -332,15 +338,75 @@ function TemplateCard({ template, isSelected, onSelect }: TemplateCardProps) {
 
 interface TemplateDetailViewProps {
   template: ResourceTemplateDocument;
+  offeringDocument: ServiceOfferingDocument;
+  dispatch: DocumentDispatch<ServiceOfferingAction>;
   onChangeTemplate: () => void;
 }
 
 function TemplateDetailView({
   template,
+  offeringDocument,
+  dispatch,
   onChangeTemplate,
 }: TemplateDetailViewProps) {
   const globalState = template.state.global;
   const statusStyle = getStatusStyle(globalState.status);
+
+  // Get the current facet selections from the offering document
+  const offeringFacetTargets = offeringDocument.state.global.facetTargets;
+
+  // Check if an option is selected in the offering
+  const isOptionSelected = useCallback(
+    (categoryKey: string, optionId: string) => {
+      const facetTarget = offeringFacetTargets.find(
+        (f) => f.categoryKey === categoryKey,
+      );
+      return facetTarget?.selectedOptions.includes(optionId) ?? false;
+    },
+    [offeringFacetTargets],
+  );
+
+  // Toggle a facet option in the offering
+  const handleToggleFacetOption = useCallback(
+    (categoryKey: string, categoryLabel: string, optionId: string) => {
+      const now = new Date().toISOString();
+      const existingFacetTarget = offeringFacetTargets.find(
+        (f) => f.categoryKey === categoryKey,
+      );
+
+      if (!existingFacetTarget) {
+        // Create the facet target with this option selected
+        dispatch(
+          setFacetTarget({
+            id: generateId(),
+            categoryKey,
+            categoryLabel,
+            selectedOptions: [optionId],
+            lastModified: now,
+          }),
+        );
+      } else if (existingFacetTarget.selectedOptions.includes(optionId)) {
+        // Remove the option
+        dispatch(
+          removeFacetOption({
+            categoryKey,
+            optionId,
+            lastModified: now,
+          }),
+        );
+      } else {
+        // Add the option
+        dispatch(
+          addFacetOption({
+            categoryKey,
+            optionId,
+            lastModified: now,
+          }),
+        );
+      }
+    },
+    [offeringFacetTargets, dispatch],
+  );
 
   return (
     <div className="rtd-container">
@@ -543,7 +609,7 @@ function TemplateDetailView({
         </section>
       </div>
 
-      {/* Facet Targeting */}
+      {/* Facet Targeting - Interactive Selection */}
       {globalState.facetTargets.length > 0 && (
         <section className="rtd-card">
           <div className="rtd-card__header">
@@ -560,20 +626,49 @@ function TemplateDetailView({
             <div>
               <h3 className="rtd-card__title">Facet Targeting</h3>
               <p className="rtd-card__subtitle">
-                Resource combinations that can use this template
+                Select which facet options apply to this offering
               </p>
             </div>
           </div>
           <div className="rtd-facets">
             {globalState.facetTargets.map((facet) => (
-              <div key={facet.id} className="rtd-facet">
+              <div key={facet.id} className="rtd-facet rtd-facet--selectable">
                 <span className="rtd-facet__label">{facet.categoryLabel}</span>
                 <div className="rtd-facet__options">
-                  {facet.selectedOptions.map((option) => (
-                    <span key={option} className="rtd-facet__option">
-                      {option.replace(/-/g, " ")}
-                    </span>
-                  ))}
+                  {facet.selectedOptions.map((option) => {
+                    const selected = isOptionSelected(
+                      facet.categoryKey,
+                      option,
+                    );
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`rtd-facet__option rtd-facet__option--toggle ${selected ? "rtd-facet__option--selected" : ""}`}
+                        onClick={() =>
+                          handleToggleFacetOption(
+                            facet.categoryKey,
+                            facet.categoryLabel,
+                            option,
+                          )
+                        }
+                      >
+                        <span className="rtd-facet__checkbox">
+                          {selected && (
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3"
+                            >
+                              <path d="M5 12l5 5L20 7" />
+                            </svg>
+                          )}
+                        </span>
+                        {option.replace(/-/g, " ")}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -1394,6 +1489,69 @@ const styles = `
     background: var(--rts-sky-light);
     border-radius: 6px;
     text-transform: capitalize;
+  }
+
+  /* Interactive facet options */
+  .rtd-facet--selectable {
+    background: var(--rts-surface);
+    border: 1.5px solid var(--rts-border);
+  }
+
+  .rtd-facet__option--toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-family: var(--rts-font);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--rts-ink-light);
+    background: var(--rts-surface-raised);
+    border: 1.5px solid var(--rts-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: capitalize;
+  }
+
+  .rtd-facet__option--toggle:hover {
+    border-color: var(--rts-sky);
+    background: var(--rts-sky-light);
+    color: var(--rts-sky);
+  }
+
+  .rtd-facet__option--toggle.rtd-facet__option--selected {
+    background: var(--rts-teal-light);
+    border-color: var(--rts-teal);
+    color: var(--rts-teal);
+  }
+
+  .rtd-facet__checkbox {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    background: var(--rts-surface);
+    border: 1.5px solid var(--rts-border);
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+
+  .rtd-facet__option--toggle:hover .rtd-facet__checkbox {
+    border-color: var(--rts-sky);
+  }
+
+  .rtd-facet__option--selected .rtd-facet__checkbox {
+    background: var(--rts-teal);
+    border-color: var(--rts-teal);
+  }
+
+  .rtd-facet__checkbox svg {
+    width: 12px;
+    height: 12px;
+    color: white;
   }
 
   /* Services List */

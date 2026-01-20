@@ -588,7 +588,7 @@ const matrixStyles = `
   }
 
   .matrix__add-metric-btn {
-    opacity: 0;
+    opacity: 0.6;
     font-family: var(--so-font-sans);
     font-size: 0.6875rem;
     font-weight: 500;
@@ -1611,7 +1611,9 @@ export function TheMatrix({
       const usageLimit = tier.usageLimits.find(
         (ul) => ul.serviceId === serviceId && ul.metric === metric,
       );
-      existingLimits[tier.id] = usageLimit?.limit?.toString() || "";
+      // Load value from either limit (numeric) or notes (string)
+      existingLimits[tier.id] =
+        usageLimit?.limit?.toString() || usageLimit?.notes || "";
       if (usageLimit) {
         enabledTiers.add(tier.id);
       }
@@ -1653,6 +1655,10 @@ export function TheMatrix({
           )
         : null;
 
+      // Check if value is numeric or string
+      const parsedLimit = limitValue ? parseInt(limitValue, 10) : null;
+      const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
+
       if (existingLimit && !isEnabled) {
         // Remove limit - tier was disabled
         dispatch(
@@ -1663,29 +1669,27 @@ export function TheMatrix({
           }),
         );
       } else if (existingLimit && isEnabled) {
-        // Update existing limit
-        const parsedLimit = limitValue ? parseInt(limitValue, 10) : null;
+        // Update existing limit - use limit for numeric values, notes for strings
         dispatch(
           updateUsageLimit({
             tierId: tier.id,
             limitId: existingLimit.id,
             metric: metricName.trim(),
-            limit:
-              parsedLimit !== null && !isNaN(parsedLimit) ? parsedLimit : null,
+            limit: isNumeric ? parsedLimit : null,
+            notes: !isNumeric && limitValue ? limitValue.trim() : null,
             lastModified: now,
           }),
         );
       } else if (!existingLimit && isEnabled) {
-        // Add new limit - tier was enabled
-        const parsedLimit = limitValue ? parseInt(limitValue, 10) : null;
+        // Add new limit - use limit for numeric values, notes for strings
         dispatch(
           addUsageLimit({
             tierId: tier.id,
             limitId: generateId(),
             serviceId,
             metric: metricName.trim(),
-            limit:
-              parsedLimit !== null && !isNaN(parsedLimit) ? parsedLimit : null,
+            limit: isNumeric ? parsedLimit : null,
+            notes: !isNumeric && limitValue ? limitValue.trim() : null,
             resetPeriod: "MONTHLY",
             lastModified: now,
           }),
@@ -2236,14 +2240,13 @@ export function TheMatrix({
 
               <div className="matrix__modal-field">
                 <label className="matrix__modal-label">
-                  Pricing Tiers & Limits
+                  Pricing Tiers & Values
                 </label>
                 <p
                   className="matrix__modal-hint"
                   style={{ marginBottom: "0.75rem" }}
                 >
-                  Enable the metric for each tier and set limit values. Leave
-                  limit empty for &quot;Unlimited&quot;.
+                  Enable the metric for each tier and set values.
                 </p>
                 <div
                   style={{
@@ -2313,8 +2316,7 @@ export function TheMatrix({
                           </span>
                         </label>
                         <input
-                          type="number"
-                          min="0"
+                          type="text"
                           value={metricLimits[tier.id] || ""}
                           onChange={(e) =>
                             setMetricLimits((prev) => ({
@@ -2322,7 +2324,7 @@ export function TheMatrix({
                               [tier.id]: e.target.value,
                             }))
                           }
-                          placeholder={isEnabled ? "Unlimited" : "—"}
+                          placeholder={isEnabled ? "Enter value" : "—"}
                           className="matrix__modal-input"
                           disabled={!isEnabled}
                           style={{
@@ -2734,7 +2736,7 @@ function ServiceRowWithMetrics({
                   {usageLimit
                     ? usageLimit.limit
                       ? `Up to ${usageLimit.limit}`
-                      : "Unlimited"
+                      : usageLimit.notes || "Unlimited"
                     : "—"}
                 </span>
               </td>
@@ -2852,13 +2854,16 @@ function ServiceLevelDetailPanel({
 
   const handleAddLimit = () => {
     if (!newMetric.trim()) return;
+    const parsedLimit = newLimit ? parseInt(newLimit, 10) : null;
+    const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
     dispatch(
       addUsageLimit({
         tierId: tier.id,
         limitId: generateId(),
         serviceId: service.id,
         metric: newMetric.trim(),
-        limit: newLimit ? parseInt(newLimit) : undefined,
+        limit: isNumeric ? parsedLimit : undefined,
+        notes: !isNumeric && newLimit ? newLimit.trim() : undefined,
         resetPeriod: "MONTHLY",
         lastModified: new Date().toISOString(),
       }),
@@ -2952,47 +2957,12 @@ function ServiceLevelDetailPanel({
 
         <div className="matrix__panel-body">
           <div>
-            <label className="matrix__panel-section-label">Service Level</label>
-            <div className="matrix__panel-level-grid">
-              {SERVICE_LEVELS.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => handleSetLevel(option.value)}
-                  className={`matrix__panel-level-btn ${
-                    serviceLevel?.level === option.value
-                      ? "matrix__panel-level-btn--active"
-                      : ""
-                  }`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {serviceLevel?.level === "CUSTOM" && (
-            <div>
-              <label className="matrix__panel-section-label">
-                Custom Value
-              </label>
-              <input
-                type="text"
-                value={customValue}
-                onChange={(e) => setCustomValue(e.target.value)}
-                onBlur={handleUpdateCustomValue}
-                placeholder="e.g., Expedited, Basic, Pro"
-                className="matrix__panel-input"
-              />
-            </div>
-          )}
-
-          <div>
             <div className="matrix__panel-limits-header">
               <label
                 className="matrix__panel-section-label"
                 style={{ marginBottom: 0 }}
               >
-                Usage Limits / Metrics
+                Metrics
               </label>
               <button
                 onClick={() => setIsAddingMetric(true)}
@@ -3035,18 +3005,16 @@ function ServiceLevelDetailPanel({
                   />
                 </div>
                 <div>
-                  <label className="matrix__panel-edit-label">
-                    Limit Value
-                  </label>
+                  <label className="matrix__panel-edit-label">Value</label>
                   <input
                     type="text"
                     value={newLimit}
                     onChange={(e) => setNewLimit(e.target.value)}
-                    placeholder="e.g., 100, 5, leave empty for Unlimited"
+                    placeholder="e.g., 100, Unlimited, Custom"
                     className="matrix__panel-input"
                   />
                   <p className="matrix__panel-edit-hint">
-                    Enter a number or leave empty for &quot;Unlimited&quot;
+                    Enter a value or leave empty
                   </p>
                 </div>
                 <div className="matrix__panel-edit-actions">
@@ -3098,15 +3066,20 @@ function MetricLimitItem({
 }: MetricLimitItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editMetric, setEditMetric] = useState(limit.metric);
-  const [editLimit, setEditLimit] = useState(limit.limit?.toString() || "");
+  const [editLimit, setEditLimit] = useState(
+    limit.limit?.toString() || limit.notes || "",
+  );
 
   const handleSave = () => {
+    const parsedLimit = editLimit ? parseInt(editLimit, 10) : null;
+    const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
     dispatch(
       updateUsageLimit({
         tierId,
         limitId: limit.id,
         metric: editMetric.trim() || limit.metric,
-        limit: editLimit ? parseInt(editLimit) : undefined,
+        limit: isNumeric ? parsedLimit : undefined,
+        notes: !isNumeric && editLimit ? editLimit.trim() : undefined,
         lastModified: new Date().toISOString(),
       }),
     );
@@ -3115,7 +3088,7 @@ function MetricLimitItem({
 
   const handleCancel = () => {
     setEditMetric(limit.metric);
-    setEditLimit(limit.limit?.toString() || "");
+    setEditLimit(limit.limit?.toString() || limit.notes || "");
     setIsEditing(false);
   };
 
@@ -3134,16 +3107,16 @@ function MetricLimitItem({
           />
         </div>
         <div>
-          <label className="matrix__panel-edit-label">Limit Value</label>
+          <label className="matrix__panel-edit-label">Value</label>
           <input
             type="text"
             value={editLimit}
             onChange={(e) => setEditLimit(e.target.value)}
-            placeholder="e.g., 3, Unlimited, As needed"
+            placeholder="e.g., 100, Unlimited, Custom"
             className="matrix__panel-input"
           />
           <p className="matrix__panel-edit-hint">
-            Can be numeric (3) or descriptive (Unlimited, Custom)
+            Enter a value or leave empty
           </p>
         </div>
         <div className="matrix__panel-edit-actions">
@@ -3172,7 +3145,7 @@ function MetricLimitItem({
       >
         <div className="matrix__panel-limit-metric">{limit.metric}</div>
         <div className="matrix__panel-limit-value">
-          {limit.limit ? `Up to ${limit.limit}` : "Unlimited"}
+          {limit.limit ?? limit.notes ?? "—"}
         </div>
       </div>
       <div className="matrix__panel-limit-actions">
