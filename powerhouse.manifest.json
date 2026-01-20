@@ -10,6 +10,22 @@
         {
             "id": "powerhouse/service-offering",
             "name": "ServiceOffering"
+        },
+        {
+            "id": "powerhouse/facet",
+            "name": "Facet"
+        },
+        {
+            "id": "powerhouse/resource-instance",
+            "name": "ResourceInstance"
+        },
+        {
+            "id": "powerhouse/service-subscription",
+            "name": "ServiceSubscription"
+        },
+        {
+            "id": "powerhouse/resource-template",
+            "name": "ResourceTemplate"
         }
     ],
     "editors": [],

@@ -16,7 +16,15 @@
       "Bash(bun x tsc:*)",
       "Bash(npm run lint:fix:*)",
       "Bash(npx eslint:*)",
-      "Bash(npm run generate:*)"
+      "Bash(npm run generate:*)",
+      "Bash(npx @anthropic-ai/claude-code mcp list)",
+      "Bash(curl:*)",
+      "Bash(npx ph-cli:*)",
+      "Bash(lsof:*)",
+      "Bash(npx reactor-mcp:*)",
+      "Bash(node:*)",
+      "Bash(python3:*)",
+      "Bash(ls:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
