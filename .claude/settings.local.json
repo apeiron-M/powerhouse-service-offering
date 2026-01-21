@@ -26,7 +26,8 @@
       "Bash(python3:*)",
       "Bash(ls:*)",
       "Bash(npx @anthropic-ai/mcp-server-document-models:*)",
-      "mcp__reactor-mcp__createDocument"
+      "mcp__reactor-mcp__createDocument",
+      "Bash(npx skills add:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
