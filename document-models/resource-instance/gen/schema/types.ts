@@ -80,7 +80,7 @@ export type InitializeInstanceInput = {
 export type InstanceConfiguration = {
   id: Scalars["OID"]["output"];
   key: Scalars["String"]["output"];
-  source: ConfigSource | `${ConfigSource}`;
+  source: ConfigSource;
   value: Scalars["String"]["output"];
 };
 
@@ -97,7 +97,7 @@ export type RecordUsageInput = {
   limit?: InputMaybe<Scalars["Int"]["input"]>;
   metricKey: Scalars["String"]["input"];
   recordedAt: Scalars["DateTime"]["input"];
-  resetPeriod?: InputMaybe<ResetPeriod | `${ResetPeriod}`>;
+  resetPeriod?: InputMaybe<ResetPeriod>;
   value: Scalars["Int"]["input"];
 };
 
@@ -130,7 +130,7 @@ export type ResourceInstanceState = {
   lastModified: Scalars["DateTime"]["output"];
   name: Scalars["String"]["output"];
   resourceTemplateId: Scalars["PHID"]["output"];
-  status: InstanceStatus | `${InstanceStatus}`;
+  status: InstanceStatus;
   subscriptionId: Scalars["PHID"]["output"];
   suspendedAt: Maybe<Scalars["DateTime"]["output"]>;
   suspensionReason: Maybe<Scalars["String"]["output"]>;
@@ -143,7 +143,7 @@ export type SetConfigurationInput = {
   id: Scalars["OID"]["input"];
   key: Scalars["String"]["input"];
   lastModified: Scalars["DateTime"]["input"];
-  source: ConfigSource | `${ConfigSource}`;
+  source: ConfigSource;
   value: Scalars["String"]["input"];
 };
 
@@ -166,7 +166,7 @@ export type UpdateInstanceNameInput = {
 
 export type UpdateInstanceStatusInput = {
   lastModified: Scalars["DateTime"]["input"];
-  status: InstanceStatus | `${InstanceStatus}`;
+  status: InstanceStatus;
 };
 
 export type UsageMetric = {
@@ -175,5 +175,5 @@ export type UsageMetric = {
   lastUpdated: Scalars["DateTime"]["output"];
   limit: Maybe<Scalars["Int"]["output"]>;
   metricKey: Scalars["String"]["output"];
-  resetPeriod: Maybe<ResetPeriod | `${ResetPeriod}`>;
+  resetPeriod: Maybe<ResetPeriod>;
 };

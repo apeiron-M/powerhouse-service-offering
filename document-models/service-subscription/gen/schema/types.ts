@@ -142,7 +142,7 @@ export type ServiceSubscriptionState = {
   selectedTierId: Scalars["OID"]["output"];
   serviceOfferingId: Scalars["PHID"]["output"];
   startDate: Maybe<Scalars["DateTime"]["output"]>;
-  status: SubscriptionStatus | `${SubscriptionStatus}`;
+  status: SubscriptionStatus;
 };
 
 export type SetFacetSelectionInput = {
@@ -154,7 +154,7 @@ export type SetFacetSelectionInput = {
 
 export type SetPricingInput = {
   amount: Scalars["Amount_Money"]["input"];
-  billingCycle: BillingCycle | `${BillingCycle}`;
+  billingCycle: BillingCycle;
   currency: Scalars["Currency"]["input"];
   lastModified: Scalars["DateTime"]["input"];
   setupFee?: InputMaybe<Scalars["Amount_Money"]["input"]>;
@@ -162,7 +162,7 @@ export type SetPricingInput = {
 
 export type SubscriptionPricing = {
   amount: Scalars["Amount_Money"]["output"];
-  billingCycle: BillingCycle | `${BillingCycle}`;
+  billingCycle: BillingCycle;
   currency: Scalars["Currency"]["output"];
   setupFee: Maybe<Scalars["Amount_Money"]["output"]>;
 };
@@ -176,5 +176,5 @@ export type SubscriptionStatus =
 
 export type UpdateSubscriptionStatusInput = {
   lastModified: Scalars["DateTime"]["input"];
-  status: SubscriptionStatus | `${SubscriptionStatus}`;
+  status: SubscriptionStatus;
 };

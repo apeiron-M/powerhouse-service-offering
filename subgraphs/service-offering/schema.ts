@@ -192,6 +192,7 @@ export const schema: DocumentNode = gql`
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    isPremiumExclusive: Boolean
     optionGroupId: OID
     lastModified: DateTime!
   }
@@ -202,6 +203,7 @@ export const schema: DocumentNode = gql`
     parentServiceId: OID
     displayOrder: Int
     isSetupFormation: Boolean
+    isPremiumExclusive: Boolean
     optionGroupId: OID
     lastModified: DateTime!
   }
