@@ -14,6 +14,8 @@ const ignoredFiles = [
   "**/.ph/",
   "**/storybook-static/",
   "**/.vite/",
+  // Temporarily ignore facet-preset-management until code generation is fixed
+  "**/document-models/resource-template/gen/facet-preset-management/",
 ];
 
 /** Global configs for eslint ignores */
