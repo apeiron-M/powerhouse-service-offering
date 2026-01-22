@@ -17,7 +17,7 @@ import {
   assertIsServiceSubscriptionDocument,
   isServiceSubscriptionState,
   assertIsServiceSubscriptionState,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 import { ZodError } from "zod";
 
 describe("ServiceSubscription Document Model", () => {

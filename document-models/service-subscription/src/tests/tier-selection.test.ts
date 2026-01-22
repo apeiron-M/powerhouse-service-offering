@@ -13,7 +13,7 @@ import {
   ChangeTierInputSchema,
   setPricing,
   SetPricingInputSchema,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 describe("TierSelection Operations", () => {
   it("should handle changeTier operation", () => {

@@ -17,7 +17,7 @@ import {
   SetOperatorInputSchema,
   setTemplateId,
   SetTemplateIdInputSchema,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 describe("TemplateManagement Operations", () => {
   it("should handle updateTemplateInfo operation", () => {

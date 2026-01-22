@@ -19,7 +19,7 @@ import {
   AddFacetBindingInputSchema,
   removeFacetBinding,
   RemoveFacetBindingInputSchema,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 describe("ServiceManagement Operations", () => {
   it("should handle addService operation", () => {

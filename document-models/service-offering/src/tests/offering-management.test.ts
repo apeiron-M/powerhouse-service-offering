@@ -17,7 +17,7 @@ import {
   SetOperatorInputSchema,
   setOfferingId,
   SetOfferingIdInputSchema,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 describe("OfferingManagement Operations", () => {
   it("should handle updateOfferingInfo operation", () => {

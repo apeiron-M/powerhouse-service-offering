@@ -4,7 +4,7 @@ import { setName } from "document-model";
 import {
   actions,
   serviceSubscriptionDocumentType,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 import type {
   ServiceSubscriptionDocument,
@@ -19,7 +19,7 @@ import type {
   RemoveAddonInput,
   SetFacetSelectionInput,
   RemoveFacetSelectionInput,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,

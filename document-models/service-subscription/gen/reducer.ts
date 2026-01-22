@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { ServiceSubscriptionPHState } from "resourceServices/document-models/service-subscription";
+import type { ServiceSubscriptionPHState } from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 import { serviceSubscriptionSubscriptionManagementOperations } from "../src/reducers/subscription-management.js";
 import { serviceSubscriptionTierSelectionOperations } from "../src/reducers/tier-selection.js";

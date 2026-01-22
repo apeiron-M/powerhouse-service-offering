@@ -8,7 +8,7 @@ import {
 import type {
   ResourceTemplateDocument,
   ResourceTemplateAction,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 import { isResourceTemplateDocument } from "./gen/document-schema.js";
 
 /** Hook to get a ResourceTemplate document by its id */

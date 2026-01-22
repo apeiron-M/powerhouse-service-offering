@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { FacetPHState } from "resourceServices/document-models/facet";
+import type { FacetPHState } from "@powerhousedao/contributor-billing/document-models/facet";
 
 import { facetFacetManagementOperations } from "../src/reducers/facet-management.js";
 import { facetOptionManagementOperations } from "../src/reducers/option-management.js";

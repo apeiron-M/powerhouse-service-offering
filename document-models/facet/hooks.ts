@@ -8,7 +8,7 @@ import {
 import type {
   FacetDocument,
   FacetAction,
-} from "resourceServices/document-models/facet";
+} from "@powerhousedao/contributor-billing/document-models/facet";
 import { isFacetDocument } from "./gen/document-schema.js";
 
 /** Hook to get a Facet document by its id */

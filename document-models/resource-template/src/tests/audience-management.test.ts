@@ -13,7 +13,7 @@ import {
   AddTargetAudienceInputSchema,
   removeTargetAudience,
   RemoveTargetAudienceInputSchema,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 describe("AudienceManagement Operations", () => {
   it("should handle addTargetAudience operation", () => {

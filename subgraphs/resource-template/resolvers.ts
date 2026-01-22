@@ -4,7 +4,7 @@ import { setName } from "document-model";
 import {
   actions,
   resourceTemplateDocumentType,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 import type {
   ResourceTemplateDocument,
@@ -28,7 +28,7 @@ import type {
   AddOptionGroupInput,
   UpdateOptionGroupInput,
   DeleteOptionGroupInput,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,

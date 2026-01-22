@@ -4,7 +4,7 @@ import { setName } from "document-model";
 import {
   actions,
   serviceOfferingDocumentType,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 import type {
   ServiceOfferingDocument,
@@ -40,7 +40,7 @@ import type {
   AddOptionGroupInput,
   UpdateOptionGroupInput,
   DeleteOptionGroupInput,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,

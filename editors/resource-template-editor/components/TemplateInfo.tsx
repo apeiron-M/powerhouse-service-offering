@@ -5,7 +5,7 @@ import type {
   ResourceTemplateDocument,
   ResourceTemplateAction,
   TargetAudience,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 import {
   updateTemplateInfo,
   updateTemplateStatus,

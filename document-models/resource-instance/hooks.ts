@@ -8,7 +8,7 @@ import {
 import type {
   ResourceInstanceDocument,
   ResourceInstanceAction,
-} from "resourceServices/document-models/resource-instance";
+} from "@powerhousedao/contributor-billing/document-models/resource-instance";
 import { isResourceInstanceDocument } from "./gen/document-schema.js";
 
 /** Hook to get a ResourceInstance document by its id */

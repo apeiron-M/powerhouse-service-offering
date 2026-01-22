@@ -4,7 +4,7 @@ import { setName } from "document-model";
 import {
   actions,
   facetDocumentType,
-} from "resourceServices/document-models/facet";
+} from "@powerhousedao/contributor-billing/document-models/facet";
 
 import type {
   FacetDocument,
@@ -14,7 +14,7 @@ import type {
   UpdateOptionInput,
   RemoveOptionInput,
   ReorderOptionsInput,
-} from "resourceServices/document-models/facet";
+} from "@powerhousedao/contributor-billing/document-models/facet";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,

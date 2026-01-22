@@ -1,18 +1,18 @@
-import type { ServiceSubscriptionTierSelectionOperations } from "resourceServices/document-models/service-subscription";
+import type { ServiceSubscriptionTierSelectionOperations } from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 export const serviceSubscriptionTierSelectionOperations: ServiceSubscriptionTierSelectionOperations =
   {
     changeTierOperation(state, action) {
-      state.selectedTierId = action.input.newTierId;
-      state.lastModified = action.input.lastModified;
-    },
+          state.selectedTierId = action.input.newTierId;
+          state.lastModified = action.input.lastModified;
+      },
     setPricingOperation(state, action) {
-      state.pricing = {
-        amount: action.input.amount,
-        currency: action.input.currency,
-        billingCycle: action.input.billingCycle,
-        setupFee: action.input.setupFee || null,
-      };
-      state.lastModified = action.input.lastModified;
+        state.pricing = {
+            amount: action.input.amount,
+            currency: action.input.currency,
+            billingCycle: action.input.billingCycle,
+            setupFee: action.input.setupFee || null
+        };
+        state.lastModified = action.input.lastModified;
     },
   };

@@ -8,7 +8,7 @@ import {
 import type {
   ServiceSubscriptionDocument,
   ServiceSubscriptionAction,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 import { isServiceSubscriptionDocument } from "./gen/document-schema.js";
 
 /** Hook to get a ServiceSubscription document by its id */

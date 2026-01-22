@@ -19,7 +19,7 @@ import {
   CancelSubscriptionInputSchema,
   renewSubscription,
   RenewSubscriptionInputSchema,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 describe("SubscriptionManagement Operations", () => {
   it("should handle initializeSubscription operation", () => {

@@ -15,7 +15,7 @@ import {
   UpdateOptionGroupInputSchema,
   deleteOptionGroup,
   DeleteOptionGroupInputSchema,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 describe("OptionGroupManagement Operations", () => {
   it("should handle addOptionGroup operation", () => {

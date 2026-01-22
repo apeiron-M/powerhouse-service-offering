@@ -4,7 +4,7 @@ import { setName } from "document-model";
 import {
   actions,
   resourceInstanceDocumentType,
-} from "resourceServices/document-models/resource-instance";
+} from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 import type {
   ResourceInstanceDocument,
@@ -18,7 +18,7 @@ import type {
   RemoveConfigurationInput,
   RecordUsageInput,
   ResetUsageInput,
-} from "resourceServices/document-models/resource-instance";
+} from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 export const getResolvers = (
   subgraph: BaseSubgraph,

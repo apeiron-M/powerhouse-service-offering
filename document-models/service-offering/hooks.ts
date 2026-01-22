@@ -8,7 +8,7 @@ import {
 import type {
   ServiceOfferingDocument,
   ServiceOfferingAction,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import { isServiceOfferingDocument } from "./gen/document-schema.js";
 
 /** Hook to get a ServiceOffering document by its id */
