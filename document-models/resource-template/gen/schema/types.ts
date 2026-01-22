@@ -163,7 +163,7 @@ export type ResourceTemplateState = {
   recurringServices: Array<Scalars["String"]["output"]>;
   services: Array<Service>;
   setupServices: Array<Scalars["String"]["output"]>;
-  status: TemplateStatus;
+  status: TemplateStatus | `${TemplateStatus}`;
   summary: Scalars["String"]["output"];
   targetAudiences: Array<TargetAudience>;
   thumbnailUrl: Maybe<Scalars["URL"]["output"]>;
@@ -248,5 +248,5 @@ export type UpdateTemplateInfoInput = {
 
 export type UpdateTemplateStatusInput = {
   lastModified: Scalars["DateTime"]["input"];
-  status: TemplateStatus;
+  status: TemplateStatus | `${TemplateStatus}`;
 };
