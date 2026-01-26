@@ -172,13 +172,13 @@ export const documentModel: DocumentModelGlobalState = {
         global: {
           examples: [],
           initialValue:
-            '"{\\n    \\"id\\": \\"\\",\\n    \\"subscriptionId\\": \\"\\",\\n    \\"resourceTemplateId\\": \\"\\",\\n    \\"customerId\\": \\"\\",\\n    \\"name\\": \\"\\",\\n    \\"status\\": \\"PROVISIONING\\",\\n    \\"configuration\\": [],\\n    \\"usageMetrics\\": [],\\n    \\"activatedAt\\": null,\\n    \\"suspendedAt\\": null,\\n    \\"suspensionReason\\": null,\\n    \\"terminatedAt\\": null,\\n    \\"terminationReason\\": null,\\n    \\"createdAt\\": \\"1970-01-01T00:00:00.000Z\\",\\n    \\"lastModified\\": \\"1970-01-01T00:00:00.000Z\\"\\n}"',
+            '{\n    "id": "",\n    "subscriptionId": "",\n    "resourceTemplateId": "",\n    "customerId": "",\n    "name": "",\n    "status": "PROVISIONING",\n    "configuration": [],\n    "usageMetrics": [],\n    "activatedAt": null,\n    "suspendedAt": null,\n    "suspensionReason": null,\n    "terminatedAt": null,\n    "terminationReason": null,\n    "createdAt": "1970-01-01T00:00:00.000Z",\n    "lastModified": "1970-01-01T00:00:00.000Z"\n}',
           schema:
             "type ResourceInstanceState {\n    id: PHID!\n    subscriptionId: PHID!\n    resourceTemplateId: PHID!\n    customerId: PHID!\n    name: String!\n    status: InstanceStatus!\n    configuration: [InstanceConfiguration!]!\n    usageMetrics: [UsageMetric!]!\n    activatedAt: DateTime\n    suspendedAt: DateTime\n    suspensionReason: String\n    terminatedAt: DateTime\n    terminationReason: String\n    createdAt: DateTime!\n    lastModified: DateTime!\n}\n\nenum InstanceStatus {\n    PROVISIONING\n    ACTIVE\n    SUSPENDED\n    TERMINATED\n    ERROR\n}\n\ntype InstanceConfiguration {\n    id: OID!\n    key: String!\n    value: String!\n    source: ConfigSource!\n}\n\nenum ConfigSource {\n    FACET_SELECTION\n    TIER_DEFAULT\n    CUSTOMER_INPUT\n    SYSTEM\n}\n\ntype UsageMetric {\n    id: OID!\n    metricKey: String!\n    currentValue: Int!\n    limit: Int\n    resetPeriod: ResetPeriod\n    lastUpdated: DateTime!\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}",
         },
         local: {
           examples: [],
-          initialValue: '""',
+          initialValue: "",
           schema: "",
         },
       },

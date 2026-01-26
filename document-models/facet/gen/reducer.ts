@@ -21,61 +21,78 @@ const stateReducer: StateReducer<FacetPHState> = (state, action, dispatch) => {
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "SET_FACET_NAME":
+    case "SET_FACET_NAME": {
       SetFacetNameInputSchema().parse(action.input);
+
       facetFacetManagementOperations.setFacetNameOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_FACET_DESCRIPTION":
+      break;
+    }
+
+    case "SET_FACET_DESCRIPTION": {
       SetFacetDescriptionInputSchema().parse(action.input);
+
       facetFacetManagementOperations.setFacetDescriptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_OPTION":
+      break;
+    }
+
+    case "ADD_OPTION": {
       AddOptionInputSchema().parse(action.input);
+
       facetOptionManagementOperations.addOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_OPTION":
+      break;
+    }
+
+    case "UPDATE_OPTION": {
       UpdateOptionInputSchema().parse(action.input);
+
       facetOptionManagementOperations.updateOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_OPTION":
+      break;
+    }
+
+    case "REMOVE_OPTION": {
       RemoveOptionInputSchema().parse(action.input);
+
       facetOptionManagementOperations.removeOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REORDER_OPTIONS":
+      break;
+    }
+
+    case "REORDER_OPTIONS": {
       ReorderOptionsInputSchema().parse(action.input);
+
       facetOptionManagementOperations.reorderOptionsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;

@@ -1,4 +1,4 @@
-import { type Action } from "document-model";
+import type { Action } from "document-model";
 import type { ChangeTierInput, SetPricingInput } from "../types.js";
 
 export type ChangeTierAction = Action & {

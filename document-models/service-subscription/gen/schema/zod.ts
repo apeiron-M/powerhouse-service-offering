@@ -1,8 +1,7 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   ActivateSubscriptionInput,
   AddAddonInput,
-  BillingCycle,
   CancelSubscriptionInput,
   ChangeTierInput,
   FacetSelection,
@@ -15,12 +14,11 @@ import type {
   SetFacetSelectionInput,
   SetPricingInput,
   SubscriptionPricing,
-  SubscriptionStatus,
   UpdateSubscriptionStatusInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -154,21 +152,21 @@ export function ServiceSubscriptionStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceSubscriptionState").optional(),
-    cancellationReason: z.string().nullable(),
-    cancelledAt: z.string().datetime().nullable(),
+    cancellationReason: z.string().nullish(),
+    cancelledAt: z.string().datetime().nullish(),
     createdAt: z.string().datetime(),
-    currentPeriodEnd: z.string().datetime().nullable(),
-    currentPeriodStart: z.string().datetime().nullable(),
+    currentPeriodEnd: z.string().datetime().nullish(),
+    currentPeriodStart: z.string().datetime().nullish(),
     customerId: z.string(),
-    facetSelections: z.array(FacetSelectionSchema()),
+    facetSelections: z.array(z.lazy(() => FacetSelectionSchema())),
     id: z.string(),
     lastModified: z.string().datetime(),
-    pricing: SubscriptionPricingSchema().nullable(),
+    pricing: z.lazy(() => SubscriptionPricingSchema().nullish()),
     resourceTemplateId: z.string(),
-    selectedAddons: z.array(SelectedAddonSchema()),
+    selectedAddons: z.array(z.lazy(() => SelectedAddonSchema())),
     selectedTierId: z.string(),
     serviceOfferingId: z.string(),
-    startDate: z.string().datetime().nullable(),
+    startDate: z.string().datetime().nullish(),
     status: SubscriptionStatusSchema,
   });
 }
@@ -204,7 +202,7 @@ export function SubscriptionPricingSchema(): z.ZodObject<
     amount: z.number(),
     billingCycle: BillingCycleSchema,
     currency: z.string(),
-    setupFee: z.number().nullable(),
+    setupFee: z.number().nullish(),
   });
 }
 

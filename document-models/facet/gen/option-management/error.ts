@@ -29,13 +29,7 @@ export class RemoveOptionNotFoundError extends Error implements ReducerError {
 }
 
 export const errors = {
-  AddOption: {
-    DuplicateOptionIdError,
-  },
-  UpdateOption: {
-    OptionNotFoundError,
-  },
-  RemoveOption: {
-    RemoveOptionNotFoundError,
-  },
+  AddOption: { DuplicateOptionIdError },
+  UpdateOption: { OptionNotFoundError },
+  RemoveOption: { RemoveOptionNotFoundError },
 };

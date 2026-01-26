@@ -1,9 +1,9 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetConfigurationAction,
-  type RemoveConfigurationAction,
+import type {
+  SetConfigurationAction,
+  RemoveConfigurationAction,
 } from "./actions.js";
-import { type ResourceInstanceState } from "../types.js";
+import type { ResourceInstanceState } from "../types.js";
 
 export interface ResourceInstanceConfigurationManagementOperations {
   setConfigurationOperation: (

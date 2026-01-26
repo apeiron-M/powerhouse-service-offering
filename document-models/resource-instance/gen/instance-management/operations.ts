@@ -1,13 +1,13 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type InitializeInstanceAction,
-  type UpdateInstanceStatusAction,
-  type ActivateInstanceAction,
-  type SuspendInstanceAction,
-  type TerminateInstanceAction,
-  type UpdateInstanceNameAction,
+import type {
+  InitializeInstanceAction,
+  UpdateInstanceStatusAction,
+  ActivateInstanceAction,
+  SuspendInstanceAction,
+  TerminateInstanceAction,
+  UpdateInstanceNameAction,
 } from "./actions.js";
-import { type ResourceInstanceState } from "../types.js";
+import type { ResourceInstanceState } from "../types.js";
 
 export interface ResourceInstanceInstanceManagementOperations {
   initializeInstanceOperation: (

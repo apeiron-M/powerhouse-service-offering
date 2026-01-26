@@ -5,6 +5,7 @@ import {
 } from "./gen/creators.js";
 
 /** Actions for the Facet document model */
+
 export const actions = {
   ...baseActions,
   ...facetManagementActions,

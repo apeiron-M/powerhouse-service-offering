@@ -3739,43 +3739,7 @@ function ServiceLevelDetailPanel({
     );
   };
 
-  const handleSetLevel = (level: ServiceLevel) => {
-    if (serviceLevel) {
-      dispatch(
-        updateServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: serviceLevel.id,
-          level,
-          customValue: level === "CUSTOM" ? customValue : undefined,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    } else {
-      dispatch(
-        addServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: generateId(),
-          serviceId: service.id,
-          level,
-          customValue: level === "CUSTOM" ? customValue : undefined,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    }
-  };
 
-  const handleUpdateCustomValue = () => {
-    if (serviceLevel && serviceLevel.level === "CUSTOM") {
-      dispatch(
-        updateServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: serviceLevel.id,
-          customValue,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    }
-  };
 
   return (
     <div

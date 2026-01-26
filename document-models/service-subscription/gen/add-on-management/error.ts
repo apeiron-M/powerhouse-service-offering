@@ -19,10 +19,6 @@ export class AddonNotFoundError extends Error implements ReducerError {
 }
 
 export const errors = {
-  AddAddon: {
-    DuplicateAddonIdError,
-  },
-  RemoveAddon: {
-    AddonNotFoundError,
-  },
+  AddAddon: { DuplicateAddonIdError },
+  RemoveAddon: { AddonNotFoundError },
 };

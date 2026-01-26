@@ -9,7 +9,6 @@
 
 import { describe, it, expect } from "vitest";
 import {
-  reducer,
   utils,
   isResourceTemplateDocument,
 } from "@powerhousedao/contributor-billing/document-models/resource-template";
@@ -43,7 +42,6 @@ describe("FacetPresetManagement Operations", () => {
     const document = utils.createDocument();
     // The document model JSON includes facetPresets, verifying it's in the structure
     // Note: Until code generation is fixed, we access it via type assertion
-    const state = document.state.global as Record<string, unknown>;
     expect(isResourceTemplateDocument(document)).toBe(true);
     // facetPresets should exist once properly regenerated
     // For now, we just verify the document is valid

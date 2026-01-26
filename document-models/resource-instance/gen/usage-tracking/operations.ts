@@ -1,6 +1,6 @@
 import { type SignalDispatch } from "document-model";
-import { type RecordUsageAction, type ResetUsageAction } from "./actions.js";
-import { type ResourceInstanceState } from "../types.js";
+import type { RecordUsageAction, ResetUsageAction } from "./actions.js";
+import type { ResourceInstanceState } from "../types.js";
 
 export interface ResourceInstanceUsageTrackingOperations {
   recordUsageOperation: (

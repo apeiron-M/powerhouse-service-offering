@@ -1,4 +1,4 @@
-export type Maybe<T> = T | null;
+export type Maybe<T> = T | null | undefined;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
@@ -25,6 +25,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  Address: { input: `${string}:0x${string}`; output: `${string}:0x${string}` };
   Amount: {
     input: { unit?: string; value?: number };
     output: { unit?: string; value?: number };
@@ -44,6 +45,7 @@ export type Scalars = {
   Amount_Money: { input: number; output: number };
   Amount_Percentage: { input: number; output: number };
   Amount_Tokens: { input: number; output: number };
+  Attachment: { input: string; output: string };
   Currency: { input: string; output: string };
   Date: { input: string; output: string };
   DateTime: { input: string; output: string };
@@ -53,6 +55,7 @@ export type Scalars = {
   OLabel: { input: string; output: string };
   PHID: { input: string; output: string };
   URL: { input: string; output: string };
+  Unknown: { input: unknown; output: unknown };
   Upload: { input: File; output: File };
 };
 
@@ -80,7 +83,7 @@ export type InitializeInstanceInput = {
 export type InstanceConfiguration = {
   id: Scalars["OID"]["output"];
   key: Scalars["String"]["output"];
-  source: ConfigSource | `${ConfigSource}`;
+  source: ConfigSource;
   value: Scalars["String"]["output"];
 };
 
@@ -97,7 +100,7 @@ export type RecordUsageInput = {
   limit?: InputMaybe<Scalars["Int"]["input"]>;
   metricKey: Scalars["String"]["input"];
   recordedAt: Scalars["DateTime"]["input"];
-  resetPeriod?: InputMaybe<ResetPeriod | `${ResetPeriod}`>;
+  resetPeriod?: InputMaybe<ResetPeriod>;
   value: Scalars["Int"]["input"];
 };
 
@@ -130,7 +133,7 @@ export type ResourceInstanceState = {
   lastModified: Scalars["DateTime"]["output"];
   name: Scalars["String"]["output"];
   resourceTemplateId: Scalars["PHID"]["output"];
-  status: InstanceStatus | `${InstanceStatus}`;
+  status: InstanceStatus;
   subscriptionId: Scalars["PHID"]["output"];
   suspendedAt: Maybe<Scalars["DateTime"]["output"]>;
   suspensionReason: Maybe<Scalars["String"]["output"]>;
@@ -143,7 +146,7 @@ export type SetConfigurationInput = {
   id: Scalars["OID"]["input"];
   key: Scalars["String"]["input"];
   lastModified: Scalars["DateTime"]["input"];
-  source: ConfigSource | `${ConfigSource}`;
+  source: ConfigSource;
   value: Scalars["String"]["input"];
 };
 
@@ -166,7 +169,7 @@ export type UpdateInstanceNameInput = {
 
 export type UpdateInstanceStatusInput = {
   lastModified: Scalars["DateTime"]["input"];
-  status: InstanceStatus | `${InstanceStatus}`;
+  status: InstanceStatus;
 };
 
 export type UsageMetric = {
@@ -175,5 +178,5 @@ export type UsageMetric = {
   lastUpdated: Scalars["DateTime"]["output"];
   limit: Maybe<Scalars["Int"]["output"]>;
   metricKey: Scalars["String"]["output"];
-  resetPeriod: Maybe<ResetPeriod | `${ResetPeriod}`>;
+  resetPeriod: Maybe<ResetPeriod>;
 };

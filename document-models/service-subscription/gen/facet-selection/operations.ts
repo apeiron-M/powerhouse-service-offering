@@ -1,9 +1,9 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetFacetSelectionAction,
-  type RemoveFacetSelectionAction,
+import type {
+  SetFacetSelectionAction,
+  RemoveFacetSelectionAction,
 } from "./actions.js";
-import { type ServiceSubscriptionState } from "../types.js";
+import type { ServiceSubscriptionState } from "../types.js";
 
 export interface ServiceSubscriptionFacetSelectionOperations {
   setFacetSelectionOperation: (

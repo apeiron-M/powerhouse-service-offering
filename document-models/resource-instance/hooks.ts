@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  ResourceInstanceDocument,
   ResourceInstanceAction,
+  ResourceInstanceDocument,
 } from "@powerhousedao/contributor-billing/document-models/resource-instance";
-import { isResourceInstanceDocument } from "./gen/document-schema.js";
+import {
+  assertIsResourceInstanceDocument,
+  isResourceInstanceDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a ResourceInstance document by its id */
 export function useResourceInstanceDocumentById(
@@ -23,12 +26,14 @@ export function useResourceInstanceDocumentById(
 }
 
 /** Hook to get the selected ResourceInstance document */
-export function useSelectedResourceInstanceDocument():
-  | [ResourceInstanceDocument, DocumentDispatch<ResourceInstanceAction>]
-  | [undefined, undefined] {
+export function useSelectedResourceInstanceDocument(): [
+  ResourceInstanceDocument,
+  DocumentDispatch<ResourceInstanceAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isResourceInstanceDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsResourceInstanceDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all ResourceInstance documents in the selected drive */

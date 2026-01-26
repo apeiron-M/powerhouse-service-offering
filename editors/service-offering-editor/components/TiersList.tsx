@@ -11,14 +11,11 @@ import type {
 } from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addTier,
-  updateTier,
-  updateTierPricing,
   deleteTier,
   addServiceLevel,
   updateServiceLevel,
   removeServiceLevel,
   addUsageLimit,
-  updateUsageLimit,
   removeUsageLimit,
 } from "../../../document-models/service-offering/gen/creators.js";
 

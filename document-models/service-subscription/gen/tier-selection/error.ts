@@ -12,7 +12,5 @@ export class InvalidTierChangeError extends Error implements ReducerError {
 }
 
 export const errors = {
-  ChangeTier: {
-    InvalidTierChangeError,
-  },
+  ChangeTier: { InvalidTierChangeError },
 };

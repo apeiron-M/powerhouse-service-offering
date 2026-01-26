@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddOptionInput,
   FacetOption,
@@ -11,7 +11,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -39,8 +39,8 @@ export function AddOptionInputSchema(): z.ZodObject<
 export function FacetOptionSchema(): z.ZodObject<Properties<FacetOption>> {
   return z.object({
     __typename: z.literal("FacetOption").optional(),
-    description: z.string().nullable(),
-    displayOrder: z.number().nullable(),
+    description: z.string().nullish(),
+    displayOrder: z.number().nullish(),
     id: z.string(),
     isDefault: z.boolean(),
     label: z.string(),
@@ -50,11 +50,11 @@ export function FacetOptionSchema(): z.ZodObject<Properties<FacetOption>> {
 export function FacetStateSchema(): z.ZodObject<Properties<FacetState>> {
   return z.object({
     __typename: z.literal("FacetState").optional(),
-    description: z.string().nullable(),
+    description: z.string().nullish(),
     id: z.string(),
     lastModified: z.string().datetime(),
     name: z.string(),
-    options: z.array(FacetOptionSchema()),
+    options: z.array(z.lazy(() => FacetOptionSchema())),
   });
 }
 

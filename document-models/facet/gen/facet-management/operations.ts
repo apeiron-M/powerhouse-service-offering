@@ -1,9 +1,9 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type SetFacetNameAction,
-  type SetFacetDescriptionAction,
+import type {
+  SetFacetNameAction,
+  SetFacetDescriptionAction,
 } from "./actions.js";
-import { type FacetState } from "../types.js";
+import type { FacetState } from "../types.js";
 
 export interface FacetFacetManagementOperations {
   setFacetNameOperation: (
