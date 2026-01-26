@@ -29,12 +29,9 @@ const STATUS_OPTIONS = [
 ] as const;
 
 const AUDIENCE_PRESETS = [
-  { label: "Founders", color: "#8b5cf6" },
-  { label: "SNO Governors", color: "#f43f5e" },
+  { label: "All", color: "#8b5cf6" },
   { label: "Builders", color: "#0ea5e9" },
-  { label: "Operators", color: "#f97316" },
-  { label: "Contributors", color: "#10b981" },
-  { label: "Investors", color: "#6366f1" },
+  { label: "Networks", color: "#10b981" },
 ];
 
 // Service templates for quick-add functionality
@@ -442,7 +439,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                 onChange={(e) => handleFieldChange("title", e.target.value)}
                 onBlur={handleInfoBlur}
                 className="template-editor__title-input"
-                placeholder="Resource Template Title"
+                placeholder="Product Title"
               />
               <div className="template-editor__status-select">
                 <select
@@ -555,7 +552,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
               onChange={(e) => handleFieldChange("summary", e.target.value)}
               onBlur={handleInfoBlur}
               className="template-editor__summary"
-              placeholder="Brief summary of your resource template..."
+              placeholder="Brief summary of your product..."
               rows={2}
             />
           </div>
@@ -577,7 +574,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
             <div>
               <h3 className="template-editor__card-title">Description</h3>
               <p className="template-editor__card-subtitle">
-                Detailed description of your resource template
+                Detailed description of your product
               </p>
             </div>
           </div>
@@ -586,7 +583,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
             onChange={(e) => handleFieldChange("description", e.target.value)}
             onBlur={handleInfoBlur}
             className="template-editor__textarea"
-            placeholder="Provide a comprehensive description of your resource template, including what makes it unique and valuable..."
+            placeholder="Provide a comprehensive description of your product, including what makes it unique and valuable..."
             rows={4}
           />
         </section>

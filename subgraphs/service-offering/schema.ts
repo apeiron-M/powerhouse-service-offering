@@ -65,6 +65,21 @@ export const schema: DocumentNode = gql`
       docId: PHID
       input: ServiceOffering_DeleteTierInput
     ): Int
+    ServiceOffering_addTierPricingOption(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_AddTierPricingOptionInput
+    ): Int
+    ServiceOffering_updateTierPricingOption(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_UpdateTierPricingOptionInput
+    ): Int
+    ServiceOffering_removeTierPricingOption(
+      driveId: String
+      docId: PHID
+      input: ServiceOffering_RemoveTierPricingOptionInput
+    ): Int
     ServiceOffering_addServiceLevel(
       driveId: String
       docId: PHID
@@ -258,6 +273,30 @@ export const schema: DocumentNode = gql`
     id: OID!
     lastModified: DateTime!
   }
+  input ServiceOffering_AddTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    billingCycle: ServiceOffering_BillingCycle!
+    amount: Amount_Money!
+    currency: Currency!
+    setupFee: Amount_Money
+    isDefault: Boolean
+    lastModified: DateTime!
+  }
+  input ServiceOffering_UpdateTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    amount: Amount_Money
+    currency: Currency
+    setupFee: Amount_Money
+    isDefault: Boolean
+    lastModified: DateTime!
+  }
+  input ServiceOffering_RemoveTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    lastModified: DateTime!
+  }
   input ServiceOffering_AddServiceLevelInput {
     tierId: OID!
     serviceLevelId: OID!
@@ -294,6 +333,9 @@ export const schema: DocumentNode = gql`
     limit: Int
     resetPeriod: ServiceOffering_ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: ServiceOffering_BillingCycle
     lastModified: DateTime!
   }
   input ServiceOffering_UpdateUsageLimitInput {
@@ -303,6 +345,9 @@ export const schema: DocumentNode = gql`
     limit: Int
     resetPeriod: ServiceOffering_ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: ServiceOffering_BillingCycle
     lastModified: DateTime!
   }
   input ServiceOffering_RemoveUsageLimitInput {

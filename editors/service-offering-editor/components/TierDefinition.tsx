@@ -13,25 +13,26 @@ import {
   updateTierPricing,
   deleteTier,
 } from "../../../document-models/service-offering/gen/creators.js";
+import { TierPricingOptionsPanel } from "./TierPricingOptionsPanel.js";
 
 interface TierDefinitionProps {
   document: ServiceOfferingDocument;
   dispatch: DocumentDispatch<ServiceOfferingAction>;
 }
 
-// Calculate price per day for mental accounting display
-const BILLING_CYCLE_DAYS: Record<BillingCycle, number> = {
-  MONTHLY: 30,
-  QUARTERLY: 90,
-  SEMI_ANNUAL: 180,
-  ANNUAL: 365,
+// Calculate price per month for mental accounting display
+const BILLING_CYCLE_MONTHS: Record<BillingCycle, number> = {
+  MONTHLY: 1,
+  QUARTERLY: 3,
+  SEMI_ANNUAL: 6,
+  ANNUAL: 12,
   ONE_TIME: 1,
 };
 
-function getPricePerDay(amount: number, billingCycle: BillingCycle): string {
+function getPricePerMonth(amount: number, billingCycle: BillingCycle): string {
   if (billingCycle === "ONE_TIME") return "";
-  const perDay = amount / BILLING_CYCLE_DAYS[billingCycle];
-  return perDay.toFixed(2);
+  const perMonth = amount / BILLING_CYCLE_MONTHS[billingCycle];
+  return perMonth.toFixed(2);
 }
 
 // Determine which tier should show "Most Popular" badge
@@ -1423,32 +1424,22 @@ function TierCard({
                 ))}
               </select>
             </div>
-            {/* Price Per Day - Mental Accounting */}
+            {/* Price Per Month - Mental Accounting */}
             {localAmount &&
               parseFloat(localAmount) > 0 &&
-              localBillingCycle !== "ONE_TIME" && (
+              localBillingCycle !== "ONE_TIME" &&
+              localBillingCycle !== "MONTHLY" && (
                 <div className="tier-card__price-breakdown">
                   <div className="tier-card__per-day">
                     <span className="tier-card__per-day-amount">
                       $
-                      {getPricePerDay(
+                      {getPricePerMonth(
                         parseFloat(localAmount),
                         localBillingCycle,
                       )}
                     </span>
-                    <span className="tier-card__per-day-label">/day</span>
+                    <span className="tier-card__per-day-label">/month</span>
                   </div>
-                  {parseFloat(localAmount) > 0 &&
-                    parseFloat(
-                      getPricePerDay(
-                        parseFloat(localAmount),
-                        localBillingCycle,
-                      ),
-                    ) < 10 && (
-                      <span className="tier-card__comparison">
-                        Less than a coffee
-                      </span>
-                    )}
                 </div>
               )}
             {/* Charm Pricing Suggestions - Left-Digit Bias */}
@@ -1498,6 +1489,15 @@ function TierCard({
             className="tier-card__desc-textarea"
           />
         </div>
+
+        {/* Multi-Billing Cycle Pricing Options */}
+        {!isCustomPricing && (
+          <TierPricingOptionsPanel
+            tierId={tier.id}
+            pricingOptions={tier.pricingOptions ?? []}
+            dispatch={dispatch}
+          />
+        )}
       </div>
 
       <div className="tier-card__footer">

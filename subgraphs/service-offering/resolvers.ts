@@ -17,6 +17,9 @@ import type {
   UpdateTierInput,
   UpdateTierPricingInput,
   DeleteTierInput,
+  AddTierPricingOptionInput,
+  UpdateTierPricingOptionInput,
+  RemoveTierPricingOptionInput,
   AddServiceLevelInput,
   UpdateServiceLevelInput,
   RemoveServiceLevelInput,
@@ -327,6 +330,78 @@ export const getResolvers = (
 
         if (result.status !== "SUCCESS") {
           throw new Error(result.error?.message ?? "Failed to deleteTier");
+        }
+
+        return true;
+      },
+
+      ServiceOffering_addTierPricingOption: async (
+        _: unknown,
+        args: { docId: string; input: AddTierPricingOptionInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.addTierPricingOption(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to addTierPricingOption",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_updateTierPricingOption: async (
+        _: unknown,
+        args: { docId: string; input: UpdateTierPricingOptionInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.updateTierPricingOption(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to updateTierPricingOption",
+          );
+        }
+
+        return true;
+      },
+
+      ServiceOffering_removeTierPricingOption: async (
+        _: unknown,
+        args: { docId: string; input: RemoveTierPricingOptionInput },
+      ) => {
+        const { docId, input } = args;
+        const doc = await reactor.getDocument<ServiceOfferingDocument>(docId);
+        if (!doc) {
+          throw new Error("Document not found");
+        }
+
+        const result = await reactor.addAction(
+          docId,
+          actions.removeTierPricingOption(input),
+        );
+
+        if (result.status !== "SUCCESS") {
+          throw new Error(
+            result.error?.message ?? "Failed to removeTierPricingOption",
+          );
         }
 
         return true;

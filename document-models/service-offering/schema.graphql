@@ -80,6 +80,7 @@ type ServiceSubscriptionTier {
     description: String
     isCustomPricing: Boolean!
     pricing: ServicePricing!
+    pricingOptions: [TierPricingOption!]!
     serviceLevels: [ServiceLevelBinding!]!
     usageLimits: [ServiceUsageLimit!]!
 }
@@ -89,6 +90,15 @@ type ServicePricing {
     currency: Currency!
     billingCycle: BillingCycle!
     setupFee: Amount_Money
+}
+
+type TierPricingOption {
+    id: OID!
+    billingCycle: BillingCycle!
+    amount: Amount_Money!
+    currency: Currency!
+    setupFee: Amount_Money
+    isDefault: Boolean!
 }
 
 enum BillingCycle {
@@ -126,6 +136,9 @@ type ServiceUsageLimit {
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: BillingCycle
 }
 
 enum ResetPeriod {
@@ -230,6 +243,33 @@ input DeleteTierInput {
     lastModified: DateTime!
 }
 
+input AddTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    billingCycle: BillingCycle!
+    amount: Amount_Money!
+    currency: Currency!
+    setupFee: Amount_Money
+    isDefault: Boolean
+    lastModified: DateTime!
+}
+
+input UpdateTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    amount: Amount_Money
+    currency: Currency
+    setupFee: Amount_Money
+    isDefault: Boolean
+    lastModified: DateTime!
+}
+
+input RemoveTierPricingOptionInput {
+    tierId: OID!
+    pricingOptionId: OID!
+    lastModified: DateTime!
+}
+
 input AddServiceLevelInput {
     tierId: OID!
     serviceLevelId: OID!
@@ -269,6 +309,9 @@ input AddUsageLimitInput {
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: BillingCycle
     lastModified: DateTime!
 }
 
@@ -279,6 +322,9 @@ input UpdateUsageLimitInput {
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
+    unitPrice: Amount_Money
+    unitPriceCurrency: Currency
+    unitPriceBillingCycle: BillingCycle
     lastModified: DateTime!
 }
 
