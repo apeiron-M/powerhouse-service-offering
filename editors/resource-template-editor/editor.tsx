@@ -25,9 +25,7 @@ export default function ResourceTemplateEditor() {
               />
             </svg>
           </div>
-          <h2 className="rt-empty-state__title">
-            No product selected
-          </h2>
+          <h2 className="rt-empty-state__title">No product selected</h2>
           <p className="rt-empty-state__subtitle">
             Select a document to start editing
           </p>

@@ -2,17 +2,21 @@ import { z } from "zod";
 import type {
   AddFacetBindingInput,
   AddFacetOptionInput,
+  AddFaqItemInput,
   AddOptionGroupInput,
   AddServiceInput,
   AddTargetAudienceInput,
+  DeleteFaqItemInput,
   DeleteOptionGroupInput,
   DeleteServiceInput,
   FacetTarget,
+  FaqItem,
   OptionGroup,
   RemoveFacetBindingInput,
   RemoveFacetOptionInput,
   RemoveFacetTargetInput,
   RemoveTargetAudienceInput,
+  ReorderFaqItemsInput,
   ResourceFacetBinding,
   ResourceTemplateState,
   Service,
@@ -23,6 +27,7 @@ import type {
   SetTemplateIdInput,
   TargetAudience,
   TemplateStatus,
+  UpdateFaqItemInput,
   UpdateOptionGroupInput,
   UpdateServiceInput,
   UpdateTemplateInfoInput,
@@ -72,6 +77,18 @@ export function AddFacetOptionInputSchema(): z.ZodObject<
   });
 }
 
+export function AddFaqItemInputSchema(): z.ZodObject<
+  Properties<AddFaqItemInput>
+> {
+  return z.object({
+    answer: z.string(),
+    displayOrder: z.number().nullish(),
+    id: z.string(),
+    lastModified: z.string().datetime(),
+    question: z.string(),
+  });
+}
+
 export function AddOptionGroupInputSchema(): z.ZodObject<
   Properties<AddOptionGroupInput>
 > {
@@ -111,6 +128,15 @@ export function AddTargetAudienceInputSchema(): z.ZodObject<
   });
 }
 
+export function DeleteFaqItemInputSchema(): z.ZodObject<
+  Properties<DeleteFaqItemInput>
+> {
+  return z.object({
+    id: z.string(),
+    lastModified: z.string().datetime(),
+  });
+}
+
 export function DeleteOptionGroupInputSchema(): z.ZodObject<
   Properties<DeleteOptionGroupInput>
 > {
@@ -136,6 +162,16 @@ export function FacetTargetSchema(): z.ZodObject<Properties<FacetTarget>> {
     categoryLabel: z.string(),
     id: z.string(),
     selectedOptions: z.array(z.string()),
+  });
+}
+
+export function FaqItemSchema(): z.ZodObject<Properties<FaqItem>> {
+  return z.object({
+    __typename: z.literal("FaqItem").optional(),
+    answer: z.string(),
+    displayOrder: z.number().nullable(),
+    id: z.string(),
+    question: z.string(),
   });
 }
 
@@ -188,6 +224,15 @@ export function RemoveTargetAudienceInputSchema(): z.ZodObject<
   });
 }
 
+export function ReorderFaqItemsInputSchema(): z.ZodObject<
+  Properties<ReorderFaqItemsInput>
+> {
+  return z.object({
+    faqIds: z.array(z.string()),
+    lastModified: z.string().datetime(),
+  });
+}
+
 export function ResourceFacetBindingSchema(): z.ZodObject<
   Properties<ResourceFacetBinding>
 > {
@@ -207,6 +252,7 @@ export function ResourceTemplateStateSchema(): z.ZodObject<
     __typename: z.literal("ResourceTemplateState").optional(),
     description: z.string().nullable(),
     facetTargets: z.array(FacetTargetSchema()),
+    faqs: z.array(FaqItemSchema()),
     id: z.string(),
     infoLink: z.string().url().nullable(),
     lastModified: z.string().datetime(),
@@ -293,6 +339,18 @@ export function TargetAudienceSchema(): z.ZodObject<
     color: z.string().nullable(),
     id: z.string(),
     label: z.string(),
+  });
+}
+
+export function UpdateFaqItemInputSchema(): z.ZodObject<
+  Properties<UpdateFaqItemInput>
+> {
+  return z.object({
+    answer: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    id: z.string(),
+    lastModified: z.string().datetime(),
+    question: z.string().nullish(),
   });
 }
 

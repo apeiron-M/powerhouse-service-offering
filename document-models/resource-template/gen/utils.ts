@@ -36,6 +36,7 @@ export const initialGlobalState: ResourceTemplateGlobalState = {
   facetTargets: [],
   services: [],
   optionGroups: [],
+  faqs: [],
 };
 export const initialLocalState: ResourceTemplateLocalState = {};
 

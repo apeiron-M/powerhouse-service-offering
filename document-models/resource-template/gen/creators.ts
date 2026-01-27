@@ -10,3 +10,5 @@ export * from "./service-management/creators.js";
 export * as serviceManagementActions from "./service-management/creators.js";
 export * from "./option-group-management/creators.js";
 export * as optionGroupManagementActions from "./option-group-management/creators.js";
+export * from "./faq-management/creators.js";
+export * as faqManagementActions from "./faq-management/creators.js";

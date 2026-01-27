@@ -251,6 +251,10 @@ export const schema: DocumentNode = gql`
     currency: Currency!
     billingCycle: ServiceOffering_BillingCycle!
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: ServiceOffering_BillingCycle
+    perSeatLabel: String
     isCustomPricing: Boolean
     lastModified: DateTime!
   }
@@ -267,6 +271,10 @@ export const schema: DocumentNode = gql`
     currency: Currency
     billingCycle: ServiceOffering_BillingCycle
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: ServiceOffering_BillingCycle
+    perSeatLabel: String
     lastModified: DateTime!
   }
   input ServiceOffering_DeleteTierInput {
@@ -280,6 +288,7 @@ export const schema: DocumentNode = gql`
     amount: Amount_Money!
     currency: Currency!
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
     isDefault: Boolean
     lastModified: DateTime!
   }
@@ -289,6 +298,7 @@ export const schema: DocumentNode = gql`
     amount: Amount_Money
     currency: Currency
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
     isDefault: Boolean
     lastModified: DateTime!
   }
@@ -330,6 +340,7 @@ export const schema: DocumentNode = gql`
     limitId: OID!
     serviceId: OID!
     metric: String!
+    unitName: String
     limit: Int
     resetPeriod: ServiceOffering_ResetPeriod
     notes: String
@@ -342,6 +353,7 @@ export const schema: DocumentNode = gql`
     tierId: OID!
     limitId: OID!
     metric: String
+    unitName: String
     limit: Int
     resetPeriod: ServiceOffering_ResetPeriod
     notes: String

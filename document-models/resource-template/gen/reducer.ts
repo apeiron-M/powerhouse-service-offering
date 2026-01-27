@@ -11,6 +11,7 @@ import { resourceTemplateFacetTargetingOperations } from "../src/reducers/facet-
 import { resourceTemplateServiceCategoryManagementOperations } from "../src/reducers/service-category-management.js";
 import { resourceTemplateServiceManagementOperations } from "../src/reducers/service-management.js";
 import { resourceTemplateOptionGroupManagementOperations } from "../src/reducers/option-group-management.js";
+import { resourceTemplateFaqManagementOperations } from "../src/reducers/faq-management.js";
 
 import {
   UpdateTemplateInfoInputSchema,
@@ -33,6 +34,10 @@ import {
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
+  AddFaqItemInputSchema,
+  UpdateFaqItemInputSchema,
+  DeleteFaqItemInputSchema,
+  ReorderFaqItemsInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ResourceTemplatePHState> = (
@@ -219,6 +224,42 @@ const stateReducer: StateReducer<ResourceTemplatePHState> = (
     case "DELETE_OPTION_GROUP":
       DeleteOptionGroupInputSchema().parse(action.input);
       resourceTemplateOptionGroupManagementOperations.deleteOptionGroupOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "ADD_FAQ_ITEM":
+      AddFaqItemInputSchema().parse(action.input);
+      resourceTemplateFaqManagementOperations.addFaqItemOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "UPDATE_FAQ_ITEM":
+      UpdateFaqItemInputSchema().parse(action.input);
+      resourceTemplateFaqManagementOperations.updateFaqItemOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "DELETE_FAQ_ITEM":
+      DeleteFaqItemInputSchema().parse(action.input);
+      resourceTemplateFaqManagementOperations.deleteFaqItemOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+      break;
+
+    case "REORDER_FAQ_ITEMS":
+      ReorderFaqItemsInputSchema().parse(action.input);
+      resourceTemplateFaqManagementOperations.reorderFaqItemsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

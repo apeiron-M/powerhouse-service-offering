@@ -121,6 +121,10 @@ export type AddTierInput = {
   isCustomPricing?: InputMaybe<Scalars["Boolean"]["input"]>;
   lastModified: Scalars["DateTime"]["input"];
   name: Scalars["String"]["input"];
+  perSeatAmount?: InputMaybe<Scalars["Amount_Money"]["input"]>;
+  perSeatBillingCycle?: InputMaybe<BillingCycle>;
+  perSeatCurrency?: InputMaybe<Scalars["Currency"]["input"]>;
+  perSeatLabel?: InputMaybe<Scalars["String"]["input"]>;
   setupFee?: InputMaybe<Scalars["Amount_Money"]["input"]>;
 };
 
@@ -130,6 +134,7 @@ export type AddTierPricingOptionInput = {
   currency: Scalars["Currency"]["input"];
   isDefault?: InputMaybe<Scalars["Boolean"]["input"]>;
   lastModified: Scalars["DateTime"]["input"];
+  perSeatAmount?: InputMaybe<Scalars["Amount_Money"]["input"]>;
   pricingOptionId: Scalars["OID"]["input"];
   setupFee?: InputMaybe<Scalars["Amount_Money"]["input"]>;
   tierId: Scalars["OID"]["input"];
@@ -144,6 +149,7 @@ export type AddUsageLimitInput = {
   resetPeriod?: InputMaybe<ResetPeriod>;
   serviceId: Scalars["OID"]["input"];
   tierId: Scalars["OID"]["input"];
+  unitName?: InputMaybe<Scalars["String"]["input"]>;
   unitPrice?: InputMaybe<Scalars["Amount_Money"]["input"]>;
   unitPriceBillingCycle?: InputMaybe<BillingCycle>;
   unitPriceCurrency?: InputMaybe<Scalars["Currency"]["input"]>;
@@ -308,6 +314,10 @@ export type ServicePricing = {
   amount: Maybe<Scalars["Amount_Money"]["output"]>;
   billingCycle: BillingCycle;
   currency: Scalars["Currency"]["output"];
+  perSeatAmount: Maybe<Scalars["Amount_Money"]["output"]>;
+  perSeatBillingCycle: Maybe<BillingCycle>;
+  perSeatCurrency: Maybe<Scalars["Currency"]["output"]>;
+  perSeatLabel: Maybe<Scalars["String"]["output"]>;
   setupFee: Maybe<Scalars["Amount_Money"]["output"]>;
 };
 
@@ -331,6 +341,7 @@ export type ServiceUsageLimit = {
   notes: Maybe<Scalars["String"]["output"]>;
   resetPeriod: Maybe<ResetPeriod>;
   serviceId: Scalars["OID"]["output"];
+  unitName: Maybe<Scalars["String"]["output"]>;
   unitPrice: Maybe<Scalars["Amount_Money"]["output"]>;
   unitPriceBillingCycle: Maybe<BillingCycle>;
   unitPriceCurrency: Maybe<Scalars["Currency"]["output"]>;
@@ -376,6 +387,7 @@ export type TierPricingOption = {
   currency: Scalars["Currency"]["output"];
   id: Scalars["OID"]["output"];
   isDefault: Scalars["Boolean"]["output"];
+  perSeatAmount: Maybe<Scalars["Amount_Money"]["output"]>;
   setupFee: Maybe<Scalars["Amount_Money"]["output"]>;
 };
 
@@ -439,6 +451,10 @@ export type UpdateTierPricingInput = {
   billingCycle?: InputMaybe<BillingCycle>;
   currency?: InputMaybe<Scalars["Currency"]["input"]>;
   lastModified: Scalars["DateTime"]["input"];
+  perSeatAmount?: InputMaybe<Scalars["Amount_Money"]["input"]>;
+  perSeatBillingCycle?: InputMaybe<BillingCycle>;
+  perSeatCurrency?: InputMaybe<Scalars["Currency"]["input"]>;
+  perSeatLabel?: InputMaybe<Scalars["String"]["input"]>;
   setupFee?: InputMaybe<Scalars["Amount_Money"]["input"]>;
   tierId: Scalars["OID"]["input"];
 };
@@ -448,6 +464,7 @@ export type UpdateTierPricingOptionInput = {
   currency?: InputMaybe<Scalars["Currency"]["input"]>;
   isDefault?: InputMaybe<Scalars["Boolean"]["input"]>;
   lastModified: Scalars["DateTime"]["input"];
+  perSeatAmount?: InputMaybe<Scalars["Amount_Money"]["input"]>;
   pricingOptionId: Scalars["OID"]["input"];
   setupFee?: InputMaybe<Scalars["Amount_Money"]["input"]>;
   tierId: Scalars["OID"]["input"];
@@ -461,6 +478,7 @@ export type UpdateUsageLimitInput = {
   notes?: InputMaybe<Scalars["String"]["input"]>;
   resetPeriod?: InputMaybe<ResetPeriod>;
   tierId: Scalars["OID"]["input"];
+  unitName?: InputMaybe<Scalars["String"]["input"]>;
   unitPrice?: InputMaybe<Scalars["Amount_Money"]["input"]>;
   unitPriceBillingCycle?: InputMaybe<BillingCycle>;
   unitPriceCurrency?: InputMaybe<Scalars["Currency"]["input"]>;

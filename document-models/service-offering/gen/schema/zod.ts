@@ -189,6 +189,10 @@ export function AddTierInputSchema(): z.ZodObject<Properties<AddTierInput>> {
     isCustomPricing: z.boolean().nullish(),
     lastModified: z.string().datetime(),
     name: z.string(),
+    perSeatAmount: z.number().nullish(),
+    perSeatBillingCycle: BillingCycleSchema.nullish(),
+    perSeatCurrency: z.string().nullish(),
+    perSeatLabel: z.string().nullish(),
     setupFee: z.number().nullish(),
   });
 }
@@ -202,6 +206,7 @@ export function AddTierPricingOptionInputSchema(): z.ZodObject<
     currency: z.string(),
     isDefault: z.boolean().nullish(),
     lastModified: z.string().datetime(),
+    perSeatAmount: z.number().nullish(),
     pricingOptionId: z.string(),
     setupFee: z.number().nullish(),
     tierId: z.string(),
@@ -220,6 +225,7 @@ export function AddUsageLimitInputSchema(): z.ZodObject<
     resetPeriod: ResetPeriodSchema.nullish(),
     serviceId: z.string(),
     tierId: z.string(),
+    unitName: z.string().nullish(),
     unitPrice: z.number().nullish(),
     unitPriceBillingCycle: BillingCycleSchema.nullish(),
     unitPriceCurrency: z.string().nullish(),
@@ -437,6 +443,10 @@ export function ServicePricingSchema(): z.ZodObject<
     amount: z.number().nullable(),
     billingCycle: BillingCycleSchema,
     currency: z.string(),
+    perSeatAmount: z.number().nullable(),
+    perSeatBillingCycle: BillingCycleSchema.nullable(),
+    perSeatCurrency: z.string().nullable(),
+    perSeatLabel: z.string().nullable(),
     setupFee: z.number().nullable(),
   });
 }
@@ -468,6 +478,7 @@ export function ServiceUsageLimitSchema(): z.ZodObject<
     notes: z.string().nullable(),
     resetPeriod: ResetPeriodSchema.nullable(),
     serviceId: z.string(),
+    unitName: z.string().nullable(),
     unitPrice: z.number().nullable(),
     unitPriceBillingCycle: BillingCycleSchema.nullable(),
     unitPriceCurrency: z.string().nullable(),
@@ -543,6 +554,7 @@ export function TierPricingOptionSchema(): z.ZodObject<
     currency: z.string(),
     id: z.string(),
     isDefault: z.boolean(),
+    perSeatAmount: z.number().nullable(),
     setupFee: z.number().nullable(),
   });
 }
@@ -634,6 +646,10 @@ export function UpdateTierPricingInputSchema(): z.ZodObject<
     billingCycle: BillingCycleSchema.nullish(),
     currency: z.string().nullish(),
     lastModified: z.string().datetime(),
+    perSeatAmount: z.number().nullish(),
+    perSeatBillingCycle: BillingCycleSchema.nullish(),
+    perSeatCurrency: z.string().nullish(),
+    perSeatLabel: z.string().nullish(),
     setupFee: z.number().nullish(),
     tierId: z.string(),
   });
@@ -647,6 +663,7 @@ export function UpdateTierPricingOptionInputSchema(): z.ZodObject<
     currency: z.string().nullish(),
     isDefault: z.boolean().nullish(),
     lastModified: z.string().datetime(),
+    perSeatAmount: z.number().nullish(),
     pricingOptionId: z.string(),
     setupFee: z.number().nullish(),
     tierId: z.string(),
@@ -664,6 +681,7 @@ export function UpdateUsageLimitInputSchema(): z.ZodObject<
     notes: z.string().nullish(),
     resetPeriod: ResetPeriodSchema.nullish(),
     tierId: z.string(),
+    unitName: z.string().nullish(),
     unitPrice: z.number().nullish(),
     unitPriceBillingCycle: BillingCycleSchema.nullish(),
     unitPriceCurrency: z.string().nullish(),

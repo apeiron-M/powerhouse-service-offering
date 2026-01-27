@@ -441,14 +441,97 @@ export const documentModel: DocumentModelGlobalState = {
             },
           ],
         },
+        {
+          description: "Operations for managing FAQ items",
+          id: "faq-management",
+          name: "FAQ Management",
+          operations: [
+            {
+              id: "add-faq-item",
+              name: "ADD_FAQ_ITEM",
+              description: "Adds a new FAQ item",
+              schema:
+                "input AddFaqItemInput {\n    id: OID!\n    question: String!\n    answer: String!\n    displayOrder: Int\n    lastModified: DateTime!\n}",
+              template: "Adds a new FAQ item",
+              reducer:
+                "state.faqs.push({\n    id: action.input.id,\n    question: action.input.question,\n    answer: action.input.answer,\n    displayOrder: action.input.displayOrder || null\n});\nstate.lastModified = action.input.lastModified;",
+              errors: [
+                {
+                  id: "duplicate-faq-id",
+                  name: "DuplicateFaqIdError",
+                  code: "DUPLICATE_FAQ_ID",
+                  description: "An FAQ item with this ID already exists",
+                  template: "",
+                },
+              ],
+              examples: [],
+              scope: "global",
+            },
+            {
+              id: "update-faq-item",
+              name: "UPDATE_FAQ_ITEM",
+              description: "Updates an existing FAQ item",
+              schema:
+                "input UpdateFaqItemInput {\n    id: OID!\n    question: String\n    answer: String\n    displayOrder: Int\n    lastModified: DateTime!\n}",
+              template: "Updates an existing FAQ item",
+              reducer:
+                "const faqItem = state.faqs.find(f => f.id === action.input.id);\nif (faqItem) {\n    if (action.input.question) {\n        faqItem.question = action.input.question;\n    }\n    if (action.input.answer) {\n        faqItem.answer = action.input.answer;\n    }\n    if (action.input.displayOrder !== undefined && action.input.displayOrder !== null) {\n        faqItem.displayOrder = action.input.displayOrder;\n    }\n}\nstate.lastModified = action.input.lastModified;",
+              errors: [
+                {
+                  id: "faq-not-found",
+                  name: "FaqNotFoundError",
+                  code: "FAQ_NOT_FOUND",
+                  description: "FAQ item with the specified ID does not exist",
+                  template: "",
+                },
+              ],
+              examples: [],
+              scope: "global",
+            },
+            {
+              id: "delete-faq-item",
+              name: "DELETE_FAQ_ITEM",
+              description: "Removes an FAQ item",
+              schema:
+                "input DeleteFaqItemInput {\n    id: OID!\n    lastModified: DateTime!\n}",
+              template: "Removes an FAQ item",
+              reducer:
+                "const faqIndex = state.faqs.findIndex(f => f.id === action.input.id);\nif (faqIndex !== -1) {\n    state.faqs.splice(faqIndex, 1);\n}\nstate.lastModified = action.input.lastModified;",
+              errors: [
+                {
+                  id: "faq-not-found-delete",
+                  name: "DeleteFaqNotFoundError",
+                  code: "DELETE_FAQ_NOT_FOUND",
+                  description: "FAQ item with the specified ID does not exist",
+                  template: "",
+                },
+              ],
+              examples: [],
+              scope: "global",
+            },
+            {
+              id: "reorder-faq-items",
+              name: "REORDER_FAQ_ITEMS",
+              description: "Reorders FAQ items by updating their display order",
+              schema:
+                "input ReorderFaqItemsInput {\n    faqIds: [OID!]!\n    lastModified: DateTime!\n}",
+              template: "Reorders FAQ items",
+              reducer:
+                "action.input.faqIds.forEach((faqId, index) => {\n    const faqItem = state.faqs.find(f => f.id === faqId);\n    if (faqItem) {\n        faqItem.displayOrder = index;\n    }\n});\nstate.lastModified = action.input.lastModified;",
+              errors: [],
+              examples: [],
+              scope: "global",
+            },
+          ],
+        },
       ],
       state: {
         global: {
           examples: [],
           initialValue:
-            '"{\\n    \\"id\\": \\"\\",\\n    \\"operatorId\\": \\"\\",\\n    \\"title\\": \\"\\",\\n    \\"summary\\": \\"\\",\\n    \\"description\\": null,\\n    \\"thumbnailUrl\\": null,\\n    \\"infoLink\\": null,\\n    \\"status\\": \\"DRAFT\\",\\n    \\"lastModified\\": \\"1970-01-01T00:00:00.000Z\\",\\n    \\"targetAudiences\\": [],\\n    \\"setupServices\\": [],\\n    \\"recurringServices\\": [],\\n    \\"facetTargets\\": [],\\n    \\"services\\": [],\\n    \\"optionGroups\\": []\\n}"',
+            '"{\\n    \\"id\\": \\"\\",\\n    \\"operatorId\\": \\"\\",\\n    \\"title\\": \\"\\",\\n    \\"summary\\": \\"\\",\\n    \\"description\\": null,\\n    \\"thumbnailUrl\\": null,\\n    \\"infoLink\\": null,\\n    \\"status\\": \\"DRAFT\\",\\n    \\"lastModified\\": \\"1970-01-01T00:00:00.000Z\\",\\n    \\"targetAudiences\\": [],\\n    \\"setupServices\\": [],\\n    \\"recurringServices\\": [],\\n    \\"facetTargets\\": [],\\n    \\"services\\": [],\\n    \\"optionGroups\\": [],\\n    \\"faqs\\": []\\n}"',
           schema:
-            "type ResourceTemplateState {\n    id: PHID!\n    operatorId: PHID!\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: TemplateStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum TemplateStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}",
+            "type ResourceTemplateState {\n    id: PHID!\n    operatorId: PHID!\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: TemplateStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    optionGroups: [OptionGroup!]!\n    faqs: [FaqItem!]!\n}\n\nenum TemplateStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}\n\ntype FaqItem {\n    id: OID!\n    question: String!\n    answer: String!\n    displayOrder: Int\n}",
         },
         local: {
           examples: [],

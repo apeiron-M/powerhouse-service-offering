@@ -71,6 +71,14 @@ export type AddFacetOptionInput = {
   optionId: Scalars["String"]["input"];
 };
 
+export type AddFaqItemInput = {
+  answer: Scalars["String"]["input"];
+  displayOrder?: InputMaybe<Scalars["Int"]["input"]>;
+  id: Scalars["OID"]["input"];
+  lastModified: Scalars["DateTime"]["input"];
+  question: Scalars["String"]["input"];
+};
+
 export type AddOptionGroupInput = {
   defaultSelected: Scalars["Boolean"]["input"];
   description?: InputMaybe<Scalars["String"]["input"]>;
@@ -98,6 +106,11 @@ export type AddTargetAudienceInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
+export type DeleteFaqItemInput = {
+  id: Scalars["OID"]["input"];
+  lastModified: Scalars["DateTime"]["input"];
+};
+
 export type DeleteOptionGroupInput = {
   id: Scalars["OID"]["input"];
   lastModified: Scalars["DateTime"]["input"];
@@ -113,6 +126,13 @@ export type FacetTarget = {
   categoryLabel: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
   selectedOptions: Array<Scalars["String"]["output"]>;
+};
+
+export type FaqItem = {
+  answer: Scalars["String"]["output"];
+  displayOrder: Maybe<Scalars["Int"]["output"]>;
+  id: Scalars["OID"]["output"];
+  question: Scalars["String"]["output"];
 };
 
 export type OptionGroup = {
@@ -145,6 +165,11 @@ export type RemoveTargetAudienceInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
+export type ReorderFaqItemsInput = {
+  faqIds: Array<Scalars["OID"]["input"]>;
+  lastModified: Scalars["DateTime"]["input"];
+};
+
 export type ResourceFacetBinding = {
   facetName: Scalars["String"]["output"];
   facetType: Scalars["PHID"]["output"];
@@ -155,6 +180,7 @@ export type ResourceFacetBinding = {
 export type ResourceTemplateState = {
   description: Maybe<Scalars["String"]["output"]>;
   facetTargets: Array<FacetTarget>;
+  faqs: Array<FaqItem>;
   id: Scalars["PHID"]["output"];
   infoLink: Maybe<Scalars["URL"]["output"]>;
   lastModified: Scalars["DateTime"]["output"];
@@ -216,6 +242,14 @@ export type TargetAudience = {
 };
 
 export type TemplateStatus = "ACTIVE" | "COMING_SOON" | "DEPRECATED" | "DRAFT";
+
+export type UpdateFaqItemInput = {
+  answer?: InputMaybe<Scalars["String"]["input"]>;
+  displayOrder?: InputMaybe<Scalars["Int"]["input"]>;
+  id: Scalars["OID"]["input"];
+  lastModified: Scalars["DateTime"]["input"];
+  question?: InputMaybe<Scalars["String"]["input"]>;
+};
 
 export type UpdateOptionGroupInput = {
   defaultSelected?: InputMaybe<Scalars["Boolean"]["input"]>;

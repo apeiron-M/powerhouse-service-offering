@@ -90,6 +90,10 @@ type ServicePricing {
     currency: Currency!
     billingCycle: BillingCycle!
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: BillingCycle
+    perSeatLabel: String
 }
 
 type TierPricingOption {
@@ -99,6 +103,7 @@ type TierPricingOption {
     currency: Currency!
     setupFee: Amount_Money
     isDefault: Boolean!
+    perSeatAmount: Amount_Money
 }
 
 enum BillingCycle {
@@ -133,6 +138,7 @@ type ServiceUsageLimit {
     id: OID!
     serviceId: OID!
     metric: String!
+    unitName: String
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
@@ -217,6 +223,10 @@ input AddTierInput {
     currency: Currency!
     billingCycle: BillingCycle!
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: BillingCycle
+    perSeatLabel: String
     isCustomPricing: Boolean
     lastModified: DateTime!
 }
@@ -235,6 +245,10 @@ input UpdateTierPricingInput {
     currency: Currency
     billingCycle: BillingCycle
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
+    perSeatCurrency: Currency
+    perSeatBillingCycle: BillingCycle
+    perSeatLabel: String
     lastModified: DateTime!
 }
 
@@ -250,6 +264,7 @@ input AddTierPricingOptionInput {
     amount: Amount_Money!
     currency: Currency!
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
     isDefault: Boolean
     lastModified: DateTime!
 }
@@ -260,6 +275,7 @@ input UpdateTierPricingOptionInput {
     amount: Amount_Money
     currency: Currency
     setupFee: Amount_Money
+    perSeatAmount: Amount_Money
     isDefault: Boolean
     lastModified: DateTime!
 }
@@ -306,6 +322,7 @@ input AddUsageLimitInput {
     limitId: OID!
     serviceId: OID!
     metric: String!
+    unitName: String
     limit: Int
     resetPeriod: ResetPeriod
     notes: String
@@ -319,6 +336,7 @@ input UpdateUsageLimitInput {
     tierId: OID!
     limitId: OID!
     metric: String
+    unitName: String
     limit: Int
     resetPeriod: ResetPeriod
     notes: String

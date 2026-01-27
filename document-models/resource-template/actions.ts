@@ -6,6 +6,7 @@ import {
   serviceCategoryManagementActions,
   serviceManagementActions,
   optionGroupManagementActions,
+  faqManagementActions,
 } from "./gen/creators.js";
 
 /** Actions for the ResourceTemplate document model */
@@ -17,4 +18,5 @@ export const actions = {
   ...serviceCategoryManagementActions,
   ...serviceManagementActions,
   ...optionGroupManagementActions,
+  ...faqManagementActions,
 };

@@ -194,8 +194,8 @@ export function ResourceTemplateSelector({
               </div>
               <h3 className="rts-empty__title">No Products Found</h3>
               <p className="rts-empty__desc">
-                Create a product first to define the base configuration for
-                your service offering.
+                Create a product first to define the base configuration for your
+                service offering.
               </p>
             </div>
           ) : filteredTemplates.length === 0 ? (

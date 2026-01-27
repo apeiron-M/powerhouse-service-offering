@@ -22,6 +22,10 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
           currency: action.input.currency,
           billingCycle: action.input.billingCycle,
           setupFee: action.input.setupFee || null,
+          perSeatAmount: action.input.perSeatAmount || null,
+          perSeatCurrency: action.input.perSeatCurrency || null,
+          perSeatBillingCycle: action.input.perSeatBillingCycle || null,
+          perSeatLabel: action.input.perSeatLabel || null,
         },
         pricingOptions: [],
         isCustomPricing: action.input.isCustomPricing || false,
@@ -63,6 +67,19 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
         }
         if (action.input.setupFee !== undefined) {
           tier.pricing.setupFee = action.input.setupFee;
+        }
+        if (action.input.perSeatAmount !== undefined) {
+          tier.pricing.perSeatAmount = action.input.perSeatAmount;
+        }
+        if (action.input.perSeatCurrency !== undefined) {
+          tier.pricing.perSeatCurrency = action.input.perSeatCurrency || null;
+        }
+        if (action.input.perSeatBillingCycle !== undefined) {
+          tier.pricing.perSeatBillingCycle =
+            action.input.perSeatBillingCycle || null;
+        }
+        if (action.input.perSeatLabel !== undefined) {
+          tier.pricing.perSeatLabel = action.input.perSeatLabel || null;
         }
       }
       state.lastModified = action.input.lastModified;
@@ -138,6 +155,7 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
           id: action.input.limitId,
           serviceId: action.input.serviceId,
           metric: action.input.metric,
+          unitName: action.input.unitName || null,
           limit: action.input.limit || null,
           resetPeriod: action.input.resetPeriod || null,
           notes: action.input.notes || null,
@@ -157,6 +175,9 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
         if (usageLimit) {
           if (action.input.metric) {
             usageLimit.metric = action.input.metric;
+          }
+          if (action.input.unitName !== undefined) {
+            usageLimit.unitName = action.input.unitName || null;
           }
           if (action.input.limit !== undefined && action.input.limit !== null) {
             usageLimit.limit = action.input.limit;
@@ -222,6 +243,7 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
         amount: action.input.amount,
         currency: action.input.currency,
         setupFee: action.input.setupFee || null,
+        perSeatAmount: action.input.perSeatAmount || null,
         isDefault: isDefault,
       });
       state.lastModified = action.input.lastModified;
@@ -249,6 +271,9 @@ export const serviceOfferingTierManagementOperations: ServiceOfferingTierManagem
       }
       if (action.input.setupFee !== undefined) {
         pricingOption.setupFee = action.input.setupFee || null;
+      }
+      if (action.input.perSeatAmount !== undefined) {
+        pricingOption.perSeatAmount = action.input.perSeatAmount || null;
       }
       if (action.input.isDefault === true) {
         tier.pricingOptions.forEach((po) => {
