@@ -1802,7 +1802,8 @@ const matrixStyles = `
   }
 
   .matrix__modal--wide {
-    width: 32rem;
+    width: min(32rem, calc(100vw - 2rem));
+    max-width: 32rem;
     max-height: 85vh;
     overflow-y: auto;
   }
@@ -1833,21 +1834,23 @@ const matrixStyles = `
 
   .matrix__modal-tier-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.625rem;
   }
 
   .matrix__modal-tier-option {
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 1rem;
+    gap: 0.5rem;
+    padding: 0.75rem;
     background: #ffffff;
     border: 2px solid #cbd5e1;
     border-radius: var(--so-radius-lg);
     cursor: pointer;
     transition: all var(--so-transition-fast);
+    min-width: 0;
+    overflow: hidden;
   }
 
   .matrix__modal-tier-option:hover {
@@ -1905,16 +1908,21 @@ const matrixStyles = `
 
   .matrix__modal-tier-name {
     flex: 1;
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: #1e293b;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .matrix__modal-tier-price {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: #64748b;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .matrix__modal-tier-option--selected .matrix__modal-tier-name {
