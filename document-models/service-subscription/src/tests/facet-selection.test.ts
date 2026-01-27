@@ -13,7 +13,7 @@ import {
   SetFacetSelectionInputSchema,
   removeFacetSelection,
   RemoveFacetSelectionInputSchema,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 describe("FacetSelection Operations", () => {
   it("should handle setFacetSelection operation", () => {

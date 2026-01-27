@@ -8,7 +8,7 @@ import {
   removeAddon,
   AddAddonInputSchema,
   RemoveAddonInputSchema,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 describe("AddOnManagementOperations", () => {
   it("should handle addAddon operation", () => {

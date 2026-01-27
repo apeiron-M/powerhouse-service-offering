@@ -13,7 +13,7 @@ import {
   SetConfigurationInputSchema,
   removeConfiguration,
   RemoveConfigurationInputSchema,
-} from "resourceServices/document-models/resource-instance";
+} from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 describe("ConfigurationManagement Operations", () => {
   it("should handle setConfiguration operation", () => {

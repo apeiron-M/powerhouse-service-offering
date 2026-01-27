@@ -14,7 +14,7 @@ import {
   DeleteServiceInputSchema,
   AddFacetBindingInputSchema,
   RemoveFacetBindingInputSchema,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 describe("ServiceManagementOperations", () => {
   it("should handle addService operation", () => {

@@ -32,7 +32,7 @@ import {
   SetRecurringServicesInputSchema,
   SelectResourceTemplateInputSchema,
   ChangeResourceTemplateInputSchema,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 describe("OfferingManagementOperations", () => {
   it("should handle updateOfferingInfo operation", () => {

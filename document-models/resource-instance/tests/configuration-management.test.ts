@@ -8,7 +8,7 @@ import {
   removeConfiguration,
   SetConfigurationInputSchema,
   RemoveConfigurationInputSchema,
-} from "resourceServices/document-models/resource-instance";
+} from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 describe("ConfigurationManagementOperations", () => {
   it("should handle setConfiguration operation", () => {

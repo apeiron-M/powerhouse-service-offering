@@ -8,7 +8,7 @@ import {
   setRecurringServices,
   SetSetupServicesInputSchema,
   SetRecurringServicesInputSchema,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 describe("ServiceCategoryManagementOperations", () => {
   it("should handle setSetupServices operation", () => {

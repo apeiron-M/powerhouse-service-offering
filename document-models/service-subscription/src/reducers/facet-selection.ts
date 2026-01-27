@@ -1,4 +1,4 @@
-import type { ServiceSubscriptionFacetSelectionOperations } from "resourceServices/document-models/service-subscription";
+import type { ServiceSubscriptionFacetSelectionOperations } from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 export const serviceSubscriptionFacetSelectionOperations: ServiceSubscriptionFacetSelectionOperations =
   {

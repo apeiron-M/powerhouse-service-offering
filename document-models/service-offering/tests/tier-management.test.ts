@@ -30,7 +30,7 @@ import {
   AddUsageLimitInputSchema,
   UpdateUsageLimitInputSchema,
   RemoveUsageLimitInputSchema,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 describe("TierManagementOperations", () => {
   it("should handle addTier operation", () => {

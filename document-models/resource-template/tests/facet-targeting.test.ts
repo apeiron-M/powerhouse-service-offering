@@ -12,7 +12,7 @@ import {
   RemoveFacetTargetInputSchema,
   AddFacetOptionInputSchema,
   RemoveFacetOptionInputSchema,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 describe("FacetTargetingOperations", () => {
   it("should handle setFacetTarget operation", () => {

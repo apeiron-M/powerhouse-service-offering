@@ -14,7 +14,7 @@ import {
   ActivateSubscriptionInputSchema,
   CancelSubscriptionInputSchema,
   RenewSubscriptionInputSchema,
-} from "resourceServices/document-models/service-subscription";
+} from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 describe("SubscriptionManagementOperations", () => {
   it("should handle initializeSubscription operation", () => {

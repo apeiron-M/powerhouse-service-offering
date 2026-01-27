@@ -12,7 +12,7 @@ import {
   UpdateOptionInputSchema,
   RemoveOptionInputSchema,
   ReorderOptionsInputSchema,
-} from "resourceServices/document-models/facet";
+} from "@powerhousedao/contributor-billing/document-models/facet";
 
 describe("OptionManagementOperations", () => {
   it("should handle addOption operation", () => {

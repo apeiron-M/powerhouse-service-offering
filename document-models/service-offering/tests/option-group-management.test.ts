@@ -10,7 +10,7 @@ import {
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 describe("OptionGroupManagementOperations", () => {
   it("should handle addOptionGroup operation", () => {

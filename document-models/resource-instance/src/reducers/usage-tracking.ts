@@ -1,4 +1,4 @@
-import type { ResourceInstanceUsageTrackingOperations } from "resourceServices/document-models/resource-instance";
+import type { ResourceInstanceUsageTrackingOperations } from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 export const resourceInstanceUsageTrackingOperations: ResourceInstanceUsageTrackingOperations =
   {

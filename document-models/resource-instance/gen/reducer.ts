@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 import type { StateReducer } from "document-model";
 import { isDocumentAction, createReducer } from "document-model/core";
-import type { ResourceInstancePHState } from "resourceServices/document-models/resource-instance";
+import type { ResourceInstancePHState } from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 import { resourceInstanceInstanceManagementOperations } from "../src/reducers/instance-management.js";
 import { resourceInstanceConfigurationManagementOperations } from "../src/reducers/configuration-management.js";

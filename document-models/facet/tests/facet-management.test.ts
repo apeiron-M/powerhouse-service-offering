@@ -8,7 +8,7 @@ import {
   setFacetDescription,
   SetFacetNameInputSchema,
   SetFacetDescriptionInputSchema,
-} from "resourceServices/document-models/facet";
+} from "@powerhousedao/contributor-billing/document-models/facet";
 
 describe("FacetManagementOperations", () => {
   it("should handle setFacetName operation", () => {

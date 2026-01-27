@@ -11,12 +11,12 @@ import {
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
   addFaq,
-  AddFaqInputSchema,
   updateFaq,
-  UpdateFaqInputSchema,
   deleteFaq,
+  AddFaqInputSchema,
+  UpdateFaqInputSchema,
   DeleteFaqInputSchema,
-} from "resourceServices/document-models/resource-template";
+} from "@powerhousedao/contributor-billing/document-models/resource-template";
 
 describe("OptionGroupManagementOperations", () => {
   it("should handle addOptionGroup operation", () => {

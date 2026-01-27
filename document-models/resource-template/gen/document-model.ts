@@ -447,7 +447,7 @@ export const documentModel: DocumentModelGlobalState = {
               name: "ADD_FAQ",
               reducer: "",
               schema:
-                "input AddFaqInput {\n  question: String\n  answer: String\n}",
+                "input AddFaqInput {\n  id: OID!\n  question: String\n  answer: String\n}",
               scope: "global",
               template: "",
             },

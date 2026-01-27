@@ -16,7 +16,7 @@ import {
   SuspendInstanceInputSchema,
   TerminateInstanceInputSchema,
   UpdateInstanceNameInputSchema,
-} from "resourceServices/document-models/resource-instance";
+} from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 describe("InstanceManagementOperations", () => {
   it("should handle initializeInstance operation", () => {

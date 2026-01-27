@@ -8,7 +8,7 @@ import {
 import type {
   FacetAction,
   FacetDocument,
-} from "resourceServices/document-models/facet";
+} from "@powerhousedao/contributor-billing/document-models/facet";
 import {
   assertIsFacetDocument,
   isFacetDocument,

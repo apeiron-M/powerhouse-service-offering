@@ -1,13 +1,13 @@
 import type { DocumentModelModule } from "document-model";
 import { createState } from "document-model";
 import { defaultBaseState } from "document-model/core";
-import type { ServiceOfferingPHState } from "resourceServices/document-models/service-offering";
+import type { ServiceOfferingPHState } from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   actions,
   documentModel,
   reducer,
   utils,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 
 /** Document model module for the Todo List document type */
 export const ServiceOffering: DocumentModelModule<ServiceOfferingPHState> = {

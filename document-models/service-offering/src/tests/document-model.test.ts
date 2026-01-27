@@ -17,7 +17,7 @@ import {
   assertIsServiceOfferingDocument,
   isServiceOfferingState,
   assertIsServiceOfferingState,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import { ZodError } from "zod";
 
 describe("ServiceOffering Document Model", () => {

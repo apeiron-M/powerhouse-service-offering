@@ -11,7 +11,7 @@ import type {
   OptionGroup,
   ServiceUsageLimit,
   BillingCycle,
-} from "resourceServices/document-models/service-offering";
+} from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   RECURRING_BILLING_CYCLES,
   BILLING_CYCLE_SHORT_LABELS,
@@ -984,22 +984,6 @@ const matrixStyles = `
     color: var(--so-violet-700);
   }
 
-  /* Drag and Drop Styles */
-  .matrix__service-row--draggable {
-    cursor: grab;
-  }
-
-  .matrix__service-row--dragging {
-    opacity: 0.5;
-    background: var(--so-violet-100) !important;
-    cursor: grabbing;
-  }
-
-  .matrix__service-row--drag-over {
-    border-top: 2px solid var(--so-violet-500);
-    background: var(--so-violet-50) !important;
-  }
-
   /* Service Reorder Buttons */
   .matrix__reorder-btns {
     display: flex;
@@ -1046,36 +1030,6 @@ const matrixStyles = `
 
   .matrix__reorder-btn:hover:not(:disabled) svg {
     color: var(--so-violet-600);
-  }
-
-  .matrix__drag-handle {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 32px;
-    color: var(--so-slate-400);
-    cursor: grab;
-    margin-right: 0.5rem;
-    opacity: 0;
-    transition: opacity 0.15s ease;
-  }
-
-  .matrix__service-row:hover .matrix__drag-handle {
-    opacity: 1;
-  }
-
-  .matrix__drag-handle:active {
-    cursor: grabbing;
-  }
-
-  .matrix__drag-handle svg {
-    width: 14px;
-    height: 14px;
-  }
-
-  .matrix__drag-handle:hover {
-    color: var(--so-violet-500);
   }
 
   /* Add Service Row */
@@ -2020,12 +1974,6 @@ export function TheMatrix({
   // Bulk actions state
   const [showBulkActions, setShowBulkActions] = useState(false);
 
-  // Drag and drop state
-  const [draggedService, setDraggedService] = useState<{
-    service: Service;
-    groupId: string;
-  } | null>(null);
-
   const getServiceGroup = (service: Service): string | null => {
     // Services now have optionGroupId directly on them
     return service.optionGroupId || null;
@@ -2041,15 +1989,6 @@ export function TheMatrix({
       const groupServices = groups.get(groupId) || [];
       groupServices.push(service);
       groups.set(groupId, groupServices);
-    });
-
-    // Sort each group's services by displayOrder
-    groups.forEach((groupServices) => {
-      groupServices.sort((a, b) => {
-        const orderA = a.displayOrder ?? 999;
-        const orderB = b.displayOrder ?? 999;
-        return orderA - orderB;
-      });
     });
 
     return groups;
@@ -2493,16 +2432,6 @@ export function TheMatrix({
   };
 
   // Service reordering - swap display order with adjacent service
-  // Drag and drop handlers
-  const handleDragStart = (service: Service, groupId: string) => {
-    setDraggedService({ service, groupId });
-  };
-
-  const handleDragEnd = () => {
-    setDraggedService(null);
-  };
-
-  // Arrow button reorder handler
   const handleReorderService = (
     serviceId: string,
     direction: "up" | "down",
@@ -2512,10 +2441,7 @@ export function TheMatrix({
     const sortedServices = [...groupServices].sort((a, b) => {
       const orderA = a.displayOrder ?? 999;
       const orderB = b.displayOrder ?? 999;
-      if (orderA !== orderB) return orderA - orderB;
-      const indexA = groupServices.findIndex((s) => s.id === a.id);
-      const indexB = groupServices.findIndex((s) => s.id === b.id);
-      return indexA - indexB;
+      return orderA - orderB;
     });
 
     const currentIndex = sortedServices.findIndex((s) => s.id === serviceId);
@@ -2523,16 +2449,13 @@ export function TheMatrix({
 
     const targetIndex =
       direction === "up" ? currentIndex - 1 : currentIndex + 1;
-
-    // Check bounds
     if (targetIndex < 0 || targetIndex >= sortedServices.length) return;
 
-    const now = new Date().toISOString();
-
-    // Swap the two services' displayOrder values
     const currentService = sortedServices[currentIndex];
     const targetService = sortedServices[targetIndex];
+    const now = new Date().toISOString();
 
+    // Swap display orders
     dispatch(
       updateService({
         id: currentService.id,
@@ -2547,94 +2470,6 @@ export function TheMatrix({
         lastModified: now,
       }),
     );
-  };
-
-  const handleDragOver = (
-    e: React.DragEvent,
-    targetService: Service,
-    groupServices: Service[],
-    groupId: string,
-  ) => {
-    e.preventDefault();
-    if (!draggedService || draggedService.service.id === targetService.id)
-      return;
-    // Only allow reordering within the same group
-    if (draggedService.groupId !== groupId) return;
-  };
-
-  const handleDrop = (
-    e: React.DragEvent,
-    targetService: Service,
-    groupServices: Service[],
-    groupId: string,
-  ) => {
-    e.preventDefault();
-    if (!draggedService || draggedService.service.id === targetService.id)
-      return;
-    // Only allow reordering within the same group
-    if (draggedService.groupId !== groupId) return;
-
-    // Sort services by displayOrder for consistent ordering
-    // Use index as tiebreaker for services with same/null displayOrder
-    const sortedServices = [...groupServices].sort((a, b) => {
-      const orderA = a.displayOrder ?? 999;
-      const orderB = b.displayOrder ?? 999;
-      if (orderA !== orderB) return orderA - orderB;
-      // Tiebreaker: use original array index
-      const indexA = groupServices.findIndex((s) => s.id === a.id);
-      const indexB = groupServices.findIndex((s) => s.id === b.id);
-      return indexA - indexB;
-    });
-
-    const draggedIndex = sortedServices.findIndex(
-      (s) => s.id === draggedService.service.id,
-    );
-    const targetIndex = sortedServices.findIndex(
-      (s) => s.id === targetService.id,
-    );
-
-    if (draggedIndex === -1 || targetIndex === -1) return;
-    if (draggedIndex === targetIndex) return;
-
-    const now = new Date().toISOString();
-
-    // Update all services with their new display order
-    sortedServices.forEach((service, currentIndex) => {
-      let newOrder: number;
-
-      if (draggedIndex < targetIndex) {
-        // Moving down
-        if (currentIndex === draggedIndex) {
-          newOrder = targetIndex;
-        } else if (currentIndex > draggedIndex && currentIndex <= targetIndex) {
-          newOrder = currentIndex - 1;
-        } else {
-          newOrder = currentIndex;
-        }
-      } else {
-        // Moving up
-        if (currentIndex === draggedIndex) {
-          newOrder = targetIndex;
-        } else if (currentIndex >= targetIndex && currentIndex < draggedIndex) {
-          newOrder = currentIndex + 1;
-        } else {
-          newOrder = currentIndex;
-        }
-      }
-
-      // Only dispatch if the order actually changed
-      if (service.displayOrder !== newOrder) {
-        dispatch(
-          updateService({
-            id: service.id,
-            displayOrder: newOrder,
-            lastModified: now,
-          }),
-        );
-      }
-    });
-
-    setDraggedService(null);
   };
 
   const handleSaveMetric = () => {
@@ -3218,11 +3053,6 @@ export function TheMatrix({
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
                   onReorderService={handleReorderService}
-                  draggedService={draggedService}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
                 />
               ))}
 
@@ -3257,11 +3087,6 @@ export function TheMatrix({
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
                   onReorderService={handleReorderService}
-                  draggedService={draggedService}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
                 />
               )}
 
@@ -3313,11 +3138,6 @@ export function TheMatrix({
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
                   onReorderService={handleReorderService}
-                  draggedService={draggedService}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
                 />
               ))}
 
@@ -3351,11 +3171,6 @@ export function TheMatrix({
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
                   onReorderService={handleReorderService}
-                  draggedService={draggedService}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
                 />
               )}
 
@@ -3395,11 +3210,6 @@ export function TheMatrix({
                   onRemoveMetric={handleRemoveMetric}
                   onTogglePremiumExclusive={handleTogglePremiumExclusive}
                   onReorderService={handleReorderService}
-                  draggedService={draggedService}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={handleDragOver}
-                  onDrop={handleDrop}
                 />
               ))}
 
@@ -3881,27 +3691,10 @@ interface ServiceGroupSectionProps {
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
   onTogglePremiumExclusive: (serviceId: string) => void;
-  // Arrow reorder handler
   onReorderService: (
     serviceId: string,
     direction: "up" | "down",
     groupServices: Service[],
-  ) => void;
-  // Drag and drop handlers
-  draggedService: { service: Service; groupId: string } | null;
-  onDragStart: (service: Service, groupId: string) => void;
-  onDragEnd: () => void;
-  onDragOver: (
-    e: React.DragEvent,
-    targetService: Service,
-    groupServices: Service[],
-    groupId: string,
-  ) => void;
-  onDrop: (
-    e: React.DragEvent,
-    targetService: Service,
-    groupServices: Service[],
-    groupId: string,
   ) => void;
 }
 
@@ -3927,11 +3720,6 @@ function ServiceGroupSection({
   onRemoveMetric,
   onTogglePremiumExclusive,
   onReorderService,
-  draggedService,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDrop,
 }: ServiceGroupSectionProps) {
   const showGroup = services.length > 0 || onAddService;
   if (!showGroup) return null;
@@ -4006,14 +3794,8 @@ function ServiceGroupSection({
             onRemoveMetric={onRemoveMetric}
             onTogglePremiumExclusive={onTogglePremiumExclusive}
             onReorderService={onReorderService}
-            serviceIndex={serviceIndex}
             groupServices={services}
-            groupId={group.id}
-            draggedService={draggedService}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
+            serviceIndex={serviceIndex}
           />
         );
       })}
@@ -4112,31 +3894,13 @@ interface ServiceRowWithMetricsProps {
   onEditMetric: (serviceId: string, metric: string) => void;
   onRemoveMetric: (serviceId: string, metric: string) => void;
   onTogglePremiumExclusive: (serviceId: string) => void;
-  // Arrow reorder handler
   onReorderService: (
     serviceId: string,
     direction: "up" | "down",
     groupServices: Service[],
   ) => void;
-  serviceIndex: number;
   groupServices: Service[];
-  groupId: string;
-  // Drag and drop handlers
-  draggedService: { service: Service; groupId: string } | null;
-  onDragStart: (service: Service, groupId: string) => void;
-  onDragEnd: () => void;
-  onDragOver: (
-    e: React.DragEvent,
-    targetService: Service,
-    groupServices: Service[],
-    groupId: string,
-  ) => void;
-  onDrop: (
-    e: React.DragEvent,
-    targetService: Service,
-    groupServices: Service[],
-    groupId: string,
-  ) => void;
+  serviceIndex: number;
 }
 
 function ServiceRowWithMetrics({
@@ -4155,55 +3919,18 @@ function ServiceRowWithMetrics({
   onRemoveMetric,
   onTogglePremiumExclusive,
   onReorderService,
-  serviceIndex,
   groupServices,
-  groupId,
-  draggedService,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDrop,
+  serviceIndex,
 }: ServiceRowWithMetricsProps) {
   // Use persisted isPremiumExclusive field from document state
   const isPremiumExclusive = service.isPremiumExclusive;
 
-  // Drag and drop state
-  const isDragging = draggedService?.service.id === service.id;
-  const [isDragOver, setIsDragOver] = useState(false);
-
   return (
     <>
-      <tr
-        className={`matrix__service-row matrix__service-row--draggable ${rowClass}${isDragging ? " matrix__service-row--dragging" : ""}${isDragOver ? " matrix__service-row--drag-over" : ""}`}
-        draggable
-        onDragStart={(e) => {
-          e.dataTransfer.effectAllowed = "move";
-          onDragStart(service, groupId);
-        }}
-        onDragEnd={() => {
-          setIsDragOver(false);
-          onDragEnd();
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          if (
-            draggedService &&
-            draggedService.service.id !== service.id &&
-            draggedService.groupId === groupId
-          ) {
-            setIsDragOver(true);
-          }
-          onDragOver(e, service, groupServices, groupId);
-        }}
-        onDragLeave={() => setIsDragOver(false)}
-        onDrop={(e) => {
-          setIsDragOver(false);
-          onDrop(e, service, groupServices, groupId);
-        }}
-      >
+      <tr className={`matrix__service-row ${rowClass}`}>
         <td className={`matrix__service-cell ${rowClass}`}>
           <div className="matrix__service-cell-wrapper">
-            {/* Arrow reorder buttons */}
+            {/* Reorder buttons */}
             <div className="matrix__reorder-btns">
               <button
                 className="matrix__reorder-btn"
@@ -4214,8 +3941,13 @@ function ServiceRowWithMetrics({
                 disabled={serviceIndex === 0}
                 title="Move up"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7 14l5-5 5 5H7z" />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M18 15l-6-6-6 6" />
                 </svg>
               </button>
               <button
@@ -4227,21 +3959,15 @@ function ServiceRowWithMetrics({
                 disabled={serviceIndex === groupServices.length - 1}
                 title="Move down"
               >
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M7 10l5 5 5-5H7z" />
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M6 9l6 6 6-6" />
                 </svg>
               </button>
-            </div>
-            {/* Drag handle */}
-            <div className="matrix__drag-handle" title="Drag to reorder">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="9" cy="6" r="1.5" />
-                <circle cx="15" cy="6" r="1.5" />
-                <circle cx="9" cy="12" r="1.5" />
-                <circle cx="15" cy="12" r="1.5" />
-                <circle cx="9" cy="18" r="1.5" />
-                <circle cx="15" cy="18" r="1.5" />
-              </svg>
             </div>
             <span className="matrix__service-title">{service.title}</span>
             <button
@@ -4412,8 +4138,8 @@ function ServiceRowWithMetrics({
                         {formatPrice(
                           usageLimit.unitPrice,
                           usageLimit.unitPriceCurrency || "USD",
-                        )}{" "}
-                        per {usageLimit.unitName || "unit"}/
+                        )}
+                        /
                         {BILLING_CYCLE_SHORT_LABELS[
                           usageLimit.unitPriceBillingCycle
                         ].toLowerCase()}

@@ -8,7 +8,7 @@ import {
   resetUsage,
   RecordUsageInputSchema,
   ResetUsageInputSchema,
-} from "resourceServices/document-models/resource-instance";
+} from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 describe("UsageTrackingOperations", () => {
   it("should handle recordUsage operation", () => {

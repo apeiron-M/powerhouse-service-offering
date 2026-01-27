@@ -1,4 +1,4 @@
-import type { ServiceSubscriptionAddOnManagementOperations } from "resourceServices/document-models/service-subscription";
+import type { ServiceSubscriptionAddOnManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 export const serviceSubscriptionAddOnManagementOperations: ServiceSubscriptionAddOnManagementOperations =
   {
