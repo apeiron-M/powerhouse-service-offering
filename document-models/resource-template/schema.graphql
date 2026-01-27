@@ -86,9 +86,10 @@ type OptionGroup {
 }
 
 type FaqField {
-  id:OID!
-  question: String
-  answer: String
+    id: OID!
+    question: String
+    answer: String
+    displayOrder: Int!
 }
 
 type ContentSection {
@@ -247,9 +248,10 @@ input DeleteOptionGroupInput {
 }
 
 input AddFaqInput {
-  id: OID!
-  question: String
-  answer: String
+    id: OID!
+    question: String
+    answer: String
+    displayOrder: Int!
 }
 
 input UpdateFaqInput {
@@ -260,6 +262,11 @@ input UpdateFaqInput {
 
 input DeleteFaqInput {
   id:OID!
+}
+
+input ReorderFaqsInput {
+    faqIds: [OID!]!
+    lastModified: DateTime!
 }
 
 # Content Section Management

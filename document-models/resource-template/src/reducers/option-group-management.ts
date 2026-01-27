@@ -60,6 +60,7 @@ export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOp
         id: action.input.id,
         question: action.input.question || null,
         answer: action.input.answer || null,
+        displayOrder: action.input.displayOrder,
       });
     },
     updateFaqOperation(state, action) {
@@ -82,5 +83,14 @@ export const resourceTemplateOptionGroupManagementOperations: ResourceTemplateOp
       if (faqIndex !== -1) {
         state.faqFields.splice(faqIndex, 1);
       }
+    },
+    reorderFaqsOperation(state, action) {
+      action.input.faqIds.forEach((id, index) => {
+        const faq = state.faqFields?.find((f) => f.id === id);
+        if (faq) {
+          faq.displayOrder = index;
+        }
+      });
+      state.lastModified = action.input.lastModified;
     },
   };

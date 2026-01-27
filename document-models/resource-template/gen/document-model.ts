@@ -445,9 +445,10 @@ export const documentModel: DocumentModelGlobalState = {
               examples: [],
               id: "5383b824-c864-4062-a90e-f892d292a658",
               name: "ADD_FAQ",
-              reducer: "",
+              reducer:
+                "if (!state.faqFields) {\n    state.faqFields = [];\n}\nstate.faqFields.push({\n    id: action.input.id,\n    question: action.input.question || null,\n    answer: action.input.answer || null,\n    displayOrder: action.input.displayOrder\n});",
               schema:
-                "input AddFaqInput {\n  id: OID!\n  question: String\n  answer: String\n}",
+                "input AddFaqInput {\n    id: OID!\n    question: String\n    answer: String\n    displayOrder: Int!\n}",
               scope: "global",
               template: "",
             },
@@ -473,6 +474,19 @@ export const documentModel: DocumentModelGlobalState = {
               schema: "input DeleteFaqInput {\n  id:OID!\n}",
               scope: "global",
               template: "",
+            },
+            {
+              description: "Reorders FAQ items by updating their display order",
+              errors: [],
+              examples: [],
+              id: "reorder-faqs",
+              name: "REORDER_FAQS",
+              reducer:
+                "action.input.faqIds.forEach((id, index) => {\n    const faq = state.faqFields?.find(f => f.id === id);\n    if (faq) {\n        faq.displayOrder = index;\n    }\n});\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input ReorderFaqsInput {\n    faqIds: [OID!]!\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template: "Reorders FAQ items by updating their display order",
             },
           ],
         },
@@ -545,7 +559,7 @@ export const documentModel: DocumentModelGlobalState = {
           initialValue:
             '{\n  "id": "",\n  "operatorId": "",\n  "title": "",\n  "summary": "",\n  "description": null,\n  "thumbnailUrl": null,\n  "infoLink": null,\n  "status": "DRAFT",\n  "lastModified": "1970-01-01T00:00:00.000Z",\n  "targetAudiences": [],\n  "setupServices": [],\n  "recurringServices": [],\n  "facetTargets": [],\n  "services": [],\n  "optionGroups": [],\n  "faqFields": [],\n  "contentSections": []\n}',
           schema:
-            "type ResourceTemplateState {\n    id: PHID!\n    operatorId: PHID!\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: TemplateStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    optionGroups: [OptionGroup!]!\n    faqFields: [FaqField!]\n    contentSections: [ContentSection!]!\n}\n\nenum TemplateStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}\n\ntype FaqField {\n  id:OID!\n  question: String\n  answer: String\n}\n\ntype ContentSection {\n    id: OID!\n    title: String!\n    content: String!\n    displayOrder: Int!\n}",
+            "type ResourceTemplateState {\n    id: PHID!\n    operatorId: PHID!\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: TemplateStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    optionGroups: [OptionGroup!]!\n    faqFields: [FaqField!]\n    contentSections: [ContentSection!]!\n}\n\nenum TemplateStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}\n\ntype FaqField {\n    id: OID!\n    question: String\n    answer: String\n    displayOrder: Int!\n}\n\ntype ContentSection {\n    id: OID!\n    title: String!\n    content: String!\n    displayOrder: Int!\n}",
         },
         local: {
           examples: [],

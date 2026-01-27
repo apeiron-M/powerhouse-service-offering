@@ -84,6 +84,7 @@ export type AddFacetOptionInput = {
 
 export type AddFaqInput = {
   answer?: InputMaybe<Scalars["String"]["input"]>;
+  displayOrder: Scalars["Int"]["input"];
   id: Scalars["OID"]["input"];
   question?: InputMaybe<Scalars["String"]["input"]>;
 };
@@ -150,6 +151,7 @@ export type FacetTarget = {
 
 export type FaqField = {
   answer: Maybe<Scalars["String"]["output"]>;
+  displayOrder: Scalars["Int"]["output"];
   id: Scalars["OID"]["output"];
   question: Maybe<Scalars["String"]["output"]>;
 };
@@ -187,6 +189,11 @@ export type RemoveTargetAudienceInput = {
 export type ReorderContentSectionsInput = {
   lastModified: Scalars["DateTime"]["input"];
   sectionIds: Array<Scalars["OID"]["input"]>;
+};
+
+export type ReorderFaqsInput = {
+  faqIds: Array<Scalars["OID"]["input"]>;
+  lastModified: Scalars["DateTime"]["input"];
 };
 
 export type ResourceFacetBinding = {

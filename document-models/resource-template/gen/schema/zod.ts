@@ -20,6 +20,7 @@ import type {
   RemoveFacetTargetInput,
   RemoveTargetAudienceInput,
   ReorderContentSectionsInput,
+  ReorderFaqsInput,
   ResourceFacetBinding,
   ResourceTemplateState,
   Service,
@@ -96,6 +97,7 @@ export function AddFacetOptionInputSchema(): z.ZodObject<
 export function AddFaqInputSchema(): z.ZodObject<Properties<AddFaqInput>> {
   return z.object({
     answer: z.string().nullish(),
+    displayOrder: z.number(),
     id: z.string(),
     question: z.string().nullish(),
   });
@@ -201,6 +203,7 @@ export function FaqFieldSchema(): z.ZodObject<Properties<FaqField>> {
   return z.object({
     __typename: z.literal("FaqField").optional(),
     answer: z.string().nullish(),
+    displayOrder: z.number(),
     id: z.string(),
     question: z.string().nullish(),
   });
@@ -261,6 +264,15 @@ export function ReorderContentSectionsInputSchema(): z.ZodObject<
   return z.object({
     lastModified: z.string().datetime(),
     sectionIds: z.array(z.string()),
+  });
+}
+
+export function ReorderFaqsInputSchema(): z.ZodObject<
+  Properties<ReorderFaqsInput>
+> {
+  return z.object({
+    faqIds: z.array(z.string()),
+    lastModified: z.string().datetime(),
   });
 }
 

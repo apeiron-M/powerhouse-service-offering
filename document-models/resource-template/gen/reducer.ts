@@ -37,6 +37,7 @@ import {
   AddFaqInputSchema,
   UpdateFaqInputSchema,
   DeleteFaqInputSchema,
+  ReorderFaqsInputSchema,
   AddContentSectionInputSchema,
   UpdateContentSectionInputSchema,
   DeleteContentSectionInputSchema,
@@ -320,6 +321,18 @@ const stateReducer: StateReducer<ResourceTemplatePHState> = (
       DeleteFaqInputSchema().parse(action.input);
 
       resourceTemplateOptionGroupManagementOperations.deleteFaqOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REORDER_FAQS": {
+      ReorderFaqsInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.reorderFaqsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

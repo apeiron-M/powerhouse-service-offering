@@ -19,6 +19,7 @@ import {
   addFaq,
   updateFaq,
   deleteFaq,
+  reorderFaqs,
   addContentSection,
   updateContentSection,
   deleteContentSection,
@@ -336,7 +337,51 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     );
   };
 
+  const handleMoveSetupService = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= globalState.setupServices.length) return;
+
+    const reorderedServices = [...globalState.setupServices];
+    [reorderedServices[index], reorderedServices[newIndex]] = [
+      reorderedServices[newIndex],
+      reorderedServices[index],
+    ];
+
+    dispatch(
+      setSetupServices({
+        services: reorderedServices,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
+  const handleMoveRecurringService = (
+    index: number,
+    direction: "up" | "down",
+  ) => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= globalState.recurringServices.length) return;
+
+    const reorderedServices = [...globalState.recurringServices];
+    [reorderedServices[index], reorderedServices[newIndex]] = [
+      reorderedServices[newIndex],
+      reorderedServices[index],
+    ];
+
+    dispatch(
+      setRecurringServices({
+        services: reorderedServices,
+        lastModified: new Date().toISOString(),
+      }),
+    );
+  };
+
   // FAQ Handlers
+  const faqFields = globalState.faqFields || [];
+  const sortedFaqs = [...faqFields].sort(
+    (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
+  );
+
   const handleAddFaq = () => {
     if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) return;
     dispatch(
@@ -344,10 +389,29 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
         id: generateId(),
         question: newFaqQuestion.trim(),
         answer: newFaqAnswer.trim(),
+        displayOrder: faqFields.length,
       }),
     );
     setNewFaqQuestion("");
     setNewFaqAnswer("");
+  };
+
+  const handleMoveFaq = (index: number, direction: "up" | "down") => {
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= sortedFaqs.length) return;
+
+    const reorderedIds = sortedFaqs.map((f) => f.id);
+    [reorderedIds[index], reorderedIds[newIndex]] = [
+      reorderedIds[newIndex],
+      reorderedIds[index],
+    ];
+
+    dispatch(
+      reorderFaqs({
+        faqIds: reorderedIds,
+        lastModified: new Date().toISOString(),
+      }),
+    );
   };
 
   const handleStartEditFaq = (faq: FaqField) => {
@@ -924,7 +988,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
           </div>
 
           <div className="template-editor__faq-list">
-            {(globalState.faqFields || []).map((faq: FaqField, index: number) => (
+            {sortedFaqs.map((faq: FaqField, index: number) => (
               <div
                 key={faq.id}
                 className={`template-editor__faq-item ${editingFaqId === faq.id ? "template-editor__faq-item--editing" : ""}`}
@@ -965,6 +1029,40 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                   </div>
                 ) : (
                   <>
+                    <div className="template-editor__faq-reorder">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveFaq(index, "up")}
+                        className="template-editor__faq-reorder-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveFaq(index, "down")}
+                        className="template-editor__faq-reorder-btn"
+                        disabled={index === sortedFaqs.length - 1}
+                        title="Move down"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
                     <div className="template-editor__faq-number">
                       {index + 1}
                     </div>
@@ -1164,6 +1262,40 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
               {globalState.setupServices.map(
                 (service: string, index: number) => (
                   <div key={index} className="template-editor__service">
+                    <div className="template-editor__service-reorder">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSetupService(index, "up")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveSetupService(index, "down")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === globalState.setupServices.length - 1}
+                        title="Move down"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
                     <span className="template-editor__service-bullet" />
                     <span className="template-editor__service-text">
                       {service}
@@ -1311,6 +1443,40 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
               {globalState.recurringServices.map(
                 (service: string, index: number) => (
                   <div key={index} className="template-editor__service">
+                    <div className="template-editor__service-reorder">
+                      <button
+                        type="button"
+                        onClick={() => handleMoveRecurringService(index, "up")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === 0}
+                        title="Move up"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M18 15l-6-6-6 6" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleMoveRecurringService(index, "down")}
+                        className="template-editor__service-reorder-btn"
+                        disabled={index === globalState.recurringServices.length - 1}
+                        title="Move down"
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <path d="M6 9l6 6 6-6" />
+                        </svg>
+                      </button>
+                    </div>
                     <span className="template-editor__service-bullet template-editor__service-bullet--recurring" />
                     <span className="template-editor__service-text">
                       {service}
@@ -1941,6 +2107,48 @@ const styles = `
     height: 14px;
   }
 
+  .template-editor__service-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .template-editor__service:hover .template-editor__service-reorder {
+    opacity: 1;
+  }
+
+  .template-editor__service-reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 14px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__service-reorder-btn:hover:not(:disabled) {
+    background: var(--te-emerald-light);
+    color: var(--te-emerald);
+  }
+
+  .template-editor__service-reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .template-editor__service-reorder-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+
   .template-editor__add-service {
     display: flex;
     align-items: center;
@@ -2441,6 +2649,48 @@ const styles = `
   .template-editor__faq-action-btn svg {
     width: 16px;
     height: 16px;
+  }
+
+  .template-editor__faq-reorder {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .template-editor__faq-item:hover .template-editor__faq-reorder {
+    opacity: 1;
+  }
+
+  .template-editor__faq-reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 16px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    color: var(--te-ink-muted);
+    transition: all 0.15s ease;
+  }
+
+  .template-editor__faq-reorder-btn:hover:not(:disabled) {
+    background: var(--te-sky-light);
+    color: var(--te-sky);
+  }
+
+  .template-editor__faq-reorder-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .template-editor__faq-reorder-btn svg {
+    width: 14px;
+    height: 14px;
   }
 
   .template-editor__faq-edit-form {
