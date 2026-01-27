@@ -857,6 +857,7 @@ const matrixStyles = `
     background: inherit;
     cursor: pointer;
     transition: var(--so-transition-fast);
+    height: 2.25rem;
   }
 
   .matrix__metric-row:hover {
@@ -864,23 +865,47 @@ const matrixStyles = `
   }
 
   .matrix__metric-cell {
-    padding: 0.375rem 1rem;
-    padding-left: 3rem;
+    padding: 0.5rem 1rem;
+    padding-left: 7rem;
     border-bottom: 1px solid var(--so-slate-100);
     position: sticky;
     left: 0;
     z-index: 10;
+    height: 2.25rem;
+    vertical-align: middle;
   }
 
   .matrix__metric-name-wrapper {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    position: relative;
+    height: 100%;
+  }
+
+  .matrix__metric-name-wrapper::before {
+    content: "";
+    position: absolute;
+    left: -2rem;
+    top: 50%;
+    width: 1.5rem;
+    height: 1px;
+    background: var(--so-slate-300);
+  }
+
+  .matrix__metric-name-wrapper::after {
+    content: "";
+    position: absolute;
+    left: -2rem;
+    top: -100%;
+    width: 1px;
+    height: calc(100% + 50%);
+    background: var(--so-slate-300);
   }
 
   .matrix__metric-name {
     font-family: var(--so-font-sans);
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-style: italic;
     color: var(--so-slate-500);
   }
@@ -956,7 +981,7 @@ const matrixStyles = `
   .matrix__service-cell-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 0.5rem;
   }
 
@@ -984,17 +1009,17 @@ const matrixStyles = `
     color: var(--so-violet-700);
   }
 
-  /* Service Reorder Buttons */
-  .matrix__reorder-btns {
+  /* Reorder Buttons for Service Reordering */
+  .matrix__reorder-buttons {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
     margin-right: 0.5rem;
     opacity: 0;
     transition: opacity 0.15s ease;
   }
 
-  .matrix__service-row:hover .matrix__reorder-btns {
+  .matrix__service-row:hover .matrix__reorder-buttons {
     opacity: 1;
   }
 
@@ -1005,16 +1030,17 @@ const matrixStyles = `
     width: 18px;
     height: 14px;
     padding: 0;
-    background: var(--so-slate-100);
-    border: 1px solid var(--so-slate-200);
-    border-radius: 3px;
+    border: none;
+    background: transparent;
+    color: var(--so-slate-400);
     cursor: pointer;
-    transition: all 0.1s ease;
+    border-radius: 2px;
+    transition: all 0.15s ease;
   }
 
   .matrix__reorder-btn:hover:not(:disabled) {
     background: var(--so-violet-100);
-    border-color: var(--so-violet-300);
+    color: var(--so-violet-600);
   }
 
   .matrix__reorder-btn:disabled {
@@ -1023,13 +1049,8 @@ const matrixStyles = `
   }
 
   .matrix__reorder-btn svg {
-    width: 10px;
-    height: 10px;
-    color: var(--so-slate-500);
-  }
-
-  .matrix__reorder-btn:hover:not(:disabled) svg {
-    color: var(--so-violet-600);
+    width: 12px;
+    height: 12px;
   }
 
   /* Add Service Row */
@@ -1974,6 +1995,8 @@ export function TheMatrix({
   // Bulk actions state
   const [showBulkActions, setShowBulkActions] = useState(false);
 
+  // Service reordering state (not used - arrow buttons handle reorder directly)
+
   const getServiceGroup = (service: Service): string | null => {
     // Services now have optionGroupId directly on them
     return service.optionGroupId || null;
@@ -1989,6 +2012,15 @@ export function TheMatrix({
       const groupServices = groups.get(groupId) || [];
       groupServices.push(service);
       groups.set(groupId, groupServices);
+    });
+
+    // Sort services within each group by displayOrder
+    groups.forEach((groupServices, _groupId) => {
+      groupServices.sort((a, b) => {
+        const orderA = a.displayOrder ?? 999;
+        const orderB = b.displayOrder ?? 999;
+        return orderA - orderB;
+      });
     });
 
     return groups;
@@ -2431,7 +2463,7 @@ export function TheMatrix({
     );
   };
 
-  // Service reordering - swap display order with adjacent service
+  // Arrow button handler for service reordering
   const handleReorderService = (
     serviceId: string,
     direction: "up" | "down",
@@ -2447,25 +2479,28 @@ export function TheMatrix({
     const currentIndex = sortedServices.findIndex((s) => s.id === serviceId);
     if (currentIndex === -1) return;
 
-    const targetIndex =
-      direction === "up" ? currentIndex - 1 : currentIndex + 1;
-    if (targetIndex < 0 || targetIndex >= sortedServices.length) return;
+    const newIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
 
-    const currentService = sortedServices[currentIndex];
-    const targetService = sortedServices[targetIndex];
+    // Check bounds
+    if (newIndex < 0 || newIndex >= sortedServices.length) return;
+
     const now = new Date().toISOString();
 
-    // Swap display orders
+    // Swap the two services
+    const currentService = sortedServices[currentIndex];
+    const swapService = sortedServices[newIndex];
+
     dispatch(
       updateService({
         id: currentService.id,
-        displayOrder: targetIndex,
+        displayOrder: newIndex,
         lastModified: now,
       }),
     );
+
     dispatch(
       updateService({
-        id: targetService.id,
+        id: swapService.id,
         displayOrder: currentIndex,
         lastModified: now,
       }),
@@ -3773,7 +3808,7 @@ function ServiceGroupSection({
         </td>
       </tr>
 
-      {services.map((service, serviceIndex) => {
+      {services.map((service) => {
         const metrics = getUniqueMetricsForService(service.id);
 
         return (
@@ -3795,7 +3830,7 @@ function ServiceGroupSection({
             onTogglePremiumExclusive={onTogglePremiumExclusive}
             onReorderService={onReorderService}
             groupServices={services}
-            serviceIndex={serviceIndex}
+            serviceIndex={services.indexOf(service)}
           />
         );
       })}
@@ -3924,21 +3959,23 @@ function ServiceRowWithMetrics({
 }: ServiceRowWithMetricsProps) {
   // Use persisted isPremiumExclusive field from document state
   const isPremiumExclusive = service.isPremiumExclusive;
+  const isFirst = serviceIndex === 0;
+  const isLast = serviceIndex === groupServices.length - 1;
 
   return (
     <>
       <tr className={`matrix__service-row ${rowClass}`}>
         <td className={`matrix__service-cell ${rowClass}`}>
           <div className="matrix__service-cell-wrapper">
-            {/* Reorder buttons */}
-            <div className="matrix__reorder-btns">
+            {/* Reorder arrows */}
+            <div className="matrix__reorder-buttons">
               <button
                 className="matrix__reorder-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   onReorderService(service.id, "up", groupServices);
                 }}
-                disabled={serviceIndex === 0}
+                disabled={isFirst}
                 title="Move up"
               >
                 <svg
@@ -3956,7 +3993,7 @@ function ServiceRowWithMetrics({
                   e.stopPropagation();
                   onReorderService(service.id, "down", groupServices);
                 }}
-                disabled={serviceIndex === groupServices.length - 1}
+                disabled={isLast}
                 title="Move down"
               >
                 <svg
@@ -4139,7 +4176,7 @@ function ServiceRowWithMetrics({
                           usageLimit.unitPrice,
                           usageLimit.unitPriceCurrency || "USD",
                         )}
-                        /
+                        {usageLimit.unitName ? ` per ${usageLimit.unitName}` : ""} per{" "}
                         {BILLING_CYCLE_SHORT_LABELS[
                           usageLimit.unitPriceBillingCycle
                         ].toLowerCase()}

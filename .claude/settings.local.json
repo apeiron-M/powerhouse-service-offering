@@ -33,7 +33,8 @@
       "Bash(bun install:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(bun run build:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",
