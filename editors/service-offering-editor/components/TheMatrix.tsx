@@ -1885,10 +1885,6 @@ export function TheMatrix({
 
   // Get resource templates to find the selected one
   const templates = useResourceTemplateDocumentsInSelectedDrive();
-  const selectedTemplate = useMemo(() => {
-    if (!resourceTemplateId || !templates) return null;
-    return templates.find((t) => t.header.id === resourceTemplateId) || null;
-  }, [resourceTemplateId, templates]);
 
   // Get selected facets from the offering document's facetTargets
   const offeringFacetTargets = state.global.facetTargets ?? [];
@@ -4292,44 +4288,6 @@ function ServiceLevelDetailPanel({
         lastModified: new Date().toISOString(),
       }),
     );
-  };
-
-  const handleSetLevel = (level: ServiceLevel) => {
-    if (serviceLevel) {
-      dispatch(
-        updateServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: serviceLevel.id,
-          level,
-          customValue: level === "CUSTOM" ? customValue : undefined,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    } else {
-      dispatch(
-        addServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: generateId(),
-          serviceId: service.id,
-          level,
-          customValue: level === "CUSTOM" ? customValue : undefined,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    }
-  };
-
-  const handleUpdateCustomValue = () => {
-    if (serviceLevel && serviceLevel.level === "CUSTOM") {
-      dispatch(
-        updateServiceLevel({
-          tierId: tier.id,
-          serviceLevelId: serviceLevel.id,
-          customValue,
-          lastModified: new Date().toISOString(),
-        }),
-      );
-    }
   };
 
   return (

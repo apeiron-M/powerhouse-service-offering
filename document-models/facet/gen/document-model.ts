@@ -135,13 +135,13 @@ export const documentModel: DocumentModelGlobalState = {
         global: {
           examples: [],
           initialValue:
-            '"{\\n    \\"id\\": \\"\\",\\n    \\"name\\": \\"\\",\\n    \\"description\\": null,\\n    \\"lastModified\\": \\"1970-01-01T00:00:00.000Z\\",\\n    \\"options\\": []\\n}"',
+            '{\n    "id": "",\n    "name": "",\n    "description": null,\n    "lastModified": "1970-01-01T00:00:00.000Z",\n    "options": []\n}',
           schema:
             "type FacetState {\n    id: PHID!\n    name: String!\n    description: String\n    lastModified: DateTime!\n    options: [FacetOption!]!\n}\n\ntype FacetOption {\n    id: OID!\n    label: String!\n    description: String\n    displayOrder: Int\n    isDefault: Boolean!\n}",
         },
         local: {
           examples: [],
-          initialValue: '""',
+          initialValue: "",
           schema: "",
         },
       },

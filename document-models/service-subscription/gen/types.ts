@@ -3,6 +3,7 @@ import type { ServiceSubscriptionAction } from "./actions.js";
 import type { ServiceSubscriptionState as ServiceSubscriptionGlobalState } from "./schema/types.js";
 
 type ServiceSubscriptionLocalState = Record<PropertyKey, never>;
+
 type ServiceSubscriptionPHState = PHBaseState & {
   global: ServiceSubscriptionGlobalState;
   local: ServiceSubscriptionLocalState;

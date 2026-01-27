@@ -20,4 +20,3 @@ export * from "./facet-targeting/operations.js";
 export * from "./service-category-management/operations.js";
 export * from "./service-management/operations.js";
 export * from "./option-group-management/operations.js";
-export * from "./faq-management/operations.js";

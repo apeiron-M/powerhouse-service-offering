@@ -11,7 +11,6 @@ import { resourceTemplateFacetTargetingOperations } from "../src/reducers/facet-
 import { resourceTemplateServiceCategoryManagementOperations } from "../src/reducers/service-category-management.js";
 import { resourceTemplateServiceManagementOperations } from "../src/reducers/service-management.js";
 import { resourceTemplateOptionGroupManagementOperations } from "../src/reducers/option-group-management.js";
-import { resourceTemplateFaqManagementOperations } from "../src/reducers/faq-management.js";
 
 import {
   UpdateTemplateInfoInputSchema,
@@ -34,10 +33,9 @@ import {
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
-  AddFaqItemInputSchema,
-  UpdateFaqItemInputSchema,
-  DeleteFaqItemInputSchema,
-  ReorderFaqItemsInputSchema,
+  AddFaqInputSchema,
+  UpdateFaqInputSchema,
+  DeleteFaqInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ResourceTemplatePHState> = (
@@ -48,223 +46,282 @@ const stateReducer: StateReducer<ResourceTemplatePHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "UPDATE_TEMPLATE_INFO":
+    case "UPDATE_TEMPLATE_INFO": {
       UpdateTemplateInfoInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.updateTemplateInfoOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_TEMPLATE_STATUS":
+      break;
+    }
+
+    case "UPDATE_TEMPLATE_STATUS": {
       UpdateTemplateStatusInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.updateTemplateStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_OPERATOR":
+      break;
+    }
+
+    case "SET_OPERATOR": {
       SetOperatorInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.setOperatorOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_TEMPLATE_ID":
+      break;
+    }
+
+    case "SET_TEMPLATE_ID": {
       SetTemplateIdInputSchema().parse(action.input);
+
       resourceTemplateTemplateManagementOperations.setTemplateIdOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_TARGET_AUDIENCE":
+      break;
+    }
+
+    case "ADD_TARGET_AUDIENCE": {
       AddTargetAudienceInputSchema().parse(action.input);
+
       resourceTemplateAudienceManagementOperations.addTargetAudienceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_TARGET_AUDIENCE":
+      break;
+    }
+
+    case "REMOVE_TARGET_AUDIENCE": {
       RemoveTargetAudienceInputSchema().parse(action.input);
+
       resourceTemplateAudienceManagementOperations.removeTargetAudienceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_FACET_TARGET":
+      break;
+    }
+
+    case "SET_FACET_TARGET": {
       SetFacetTargetInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.setFacetTargetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_FACET_TARGET":
+      break;
+    }
+
+    case "REMOVE_FACET_TARGET": {
       RemoveFacetTargetInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.removeFacetTargetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_FACET_OPTION":
+      break;
+    }
+
+    case "ADD_FACET_OPTION": {
       AddFacetOptionInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.addFacetOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_FACET_OPTION":
+      break;
+    }
+
+    case "REMOVE_FACET_OPTION": {
       RemoveFacetOptionInputSchema().parse(action.input);
+
       resourceTemplateFacetTargetingOperations.removeFacetOptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_SETUP_SERVICES":
+      break;
+    }
+
+    case "SET_SETUP_SERVICES": {
       SetSetupServicesInputSchema().parse(action.input);
+
       resourceTemplateServiceCategoryManagementOperations.setSetupServicesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_RECURRING_SERVICES":
+      break;
+    }
+
+    case "SET_RECURRING_SERVICES": {
       SetRecurringServicesInputSchema().parse(action.input);
+
       resourceTemplateServiceCategoryManagementOperations.setRecurringServicesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_SERVICE":
+      break;
+    }
+
+    case "ADD_SERVICE": {
       AddServiceInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.addServiceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_SERVICE":
+      break;
+    }
+
+    case "UPDATE_SERVICE": {
       UpdateServiceInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.updateServiceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "DELETE_SERVICE":
+      break;
+    }
+
+    case "DELETE_SERVICE": {
       DeleteServiceInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.deleteServiceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_FACET_BINDING":
+      break;
+    }
+
+    case "ADD_FACET_BINDING": {
       AddFacetBindingInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.addFacetBindingOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_FACET_BINDING":
+      break;
+    }
+
+    case "REMOVE_FACET_BINDING": {
       RemoveFacetBindingInputSchema().parse(action.input);
+
       resourceTemplateServiceManagementOperations.removeFacetBindingOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_OPTION_GROUP":
+      break;
+    }
+
+    case "ADD_OPTION_GROUP": {
       AddOptionGroupInputSchema().parse(action.input);
+
       resourceTemplateOptionGroupManagementOperations.addOptionGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_OPTION_GROUP":
+      break;
+    }
+
+    case "UPDATE_OPTION_GROUP": {
       UpdateOptionGroupInputSchema().parse(action.input);
+
       resourceTemplateOptionGroupManagementOperations.updateOptionGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "DELETE_OPTION_GROUP":
+      break;
+    }
+
+    case "DELETE_OPTION_GROUP": {
       DeleteOptionGroupInputSchema().parse(action.input);
+
       resourceTemplateOptionGroupManagementOperations.deleteOptionGroupOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_FAQ_ITEM":
-      AddFaqItemInputSchema().parse(action.input);
-      resourceTemplateFaqManagementOperations.addFaqItemOperation(
+      break;
+    }
+
+    case "ADD_FAQ": {
+      AddFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.addFaqOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_FAQ_ITEM":
-      UpdateFaqItemInputSchema().parse(action.input);
-      resourceTemplateFaqManagementOperations.updateFaqItemOperation(
+      break;
+    }
+
+    case "UPDATE_FAQ": {
+      UpdateFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.updateFaqOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "DELETE_FAQ_ITEM":
-      DeleteFaqItemInputSchema().parse(action.input);
-      resourceTemplateFaqManagementOperations.deleteFaqItemOperation(
+      break;
+    }
+
+    case "DELETE_FAQ": {
+      DeleteFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.deleteFaqOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REORDER_FAQ_ITEMS":
-      ReorderFaqItemsInputSchema().parse(action.input);
-      resourceTemplateFaqManagementOperations.reorderFaqItemsOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
       break;
+    }
 
     default:
       return state;

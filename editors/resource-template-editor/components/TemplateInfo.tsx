@@ -5,7 +5,7 @@ import type {
   ResourceTemplateDocument,
   ResourceTemplateAction,
   TargetAudience,
-  FaqItem,
+  FaqField,
 } from "resourceServices/document-models/resource-template";
 import {
   updateTemplateInfo,
@@ -15,9 +15,9 @@ import {
   removeTargetAudience,
   setSetupServices,
   setRecurringServices,
-  addFaqItem,
-  updateFaqItem,
-  deleteFaqItem,
+  addFaq,
+  updateFaq,
+  deleteFaq,
 } from "../../../document-models/resource-template/gen/creators.js";
 
 interface TemplateInfoProps {
@@ -327,7 +327,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
   const handleAddFaq = () => {
     if (!newFaqQuestion.trim() || !newFaqAnswer.trim()) return;
     dispatch(
-      addFaqItem({
+      addFaq({
         id: generateId(),
         question: newFaqQuestion.trim(),
         answer: newFaqAnswer.trim(),
@@ -338,17 +338,17 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     setNewFaqAnswer("");
   };
 
-  const handleStartEditFaq = (faq: FaqItem) => {
+  const handleStartEditFaq = (faq: FaqField) => {
     setEditingFaqId(faq.id);
-    setEditingFaqQuestion(faq.question);
-    setEditingFaqAnswer(faq.answer);
+    setEditingFaqQuestion(faq.question || "");
+    setEditingFaqAnswer(faq.answer || "");
   };
 
   const handleSaveFaqEdit = () => {
     if (!editingFaqId || !editingFaqQuestion.trim() || !editingFaqAnswer.trim())
       return;
     dispatch(
-      updateFaqItem({
+      updateFaq({
         id: editingFaqId,
         question: editingFaqQuestion.trim(),
         answer: editingFaqAnswer.trim(),
@@ -368,7 +368,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
 
   const handleDeleteFaq = (id: string) => {
     dispatch(
-      deleteFaqItem({
+      deleteFaq({
         id,
         lastModified: new Date().toISOString(),
       }),
@@ -617,7 +617,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
           </div>
 
           <div className="template-editor__faq-list">
-            {globalState.faqs.map((faq: FaqItem, index: number) => (
+            {globalState.faqFields.map((faq: FaqField, index: number) => (
               <div
                 key={faq.id}
                 className={`template-editor__faq-item ${editingFaqId === faq.id ? "template-editor__faq-item--editing" : ""}`}

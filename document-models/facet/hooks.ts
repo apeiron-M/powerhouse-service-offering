@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  FacetDocument,
   FacetAction,
+  FacetDocument,
 } from "resourceServices/document-models/facet";
-import { isFacetDocument } from "./gen/document-schema.js";
+import {
+  assertIsFacetDocument,
+  isFacetDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a Facet document by its id */
 export function useFacetDocumentById(
@@ -21,12 +24,14 @@ export function useFacetDocumentById(
 }
 
 /** Hook to get the selected Facet document */
-export function useSelectedFacetDocument():
-  | [FacetDocument, DocumentDispatch<FacetAction>]
-  | [undefined, undefined] {
+export function useSelectedFacetDocument(): [
+  FacetDocument,
+  DocumentDispatch<FacetAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isFacetDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsFacetDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all Facet documents in the selected drive */

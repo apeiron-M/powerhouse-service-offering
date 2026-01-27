@@ -1,11 +1,11 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddOptionAction,
-  type UpdateOptionAction,
-  type RemoveOptionAction,
-  type ReorderOptionsAction,
+import type {
+  AddOptionAction,
+  UpdateOptionAction,
+  RemoveOptionAction,
+  ReorderOptionsAction,
 } from "./actions.js";
-import { type FacetState } from "../types.js";
+import type { FacetState } from "../types.js";
 
 export interface FacetOptionManagementOperations {
   addOptionOperation: (

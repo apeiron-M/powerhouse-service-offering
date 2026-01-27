@@ -1,4 +1,4 @@
-import { type Action } from "document-model";
+import type { Action } from "document-model";
 import type { SetFacetNameInput, SetFacetDescriptionInput } from "../types.js";
 
 export type SetFacetNameAction = Action & {

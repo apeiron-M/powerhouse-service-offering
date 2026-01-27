@@ -102,10 +102,7 @@ const SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
     },
   ],
 };
-import type {
-  ServiceSubscriptionTier,
-  ServiceLevelBinding,
-} from "../../../document-models/service-offering/gen/schema/types.js";
+import type { ServiceSubscriptionTier } from "../../../document-models/service-offering/gen/schema/types.js";
 
 // Extended group info for UI (tracks setup status and fee locally since schema doesn't support it yet)
 export interface GroupMetadata {

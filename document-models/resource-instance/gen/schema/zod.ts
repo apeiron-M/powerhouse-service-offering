@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   ActivateInstanceInput,
   ConfigSource,
@@ -19,7 +19,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -129,8 +129,8 @@ export function ResourceInstanceStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ResourceInstanceState").optional(),
-    activatedAt: z.string().datetime().nullable(),
-    configuration: z.array(InstanceConfigurationSchema()),
+    activatedAt: z.string().datetime().nullish(),
+    configuration: z.array(z.lazy(() => InstanceConfigurationSchema())),
     createdAt: z.string().datetime(),
     customerId: z.string(),
     id: z.string(),
@@ -139,11 +139,11 @@ export function ResourceInstanceStateSchema(): z.ZodObject<
     resourceTemplateId: z.string(),
     status: InstanceStatusSchema,
     subscriptionId: z.string(),
-    suspendedAt: z.string().datetime().nullable(),
-    suspensionReason: z.string().nullable(),
-    terminatedAt: z.string().datetime().nullable(),
-    terminationReason: z.string().nullable(),
-    usageMetrics: z.array(UsageMetricSchema()),
+    suspendedAt: z.string().datetime().nullish(),
+    suspensionReason: z.string().nullish(),
+    terminatedAt: z.string().datetime().nullish(),
+    terminationReason: z.string().nullish(),
+    usageMetrics: z.array(z.lazy(() => UsageMetricSchema())),
   });
 }
 
@@ -203,8 +203,8 @@ export function UsageMetricSchema(): z.ZodObject<Properties<UsageMetric>> {
     currentValue: z.number(),
     id: z.string(),
     lastUpdated: z.string().datetime(),
-    limit: z.number().nullable(),
+    limit: z.number().nullish(),
     metricKey: z.string(),
-    resetPeriod: ResetPeriodSchema.nullable(),
+    resetPeriod: ResetPeriodSchema.nullish(),
   });
 }

@@ -30,97 +30,126 @@ const stateReducer: StateReducer<ResourceInstancePHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "INITIALIZE_INSTANCE":
+    case "INITIALIZE_INSTANCE": {
       InitializeInstanceInputSchema().parse(action.input);
+
       resourceInstanceInstanceManagementOperations.initializeInstanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_INSTANCE_STATUS":
+      break;
+    }
+
+    case "UPDATE_INSTANCE_STATUS": {
       UpdateInstanceStatusInputSchema().parse(action.input);
+
       resourceInstanceInstanceManagementOperations.updateInstanceStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ACTIVATE_INSTANCE":
+      break;
+    }
+
+    case "ACTIVATE_INSTANCE": {
       ActivateInstanceInputSchema().parse(action.input);
+
       resourceInstanceInstanceManagementOperations.activateInstanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SUSPEND_INSTANCE":
+      break;
+    }
+
+    case "SUSPEND_INSTANCE": {
       SuspendInstanceInputSchema().parse(action.input);
+
       resourceInstanceInstanceManagementOperations.suspendInstanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "TERMINATE_INSTANCE":
+      break;
+    }
+
+    case "TERMINATE_INSTANCE": {
       TerminateInstanceInputSchema().parse(action.input);
+
       resourceInstanceInstanceManagementOperations.terminateInstanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_INSTANCE_NAME":
+      break;
+    }
+
+    case "UPDATE_INSTANCE_NAME": {
       UpdateInstanceNameInputSchema().parse(action.input);
+
       resourceInstanceInstanceManagementOperations.updateInstanceNameOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_CONFIGURATION":
+      break;
+    }
+
+    case "SET_CONFIGURATION": {
       SetConfigurationInputSchema().parse(action.input);
+
       resourceInstanceConfigurationManagementOperations.setConfigurationOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_CONFIGURATION":
+      break;
+    }
+
+    case "REMOVE_CONFIGURATION": {
       RemoveConfigurationInputSchema().parse(action.input);
+
       resourceInstanceConfigurationManagementOperations.removeConfigurationOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "RECORD_USAGE":
+      break;
+    }
+
+    case "RECORD_USAGE": {
       RecordUsageInputSchema().parse(action.input);
+
       resourceInstanceUsageTrackingOperations.recordUsageOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "RESET_USAGE":
+      break;
+    }
+
+    case "RESET_USAGE": {
       ResetUsageInputSchema().parse(action.input);
+
       resourceInstanceUsageTrackingOperations.resetUsageOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;

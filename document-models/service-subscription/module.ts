@@ -12,6 +12,7 @@ import {
 /** Document model module for the Todo List document type */
 export const ServiceSubscription: DocumentModelModule<ServiceSubscriptionPHState> =
   {
+    version: 1,
     reducer,
     actions,
     utils,

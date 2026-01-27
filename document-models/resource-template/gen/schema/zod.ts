@@ -1,22 +1,21 @@
-import { z } from "zod";
+import * as z from "zod";
 import type {
   AddFacetBindingInput,
   AddFacetOptionInput,
-  AddFaqItemInput,
+  AddFaqInput,
   AddOptionGroupInput,
   AddServiceInput,
   AddTargetAudienceInput,
-  DeleteFaqItemInput,
+  DeleteFaqInput,
   DeleteOptionGroupInput,
   DeleteServiceInput,
   FacetTarget,
-  FaqItem,
+  FaqField,
   OptionGroup,
   RemoveFacetBindingInput,
   RemoveFacetOptionInput,
   RemoveFacetTargetInput,
   RemoveTargetAudienceInput,
-  ReorderFaqItemsInput,
   ResourceFacetBinding,
   ResourceTemplateState,
   Service,
@@ -27,7 +26,7 @@ import type {
   SetTemplateIdInput,
   TargetAudience,
   TemplateStatus,
-  UpdateFaqItemInput,
+  UpdateFaqInput,
   UpdateOptionGroupInput,
   UpdateServiceInput,
   UpdateTemplateInfoInput,
@@ -35,7 +34,7 @@ import type {
 } from "./types.js";
 
 type Properties<T> = Required<{
-  [K in keyof T]: z.ZodType<T[K], any, T[K]>;
+  [K in keyof T]: z.ZodType<T[K]>;
 }>;
 
 type definedNonNullAny = {};
@@ -77,15 +76,10 @@ export function AddFacetOptionInputSchema(): z.ZodObject<
   });
 }
 
-export function AddFaqItemInputSchema(): z.ZodObject<
-  Properties<AddFaqItemInput>
-> {
+export function AddFaqInputSchema(): z.ZodObject<Properties<AddFaqInput>> {
   return z.object({
-    answer: z.string(),
-    displayOrder: z.number().nullish(),
-    id: z.string(),
-    lastModified: z.string().datetime(),
-    question: z.string(),
+    answer: z.string().nullish(),
+    question: z.string().nullish(),
   });
 }
 
@@ -128,12 +122,11 @@ export function AddTargetAudienceInputSchema(): z.ZodObject<
   });
 }
 
-export function DeleteFaqItemInputSchema(): z.ZodObject<
-  Properties<DeleteFaqItemInput>
+export function DeleteFaqInputSchema(): z.ZodObject<
+  Properties<DeleteFaqInput>
 > {
   return z.object({
     id: z.string(),
-    lastModified: z.string().datetime(),
   });
 }
 
@@ -165,13 +158,12 @@ export function FacetTargetSchema(): z.ZodObject<Properties<FacetTarget>> {
   });
 }
 
-export function FaqItemSchema(): z.ZodObject<Properties<FaqItem>> {
+export function FaqFieldSchema(): z.ZodObject<Properties<FaqField>> {
   return z.object({
-    __typename: z.literal("FaqItem").optional(),
-    answer: z.string(),
-    displayOrder: z.number().nullable(),
+    __typename: z.literal("FaqField").optional(),
+    answer: z.string().nullish(),
     id: z.string(),
-    question: z.string(),
+    question: z.string().nullish(),
   });
 }
 
@@ -179,7 +171,7 @@ export function OptionGroupSchema(): z.ZodObject<Properties<OptionGroup>> {
   return z.object({
     __typename: z.literal("OptionGroup").optional(),
     defaultSelected: z.boolean(),
-    description: z.string().nullable(),
+    description: z.string().nullish(),
     id: z.string(),
     isAddOn: z.boolean(),
     name: z.string(),
@@ -224,15 +216,6 @@ export function RemoveTargetAudienceInputSchema(): z.ZodObject<
   });
 }
 
-export function ReorderFaqItemsInputSchema(): z.ZodObject<
-  Properties<ReorderFaqItemsInput>
-> {
-  return z.object({
-    faqIds: z.array(z.string()),
-    lastModified: z.string().datetime(),
-  });
-}
-
 export function ResourceFacetBindingSchema(): z.ZodObject<
   Properties<ResourceFacetBinding>
 > {
@@ -250,21 +233,21 @@ export function ResourceTemplateStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ResourceTemplateState").optional(),
-    description: z.string().nullable(),
-    facetTargets: z.array(FacetTargetSchema()),
-    faqs: z.array(FaqItemSchema()),
+    description: z.string().nullish(),
+    facetTargets: z.array(z.lazy(() => FacetTargetSchema())),
+    faqFields: z.array(z.lazy(() => FaqFieldSchema())),
     id: z.string(),
-    infoLink: z.string().url().nullable(),
+    infoLink: z.string().url().nullish(),
     lastModified: z.string().datetime(),
     operatorId: z.string(),
-    optionGroups: z.array(OptionGroupSchema()),
+    optionGroups: z.array(z.lazy(() => OptionGroupSchema())),
     recurringServices: z.array(z.string()),
-    services: z.array(ServiceSchema()),
+    services: z.array(z.lazy(() => ServiceSchema())),
     setupServices: z.array(z.string()),
     status: TemplateStatusSchema,
     summary: z.string(),
-    targetAudiences: z.array(TargetAudienceSchema()),
-    thumbnailUrl: z.string().url().nullable(),
+    targetAudiences: z.array(z.lazy(() => TargetAudienceSchema())),
+    thumbnailUrl: z.string().url().nullish(),
     title: z.string(),
   });
 }
@@ -272,13 +255,13 @@ export function ResourceTemplateStateSchema(): z.ZodObject<
 export function ServiceSchema(): z.ZodObject<Properties<Service>> {
   return z.object({
     __typename: z.literal("Service").optional(),
-    description: z.string().nullable(),
-    displayOrder: z.number().nullable(),
-    facetBindings: z.array(ResourceFacetBindingSchema()),
+    description: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    facetBindings: z.array(z.lazy(() => ResourceFacetBindingSchema())),
     id: z.string(),
     isSetupFormation: z.boolean(),
-    optionGroupId: z.string().nullable(),
-    parentServiceId: z.string().nullable(),
+    optionGroupId: z.string().nullish(),
+    parentServiceId: z.string().nullish(),
     title: z.string(),
   });
 }
@@ -336,20 +319,18 @@ export function TargetAudienceSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("TargetAudience").optional(),
-    color: z.string().nullable(),
+    color: z.string().nullish(),
     id: z.string(),
     label: z.string(),
   });
 }
 
-export function UpdateFaqItemInputSchema(): z.ZodObject<
-  Properties<UpdateFaqItemInput>
+export function UpdateFaqInputSchema(): z.ZodObject<
+  Properties<UpdateFaqInput>
 > {
   return z.object({
     answer: z.string().nullish(),
-    displayOrder: z.number().nullish(),
     id: z.string(),
-    lastModified: z.string().datetime(),
     question: z.string().nullish(),
   });
 }

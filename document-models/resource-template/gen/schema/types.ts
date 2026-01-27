@@ -1,4 +1,4 @@
-export type Maybe<T> = T | null;
+export type Maybe<T> = T | null | undefined;
 export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = {
   [K in keyof T]: T[K];
@@ -25,6 +25,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  Address: { input: `${string}:0x${string}`; output: `${string}:0x${string}` };
   Amount: {
     input: { unit?: string; value?: number };
     output: { unit?: string; value?: number };
@@ -44,6 +45,7 @@ export type Scalars = {
   Amount_Money: { input: number; output: number };
   Amount_Percentage: { input: number; output: number };
   Amount_Tokens: { input: number; output: number };
+  Attachment: { input: string; output: string };
   Currency: { input: string; output: string };
   Date: { input: string; output: string };
   DateTime: { input: string; output: string };
@@ -53,6 +55,7 @@ export type Scalars = {
   OLabel: { input: string; output: string };
   PHID: { input: string; output: string };
   URL: { input: string; output: string };
+  Unknown: { input: unknown; output: unknown };
   Upload: { input: File; output: File };
 };
 
@@ -71,12 +74,9 @@ export type AddFacetOptionInput = {
   optionId: Scalars["String"]["input"];
 };
 
-export type AddFaqItemInput = {
-  answer: Scalars["String"]["input"];
-  displayOrder?: InputMaybe<Scalars["Int"]["input"]>;
-  id: Scalars["OID"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
-  question: Scalars["String"]["input"];
+export type AddFaqInput = {
+  answer?: InputMaybe<Scalars["String"]["input"]>;
+  question?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type AddOptionGroupInput = {
@@ -106,9 +106,8 @@ export type AddTargetAudienceInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
-export type DeleteFaqItemInput = {
+export type DeleteFaqInput = {
   id: Scalars["OID"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
 };
 
 export type DeleteOptionGroupInput = {
@@ -128,11 +127,10 @@ export type FacetTarget = {
   selectedOptions: Array<Scalars["String"]["output"]>;
 };
 
-export type FaqItem = {
-  answer: Scalars["String"]["output"];
-  displayOrder: Maybe<Scalars["Int"]["output"]>;
+export type FaqField = {
+  answer: Maybe<Scalars["String"]["output"]>;
   id: Scalars["OID"]["output"];
-  question: Scalars["String"]["output"];
+  question: Maybe<Scalars["String"]["output"]>;
 };
 
 export type OptionGroup = {
@@ -165,11 +163,6 @@ export type RemoveTargetAudienceInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
-export type ReorderFaqItemsInput = {
-  faqIds: Array<Scalars["OID"]["input"]>;
-  lastModified: Scalars["DateTime"]["input"];
-};
-
 export type ResourceFacetBinding = {
   facetName: Scalars["String"]["output"];
   facetType: Scalars["PHID"]["output"];
@@ -180,7 +173,7 @@ export type ResourceFacetBinding = {
 export type ResourceTemplateState = {
   description: Maybe<Scalars["String"]["output"]>;
   facetTargets: Array<FacetTarget>;
-  faqs: Array<FaqItem>;
+  faqFields: Array<FaqField>;
   id: Scalars["PHID"]["output"];
   infoLink: Maybe<Scalars["URL"]["output"]>;
   lastModified: Scalars["DateTime"]["output"];
@@ -243,11 +236,9 @@ export type TargetAudience = {
 
 export type TemplateStatus = "ACTIVE" | "COMING_SOON" | "DEPRECATED" | "DRAFT";
 
-export type UpdateFaqItemInput = {
+export type UpdateFaqInput = {
   answer?: InputMaybe<Scalars["String"]["input"]>;
-  displayOrder?: InputMaybe<Scalars["Int"]["input"]>;
   id: Scalars["OID"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
   question?: InputMaybe<Scalars["String"]["input"]>;
 };
 

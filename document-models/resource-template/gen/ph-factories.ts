@@ -28,7 +28,7 @@ export function defaultGlobalState(): ResourceTemplateGlobalState {
     facetTargets: [],
     services: [],
     optionGroups: [],
-    faqs: [],
+    faqFields: [],
   };
 }
 

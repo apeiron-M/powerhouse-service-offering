@@ -1,11 +1,11 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddFaqItemAction,
-  type UpdateFaqItemAction,
-  type DeleteFaqItemAction,
-  type ReorderFaqItemsAction,
+import type {
+  AddFaqItemAction,
+  UpdateFaqItemAction,
+  DeleteFaqItemAction,
+  ReorderFaqItemsAction,
 } from "./actions.js";
-import { type ResourceTemplateState } from "../types.js";
+import type { ResourceTemplateState } from "../types.js";
 
 export interface ResourceTemplateFaqManagementOperations {
   addFaqItemOperation: (

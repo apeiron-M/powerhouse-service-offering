@@ -1,15 +1,18 @@
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import {
+  useDocumentById,
   useDocumentsInSelectedDrive,
   useDocumentsInSelectedFolder,
-  useDocumentById,
   useSelectedDocument,
 } from "@powerhousedao/reactor-browser";
 import type {
-  ServiceSubscriptionDocument,
   ServiceSubscriptionAction,
+  ServiceSubscriptionDocument,
 } from "resourceServices/document-models/service-subscription";
-import { isServiceSubscriptionDocument } from "./gen/document-schema.js";
+import {
+  assertIsServiceSubscriptionDocument,
+  isServiceSubscriptionDocument,
+} from "./gen/document-schema.js";
 
 /** Hook to get a ServiceSubscription document by its id */
 export function useServiceSubscriptionDocumentById(
@@ -23,12 +26,14 @@ export function useServiceSubscriptionDocumentById(
 }
 
 /** Hook to get the selected ServiceSubscription document */
-export function useSelectedServiceSubscriptionDocument():
-  | [ServiceSubscriptionDocument, DocumentDispatch<ServiceSubscriptionAction>]
-  | [undefined, undefined] {
+export function useSelectedServiceSubscriptionDocument(): [
+  ServiceSubscriptionDocument,
+  DocumentDispatch<ServiceSubscriptionAction>,
+] {
   const [document, dispatch] = useSelectedDocument();
-  if (!isServiceSubscriptionDocument(document)) return [undefined, undefined];
-  return [document, dispatch];
+
+  assertIsServiceSubscriptionDocument(document);
+  return [document, dispatch] as const;
 }
 
 /** Hook to get all ServiceSubscription documents in the selected drive */

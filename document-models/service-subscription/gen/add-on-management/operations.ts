@@ -1,6 +1,6 @@
 import { type SignalDispatch } from "document-model";
-import { type AddAddonAction, type RemoveAddonAction } from "./actions.js";
-import { type ServiceSubscriptionState } from "../types.js";
+import type { AddAddonAction, RemoveAddonAction } from "./actions.js";
+import type { ServiceSubscriptionState } from "../types.js";
 
 export interface ServiceSubscriptionAddOnManagementOperations {
   addAddonOperation: (

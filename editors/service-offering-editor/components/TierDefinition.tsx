@@ -1372,7 +1372,9 @@ function TierCard({
   );
 
   // Get default option
-  const defaultOption = (tier.pricingOptions ?? []).find((opt) => opt.isDefault);
+  const defaultOption = (tier.pricingOptions ?? []).find(
+    (opt) => opt.isDefault,
+  );
   const defaultCycle = defaultOption?.billingCycle ?? "MONTHLY";
   const defaultAmount = defaultOption?.amount ?? 0;
 
@@ -1637,7 +1639,10 @@ function TierCard({
                               checked={isActive}
                               onChange={(e) => {
                                 e.stopPropagation();
-                                handleCycleToggle(cycle.value, e.target.checked);
+                                handleCycleToggle(
+                                  cycle.value,
+                                  e.target.checked,
+                                );
                               }}
                               className="tier-card__cycle-checkbox"
                               disabled={
@@ -1652,7 +1657,12 @@ function TierCard({
                                   handleSetDefault(cycle.value);
                                 }
                               }}
-                              style={{ cursor: isActive && !isDefault ? "pointer" : "default" }}
+                              style={{
+                                cursor:
+                                  isActive && !isDefault
+                                    ? "pointer"
+                                    : "default",
+                              }}
                             >
                               {cycle.label}
                             </span>

@@ -1,20 +1,20 @@
 import { type SignalDispatch } from "document-model";
-import {
-  type AddTierAction,
-  type UpdateTierAction,
-  type UpdateTierPricingAction,
-  type DeleteTierAction,
-  type AddTierPricingOptionAction,
-  type UpdateTierPricingOptionAction,
-  type RemoveTierPricingOptionAction,
-  type AddServiceLevelAction,
-  type UpdateServiceLevelAction,
-  type RemoveServiceLevelAction,
-  type AddUsageLimitAction,
-  type UpdateUsageLimitAction,
-  type RemoveUsageLimitAction,
+import type {
+  AddTierAction,
+  UpdateTierAction,
+  UpdateTierPricingAction,
+  DeleteTierAction,
+  AddTierPricingOptionAction,
+  UpdateTierPricingOptionAction,
+  RemoveTierPricingOptionAction,
+  AddServiceLevelAction,
+  UpdateServiceLevelAction,
+  RemoveServiceLevelAction,
+  AddUsageLimitAction,
+  UpdateUsageLimitAction,
+  RemoveUsageLimitAction,
 } from "./actions.js";
-import { type ServiceOfferingState } from "../types.js";
+import type { ServiceOfferingState } from "../types.js";
 
 export interface ServiceOfferingTierManagementOperations {
   addTierOperation: (

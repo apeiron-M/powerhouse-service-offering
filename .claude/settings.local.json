@@ -28,7 +28,10 @@
       "Bash(npx @anthropic-ai/mcp-server-document-models:*)",
       "mcp__reactor-mcp__createDocument",
       "Bash(npx skills add:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(npm ls:*)",
+      "Bash(bun install:*)",
+      "Bash(git add:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

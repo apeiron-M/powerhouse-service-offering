@@ -216,13 +216,13 @@ export const documentModel: DocumentModelGlobalState = {
         global: {
           examples: [],
           initialValue:
-            '"{\\n    \\"id\\": \\"\\",\\n    \\"customerId\\": \\"\\",\\n    \\"serviceOfferingId\\": \\"\\",\\n    \\"resourceTemplateId\\": \\"\\",\\n    \\"selectedTierId\\": \\"\\",\\n    \\"status\\": \\"PENDING\\",\\n    \\"pricing\\": null,\\n    \\"selectedAddons\\": [],\\n    \\"facetSelections\\": [],\\n    \\"startDate\\": null,\\n    \\"currentPeriodStart\\": null,\\n    \\"currentPeriodEnd\\": null,\\n    \\"cancelledAt\\": null,\\n    \\"cancellationReason\\": null,\\n    \\"createdAt\\": \\"1970-01-01T00:00:00.000Z\\",\\n    \\"lastModified\\": \\"1970-01-01T00:00:00.000Z\\"\\n}"',
+            '{\n    "id": "",\n    "customerId": "",\n    "serviceOfferingId": "",\n    "resourceTemplateId": "",\n    "selectedTierId": "",\n    "status": "PENDING",\n    "pricing": null,\n    "selectedAddons": [],\n    "facetSelections": [],\n    "startDate": null,\n    "currentPeriodStart": null,\n    "currentPeriodEnd": null,\n    "cancelledAt": null,\n    "cancellationReason": null,\n    "createdAt": "1970-01-01T00:00:00.000Z",\n    "lastModified": "1970-01-01T00:00:00.000Z"\n}',
           schema:
             "type ServiceSubscriptionState {\n    id: PHID!\n    customerId: PHID!\n    serviceOfferingId: PHID!\n    resourceTemplateId: PHID!\n    selectedTierId: OID!\n    status: SubscriptionStatus!\n    pricing: SubscriptionPricing\n    selectedAddons: [SelectedAddon!]!\n    facetSelections: [FacetSelection!]!\n    startDate: DateTime\n    currentPeriodStart: DateTime\n    currentPeriodEnd: DateTime\n    cancelledAt: DateTime\n    cancellationReason: String\n    createdAt: DateTime!\n    lastModified: DateTime!\n}\n\nenum SubscriptionStatus {\n    PENDING\n    ACTIVE\n    PAUSED\n    CANCELLED\n    EXPIRED\n}\n\ntype SubscriptionPricing {\n    amount: Amount_Money!\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype SelectedAddon {\n    id: OID!\n    optionGroupId: OID!\n    addedAt: DateTime!\n}\n\ntype FacetSelection {\n    id: OID!\n    categoryKey: String!\n    selectedOptionId: String!\n}",
         },
         local: {
           examples: [],
-          initialValue: '""',
+          initialValue: "",
           schema: "",
         },
       },

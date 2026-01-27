@@ -29,13 +29,7 @@ export class DeleteFaqNotFoundError extends Error implements ReducerError {
 }
 
 export const errors = {
-  AddFaqItem: {
-    DuplicateFaqIdError,
-  },
-  UpdateFaqItem: {
-    FaqNotFoundError,
-  },
-  DeleteFaqItem: {
-    DeleteFaqNotFoundError,
-  },
+  AddFaqItem: { DuplicateFaqIdError },
+  UpdateFaqItem: { FaqNotFoundError },
+  DeleteFaqItem: { DeleteFaqNotFoundError },
 };

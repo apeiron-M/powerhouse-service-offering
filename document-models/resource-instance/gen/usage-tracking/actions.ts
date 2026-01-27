@@ -1,4 +1,4 @@
-import { type Action } from "document-model";
+import type { Action } from "document-model";
 import type { RecordUsageInput, ResetUsageInput } from "../types.js";
 
 export type RecordUsageAction = Action & {

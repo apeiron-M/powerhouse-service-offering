@@ -3,6 +3,7 @@ import type { FacetAction } from "./actions.js";
 import type { FacetState as FacetGlobalState } from "./schema/types.js";
 
 type FacetLocalState = Record<PropertyKey, never>;
+
 type FacetPHState = PHBaseState & {
   global: FacetGlobalState;
   local: FacetLocalState;

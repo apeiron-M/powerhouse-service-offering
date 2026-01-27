@@ -32,106 +32,138 @@ const stateReducer: StateReducer<ServiceSubscriptionPHState> = (
   if (isDocumentAction(action)) {
     return state;
   }
-
   switch (action.type) {
-    case "INITIALIZE_SUBSCRIPTION":
+    case "INITIALIZE_SUBSCRIPTION": {
       InitializeSubscriptionInputSchema().parse(action.input);
+
       serviceSubscriptionSubscriptionManagementOperations.initializeSubscriptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "UPDATE_SUBSCRIPTION_STATUS":
+      break;
+    }
+
+    case "UPDATE_SUBSCRIPTION_STATUS": {
       UpdateSubscriptionStatusInputSchema().parse(action.input);
+
       serviceSubscriptionSubscriptionManagementOperations.updateSubscriptionStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ACTIVATE_SUBSCRIPTION":
+      break;
+    }
+
+    case "ACTIVATE_SUBSCRIPTION": {
       ActivateSubscriptionInputSchema().parse(action.input);
+
       serviceSubscriptionSubscriptionManagementOperations.activateSubscriptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "CANCEL_SUBSCRIPTION":
+      break;
+    }
+
+    case "CANCEL_SUBSCRIPTION": {
       CancelSubscriptionInputSchema().parse(action.input);
+
       serviceSubscriptionSubscriptionManagementOperations.cancelSubscriptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "RENEW_SUBSCRIPTION":
+      break;
+    }
+
+    case "RENEW_SUBSCRIPTION": {
       RenewSubscriptionInputSchema().parse(action.input);
+
       serviceSubscriptionSubscriptionManagementOperations.renewSubscriptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "CHANGE_TIER":
+      break;
+    }
+
+    case "CHANGE_TIER": {
       ChangeTierInputSchema().parse(action.input);
+
       serviceSubscriptionTierSelectionOperations.changeTierOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_PRICING":
+      break;
+    }
+
+    case "SET_PRICING": {
       SetPricingInputSchema().parse(action.input);
+
       serviceSubscriptionTierSelectionOperations.setPricingOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "ADD_ADDON":
+      break;
+    }
+
+    case "ADD_ADDON": {
       AddAddonInputSchema().parse(action.input);
+
       serviceSubscriptionAddOnManagementOperations.addAddonOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_ADDON":
+      break;
+    }
+
+    case "REMOVE_ADDON": {
       RemoveAddonInputSchema().parse(action.input);
+
       serviceSubscriptionAddOnManagementOperations.removeAddonOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "SET_FACET_SELECTION":
+      break;
+    }
+
+    case "SET_FACET_SELECTION": {
       SetFacetSelectionInputSchema().parse(action.input);
+
       serviceSubscriptionFacetSelectionOperations.setFacetSelectionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
-      break;
 
-    case "REMOVE_FACET_SELECTION":
+      break;
+    }
+
+    case "REMOVE_FACET_SELECTION": {
       RemoveFacetSelectionInputSchema().parse(action.input);
+
       serviceSubscriptionFacetSelectionOperations.removeFacetSelectionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
       );
+
       break;
+    }
 
     default:
       return state;
