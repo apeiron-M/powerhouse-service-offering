@@ -16,4 +16,3 @@ export * from "./document-type.js";
 export * from "./document-schema.js";
 export * from "./instance-management/operations.js";
 export * from "./configuration-management/operations.js";
-export * from "./usage-tracking/operations.js";

@@ -3,38 +3,112 @@ import type { ResourceInstanceInstanceManagementOperations } from "@powerhouseda
 export const resourceInstanceInstanceManagementOperations: ResourceInstanceInstanceManagementOperations =
   {
     initializeInstanceOperation(state, action) {
-      state.id = action.input.id;
-      state.subscriptionId = action.input.subscriptionId;
-      state.resourceTemplateId = action.input.resourceTemplateId;
-      state.customerId = action.input.customerId;
-      state.name = action.input.name;
-      state.status = "PROVISIONING";
-      state.createdAt = action.input.createdAt;
-      state.lastModified = action.input.lastModified;
+      state.profile = {
+        id: action.input.profileId,
+        documentType: action.input.profileDocumentType,
+      };
+      state.resourceTemplateId = action.input.resourceTemplateId || null;
+      state.customerId = action.input.customerId || null;
+      state.name = action.input.name || null;
+      state.thumbnailUrl = action.input.thumbnailUrl || null;
+      state.infoLink = action.input.infoLink || null;
+      state.description = action.input.description || null;
+      state.status = "DRAFT";
+    },
+    updateInstanceInfoOperation(state, action) {
+      if (action.input.name) state.name = action.input.name;
+      if (action.input.thumbnailUrl)
+        state.thumbnailUrl = action.input.thumbnailUrl;
+      if (action.input.infoLink) state.infoLink = action.input.infoLink;
+      if (action.input.description)
+        state.description = action.input.description;
+    },
+    setResourceProfileOperation(state, action) {
+      state.profile = {
+        id: action.input.profileId,
+        documentType: action.input.profileDocumentType,
+      };
     },
     updateInstanceStatusOperation(state, action) {
       state.status = action.input.status;
-      state.lastModified = action.input.lastModified;
+    },
+    confirmInstanceOperation(state, action) {
+      state.confirmedAt = action.input.confirmedAt;
+    },
+    reportProvisioningStartedOperation(state, action) {
+      state.status = "PROVISIONING";
+      state.provisioningStartedAt = action.input.startedAt;
+    },
+    reportProvisioningCompletedOperation(state, action) {
+      state.provisioningCompletedAt = action.input.completedAt;
+    },
+    reportProvisioningFailedOperation(state, action) {
+      state.provisioningFailureReason = action.input.failureReason;
     },
     activateInstanceOperation(state, action) {
       state.status = "ACTIVE";
       state.activatedAt = action.input.activatedAt;
-      state.lastModified = action.input.lastModified;
+    },
+    suspendForNonPaymentOperation(state, action) {
+      state.status = "SUSPENDED";
+      state.suspendedAt = action.input.suspendedAt;
+      state.suspensionType = "NON_PAYMENT";
+      const details: string[] = [];
+      if (
+        action.input.outstandingAmount !== undefined &&
+        action.input.outstandingAmount !== null
+      ) {
+        details.push(`Outstanding: ${action.input.outstandingAmount}`);
+      }
+      if (
+        action.input.daysPastDue !== undefined &&
+        action.input.daysPastDue !== null
+      ) {
+        details.push(`Days past due: ${action.input.daysPastDue}`);
+      }
+      state.suspensionDetails = details.length > 0 ? details.join(", ") : null;
+      state.suspensionReason = "Non-payment";
+    },
+    suspendForMaintenanceOperation(state, action) {
+      state.status = "SUSPENDED";
+      state.suspendedAt = action.input.suspendedAt;
+      state.suspensionType = "MAINTENANCE";
+      const details: string[] = [];
+      if (action.input.estimatedDuration) {
+        details.push(`Duration: ${action.input.estimatedDuration}`);
+      }
+      if (action.input.maintenanceType) {
+        details.push(`Type: ${action.input.maintenanceType}`);
+      }
+      state.suspensionDetails = details.length > 0 ? details.join(", ") : null;
+      state.suspensionReason = "Maintenance";
+    },
+    resumeAfterPaymentOperation(state, action) {
+      state.status = "ACTIVE";
+      state.resumedAt = action.input.resumedAt;
+      state.suspendedAt = null;
+      state.suspensionType = null;
+      state.suspensionReason = null;
+      state.suspensionDetails = null;
+    },
+    resumeAfterMaintenanceOperation(state, action) {
+      state.status = "ACTIVE";
+      state.resumedAt = action.input.resumedAt;
+      state.suspendedAt = null;
+      state.suspensionType = null;
+      state.suspensionReason = null;
+      state.suspensionDetails = null;
     },
     suspendInstanceOperation(state, action) {
       state.status = "SUSPENDED";
       state.suspendedAt = action.input.suspendedAt;
+      state.suspensionType = "OTHER";
       state.suspensionReason = action.input.reason || null;
-      state.lastModified = action.input.lastModified;
+      state.suspensionDetails = null;
     },
     terminateInstanceOperation(state, action) {
       state.status = "TERMINATED";
       state.terminatedAt = action.input.terminatedAt;
-      state.terminationReason = action.input.reason || null;
-      state.lastModified = action.input.lastModified;
-    },
-    updateInstanceNameOperation(state, action) {
-      state.name = action.input.name;
-      state.lastModified = action.input.lastModified;
+      state.terminationReason = action.input.reason;
     },
   };

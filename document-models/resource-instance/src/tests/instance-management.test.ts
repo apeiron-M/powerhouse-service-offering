@@ -19,8 +19,6 @@ import {
   SuspendInstanceInputSchema,
   terminateInstance,
   TerminateInstanceInputSchema,
-  updateInstanceName,
-  UpdateInstanceNameInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/resource-instance";
 
 describe("InstanceManagement Operations", () => {
@@ -98,22 +96,6 @@ describe("InstanceManagement Operations", () => {
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "TERMINATE_INSTANCE",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
-  it("should handle updateInstanceName operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(UpdateInstanceNameInputSchema());
-
-    const updatedDocument = reducer(document, updateInstanceName(input));
-
-    expect(isResourceInstanceDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "UPDATE_INSTANCE_NAME",
     );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,

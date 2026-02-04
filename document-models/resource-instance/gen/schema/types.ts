@@ -61,122 +61,149 @@ export type Scalars = {
 
 export type ActivateInstanceInput = {
   activatedAt: Scalars["DateTime"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
 };
 
-export type ConfigSource =
-  | "CUSTOMER_INPUT"
-  | "FACET_SELECTION"
-  | "SYSTEM"
-  | "TIER_DEFAULT";
+export type ApplyConfigurationChangesInput = {
+  addFacets?: InputMaybe<Array<SetInstanceFacetInput>>;
+  appliedAt: Scalars["DateTime"]["input"];
+  changeDescription?: InputMaybe<Scalars["String"]["input"]>;
+  removeFacetKeys?: InputMaybe<Array<Scalars["String"]["input"]>>;
+  updateFacets?: InputMaybe<Array<UpdateInstanceFacetInput>>;
+};
+
+export type ConfirmInstanceInput = {
+  confirmedAt: Scalars["DateTime"]["input"];
+};
 
 export type InitializeInstanceInput = {
-  createdAt: Scalars["DateTime"]["input"];
-  customerId: Scalars["PHID"]["input"];
-  id: Scalars["PHID"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
-  name: Scalars["String"]["input"];
-  resourceTemplateId: Scalars["PHID"]["input"];
-  subscriptionId: Scalars["PHID"]["input"];
+  customerId?: InputMaybe<Scalars["PHID"]["input"]>;
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  infoLink?: InputMaybe<Scalars["URL"]["input"]>;
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  profileDocumentType: Scalars["String"]["input"];
+  profileId: Scalars["PHID"]["input"];
+  resourceTemplateId?: InputMaybe<Scalars["PHID"]["input"]>;
+  thumbnailUrl?: InputMaybe<Scalars["URL"]["input"]>;
 };
 
-export type InstanceConfiguration = {
+export type InstanceFacet = {
+  categoryKey: Scalars["String"]["output"];
+  categoryLabel: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
-  key: Scalars["String"]["output"];
-  source: ConfigSource;
-  value: Scalars["String"]["output"];
+  selectedOption: Scalars["String"]["output"];
 };
 
 export type InstanceStatus =
   | "ACTIVE"
-  | "ERROR"
+  | "DRAFT"
   | "PROVISIONING"
   | "SUSPENDED"
   | "TERMINATED";
 
-export type RecordUsageInput = {
-  id: Scalars["OID"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
-  limit?: InputMaybe<Scalars["Int"]["input"]>;
-  metricKey: Scalars["String"]["input"];
-  recordedAt: Scalars["DateTime"]["input"];
-  resetPeriod?: InputMaybe<ResetPeriod>;
-  value: Scalars["Int"]["input"];
+export type RemoveInstanceFacetInput = {
+  categoryKey: Scalars["String"]["input"];
 };
 
-export type RemoveConfigurationInput = {
-  key: Scalars["String"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
+export type ReportProvisioningCompletedInput = {
+  completedAt: Scalars["DateTime"]["input"];
 };
 
-export type ResetPeriod =
-  | "ANNUAL"
-  | "DAILY"
-  | "HOURLY"
-  | "MONTHLY"
-  | "QUARTERLY"
-  | "SEMI_ANNUAL"
-  | "WEEKLY";
+export type ReportProvisioningFailedInput = {
+  failedAt: Scalars["DateTime"]["input"];
+  failureReason: Scalars["String"]["input"];
+};
 
-export type ResetUsageInput = {
-  lastModified: Scalars["DateTime"]["input"];
-  metricKey: Scalars["String"]["input"];
-  resetAt: Scalars["DateTime"]["input"];
+export type ReportProvisioningStartedInput = {
+  startedAt: Scalars["DateTime"]["input"];
 };
 
 export type ResourceInstanceState = {
   activatedAt: Maybe<Scalars["DateTime"]["output"]>;
-  configuration: Array<InstanceConfiguration>;
-  createdAt: Scalars["DateTime"]["output"];
-  customerId: Scalars["PHID"]["output"];
-  id: Scalars["PHID"]["output"];
-  lastModified: Scalars["DateTime"]["output"];
-  name: Scalars["String"]["output"];
-  resourceTemplateId: Scalars["PHID"]["output"];
+  configuration: Array<InstanceFacet>;
+  confirmedAt: Maybe<Scalars["DateTime"]["output"]>;
+  customerId: Maybe<Scalars["PHID"]["output"]>;
+  description: Maybe<Scalars["String"]["output"]>;
+  infoLink: Maybe<Scalars["URL"]["output"]>;
+  name: Maybe<Scalars["String"]["output"]>;
+  profile: Maybe<ResourceProfile>;
+  provisioningCompletedAt: Maybe<Scalars["DateTime"]["output"]>;
+  provisioningFailureReason: Maybe<Scalars["String"]["output"]>;
+  provisioningStartedAt: Maybe<Scalars["DateTime"]["output"]>;
+  resourceTemplateId: Maybe<Scalars["PHID"]["output"]>;
+  resumedAt: Maybe<Scalars["DateTime"]["output"]>;
   status: InstanceStatus;
-  subscriptionId: Scalars["PHID"]["output"];
   suspendedAt: Maybe<Scalars["DateTime"]["output"]>;
+  suspensionDetails: Maybe<Scalars["String"]["output"]>;
   suspensionReason: Maybe<Scalars["String"]["output"]>;
+  suspensionType: Maybe<SuspensionType>;
   terminatedAt: Maybe<Scalars["DateTime"]["output"]>;
   terminationReason: Maybe<Scalars["String"]["output"]>;
-  usageMetrics: Array<UsageMetric>;
+  thumbnailUrl: Maybe<Scalars["URL"]["output"]>;
 };
 
-export type SetConfigurationInput = {
+export type ResourceProfile = {
+  documentType: Scalars["String"]["output"];
+  id: Scalars["PHID"]["output"];
+};
+
+export type ResumeAfterMaintenanceInput = {
+  resumedAt: Scalars["DateTime"]["input"];
+};
+
+export type ResumeAfterPaymentInput = {
+  paymentReference?: InputMaybe<Scalars["String"]["input"]>;
+  resumedAt: Scalars["DateTime"]["input"];
+};
+
+export type SetInstanceFacetInput = {
+  categoryKey: Scalars["String"]["input"];
+  categoryLabel: Scalars["String"]["input"];
   id: Scalars["OID"]["input"];
-  key: Scalars["String"]["input"];
-  lastModified: Scalars["DateTime"]["input"];
-  source: ConfigSource;
-  value: Scalars["String"]["input"];
+  selectedOption: Scalars["String"]["input"];
+};
+
+export type SetResourceProfileInput = {
+  profileDocumentType: Scalars["String"]["input"];
+  profileId: Scalars["PHID"]["input"];
+};
+
+export type SuspendForMaintenanceInput = {
+  estimatedDuration?: InputMaybe<Scalars["String"]["input"]>;
+  maintenanceType?: InputMaybe<Scalars["String"]["input"]>;
+  suspendedAt: Scalars["DateTime"]["input"];
+};
+
+export type SuspendForNonPaymentInput = {
+  daysPastDue?: InputMaybe<Scalars["Int"]["input"]>;
+  outstandingAmount?: InputMaybe<Scalars["Amount_Money"]["input"]>;
+  suspendedAt: Scalars["DateTime"]["input"];
 };
 
 export type SuspendInstanceInput = {
-  lastModified: Scalars["DateTime"]["input"];
   reason?: InputMaybe<Scalars["String"]["input"]>;
   suspendedAt: Scalars["DateTime"]["input"];
 };
 
+export type SuspensionType = "MAINTENANCE" | "NON_PAYMENT" | "OTHER";
+
 export type TerminateInstanceInput = {
-  lastModified: Scalars["DateTime"]["input"];
-  reason?: InputMaybe<Scalars["String"]["input"]>;
+  reason: Scalars["String"]["input"];
   terminatedAt: Scalars["DateTime"]["input"];
 };
 
-export type UpdateInstanceNameInput = {
-  lastModified: Scalars["DateTime"]["input"];
-  name: Scalars["String"]["input"];
+export type UpdateInstanceFacetInput = {
+  categoryKey: Scalars["String"]["input"];
+  categoryLabel?: InputMaybe<Scalars["String"]["input"]>;
+  selectedOption?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type UpdateInstanceInfoInput = {
+  description?: InputMaybe<Scalars["String"]["input"]>;
+  infoLink?: InputMaybe<Scalars["URL"]["input"]>;
+  name?: InputMaybe<Scalars["String"]["input"]>;
+  thumbnailUrl?: InputMaybe<Scalars["URL"]["input"]>;
 };
 
 export type UpdateInstanceStatusInput = {
-  lastModified: Scalars["DateTime"]["input"];
   status: InstanceStatus;
-};
-
-export type UsageMetric = {
-  currentValue: Scalars["Int"]["output"];
-  id: Scalars["OID"]["output"];
-  lastUpdated: Scalars["DateTime"]["output"];
-  limit: Maybe<Scalars["Int"]["output"]>;
-  metricKey: Scalars["String"]["output"];
-  resetPeriod: Maybe<ResetPeriod>;
 };

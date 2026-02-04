@@ -1,19 +1,31 @@
 import { type SignalDispatch } from "document-model";
 import type {
-  SetConfigurationAction,
-  RemoveConfigurationAction,
+  SetInstanceFacetAction,
+  RemoveInstanceFacetAction,
+  UpdateInstanceFacetAction,
+  ApplyConfigurationChangesAction,
 } from "./actions.js";
 import type { ResourceInstanceState } from "../types.js";
 
 export interface ResourceInstanceConfigurationManagementOperations {
-  setConfigurationOperation: (
+  setInstanceFacetOperation: (
     state: ResourceInstanceState,
-    action: SetConfigurationAction,
+    action: SetInstanceFacetAction,
     dispatch?: SignalDispatch,
   ) => void;
-  removeConfigurationOperation: (
+  removeInstanceFacetOperation: (
     state: ResourceInstanceState,
-    action: RemoveConfigurationAction,
+    action: RemoveInstanceFacetAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  updateInstanceFacetOperation: (
+    state: ResourceInstanceState,
+    action: UpdateInstanceFacetAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  applyConfigurationChangesOperation: (
+    state: ResourceInstanceState,
+    action: ApplyConfigurationChangesAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

@@ -7,19 +7,27 @@ import type { ResourceInstancePHState } from "@powerhousedao/contributor-billing
 
 import { resourceInstanceInstanceManagementOperations } from "../src/reducers/instance-management.js";
 import { resourceInstanceConfigurationManagementOperations } from "../src/reducers/configuration-management.js";
-import { resourceInstanceUsageTrackingOperations } from "../src/reducers/usage-tracking.js";
 
 import {
   InitializeInstanceInputSchema,
+  UpdateInstanceInfoInputSchema,
+  SetResourceProfileInputSchema,
   UpdateInstanceStatusInputSchema,
+  ConfirmInstanceInputSchema,
+  ReportProvisioningStartedInputSchema,
+  ReportProvisioningCompletedInputSchema,
+  ReportProvisioningFailedInputSchema,
   ActivateInstanceInputSchema,
+  SuspendForNonPaymentInputSchema,
+  SuspendForMaintenanceInputSchema,
+  ResumeAfterPaymentInputSchema,
+  ResumeAfterMaintenanceInputSchema,
   SuspendInstanceInputSchema,
   TerminateInstanceInputSchema,
-  UpdateInstanceNameInputSchema,
-  SetConfigurationInputSchema,
-  RemoveConfigurationInputSchema,
-  RecordUsageInputSchema,
-  ResetUsageInputSchema,
+  SetInstanceFacetInputSchema,
+  RemoveInstanceFacetInputSchema,
+  UpdateInstanceFacetInputSchema,
+  ApplyConfigurationChangesInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ResourceInstancePHState> = (
@@ -43,6 +51,30 @@ const stateReducer: StateReducer<ResourceInstancePHState> = (
       break;
     }
 
+    case "UPDATE_INSTANCE_INFO": {
+      UpdateInstanceInfoInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.updateInstanceInfoOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "SET_RESOURCE_PROFILE": {
+      SetResourceProfileInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.setResourceProfileOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
     case "UPDATE_INSTANCE_STATUS": {
       UpdateInstanceStatusInputSchema().parse(action.input);
 
@@ -55,10 +87,106 @@ const stateReducer: StateReducer<ResourceInstancePHState> = (
       break;
     }
 
+    case "CONFIRM_INSTANCE": {
+      ConfirmInstanceInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.confirmInstanceOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REPORT_PROVISIONING_STARTED": {
+      ReportProvisioningStartedInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.reportProvisioningStartedOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REPORT_PROVISIONING_COMPLETED": {
+      ReportProvisioningCompletedInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.reportProvisioningCompletedOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REPORT_PROVISIONING_FAILED": {
+      ReportProvisioningFailedInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.reportProvisioningFailedOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
     case "ACTIVATE_INSTANCE": {
       ActivateInstanceInputSchema().parse(action.input);
 
       resourceInstanceInstanceManagementOperations.activateInstanceOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "SUSPEND_FOR_NON_PAYMENT": {
+      SuspendForNonPaymentInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.suspendForNonPaymentOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "SUSPEND_FOR_MAINTENANCE": {
+      SuspendForMaintenanceInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.suspendForMaintenanceOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "RESUME_AFTER_PAYMENT": {
+      ResumeAfterPaymentInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.resumeAfterPaymentOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "RESUME_AFTER_MAINTENANCE": {
+      ResumeAfterMaintenanceInputSchema().parse(action.input);
+
+      resourceInstanceInstanceManagementOperations.resumeAfterMaintenanceOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -91,10 +219,10 @@ const stateReducer: StateReducer<ResourceInstancePHState> = (
       break;
     }
 
-    case "UPDATE_INSTANCE_NAME": {
-      UpdateInstanceNameInputSchema().parse(action.input);
+    case "SET_INSTANCE_FACET": {
+      SetInstanceFacetInputSchema().parse(action.input);
 
-      resourceInstanceInstanceManagementOperations.updateInstanceNameOperation(
+      resourceInstanceConfigurationManagementOperations.setInstanceFacetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -103,10 +231,10 @@ const stateReducer: StateReducer<ResourceInstancePHState> = (
       break;
     }
 
-    case "SET_CONFIGURATION": {
-      SetConfigurationInputSchema().parse(action.input);
+    case "REMOVE_INSTANCE_FACET": {
+      RemoveInstanceFacetInputSchema().parse(action.input);
 
-      resourceInstanceConfigurationManagementOperations.setConfigurationOperation(
+      resourceInstanceConfigurationManagementOperations.removeInstanceFacetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -115,10 +243,10 @@ const stateReducer: StateReducer<ResourceInstancePHState> = (
       break;
     }
 
-    case "REMOVE_CONFIGURATION": {
-      RemoveConfigurationInputSchema().parse(action.input);
+    case "UPDATE_INSTANCE_FACET": {
+      UpdateInstanceFacetInputSchema().parse(action.input);
 
-      resourceInstanceConfigurationManagementOperations.removeConfigurationOperation(
+      resourceInstanceConfigurationManagementOperations.updateInstanceFacetOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -127,22 +255,10 @@ const stateReducer: StateReducer<ResourceInstancePHState> = (
       break;
     }
 
-    case "RECORD_USAGE": {
-      RecordUsageInputSchema().parse(action.input);
+    case "APPLY_CONFIGURATION_CHANGES": {
+      ApplyConfigurationChangesInputSchema().parse(action.input);
 
-      resourceInstanceUsageTrackingOperations.recordUsageOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "RESET_USAGE": {
-      ResetUsageInputSchema().parse(action.input);
-
-      resourceInstanceUsageTrackingOperations.resetUsageOperation(
+      resourceInstanceConfigurationManagementOperations.applyConfigurationChangesOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

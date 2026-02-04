@@ -20,132 +20,159 @@ scalar Amount
 scalar Upload
 
 type ResourceInstanceState {
-    id: PHID!
-    subscriptionId: PHID!
-    resourceTemplateId: PHID!
-    customerId: PHID!
-    name: String!
+    resourceTemplateId: PHID
+    customerId: PHID
+    name: String
+    thumbnailUrl: URL
+    infoLink: URL
+    description: String
+    profile: ResourceProfile
     status: InstanceStatus!
-    configuration: [InstanceConfiguration!]!
-    usageMetrics: [UsageMetric!]!
+    configuration: [InstanceFacet!]!
+    confirmedAt: DateTime
+    provisioningStartedAt: DateTime
+    provisioningCompletedAt: DateTime
+    provisioningFailureReason: String
     activatedAt: DateTime
     suspendedAt: DateTime
+    suspensionType: SuspensionType
     suspensionReason: String
+    suspensionDetails: String
+    resumedAt: DateTime
     terminatedAt: DateTime
     terminationReason: String
-    createdAt: DateTime!
-    lastModified: DateTime!
+}
+
+type ResourceProfile {
+    id: PHID!
+    documentType: String!
 }
 
 enum InstanceStatus {
+    DRAFT
     PROVISIONING
     ACTIVE
     SUSPENDED
     TERMINATED
-    ERROR
 }
 
-type InstanceConfiguration {
+enum SuspensionType {
+    NON_PAYMENT
+    MAINTENANCE
+    OTHER
+}
+
+type InstanceFacet {
     id: OID!
-    key: String!
-    value: String!
-    source: ConfigSource!
-}
-
-enum ConfigSource {
-    FACET_SELECTION
-    TIER_DEFAULT
-    CUSTOMER_INPUT
-    SYSTEM
-}
-
-type UsageMetric {
-    id: OID!
-    metricKey: String!
-    currentValue: Int!
-    limit: Int
-    resetPeriod: ResetPeriod
-    lastUpdated: DateTime!
-}
-
-enum ResetPeriod {
-    HOURLY
-    DAILY
-    WEEKLY
-    MONTHLY
-    QUARTERLY
-    SEMI_ANNUAL
-    ANNUAL
+    categoryKey: String!
+    categoryLabel: String!
+    selectedOption: String!
 }
 
 # Instance Management
 
 input InitializeInstanceInput {
-    id: PHID!
-    subscriptionId: PHID!
-    resourceTemplateId: PHID!
-    customerId: PHID!
-    name: String!
-    createdAt: DateTime!
-    lastModified: DateTime!
+    profileId: PHID!
+    profileDocumentType: String!
+    resourceTemplateId: PHID
+    customerId: PHID
+    name: String
+    thumbnailUrl: URL
+    infoLink: URL
+    description: String
+}
+
+input UpdateInstanceInfoInput {
+    name: String
+    thumbnailUrl: URL
+    infoLink: URL
+    description: String
+}
+
+input SetResourceProfileInput {
+    profileId: PHID!
+    profileDocumentType: String!
 }
 
 input UpdateInstanceStatusInput {
     status: InstanceStatus!
-    lastModified: DateTime!
+}
+
+input ConfirmInstanceInput {
+    confirmedAt: DateTime!
+}
+
+input ReportProvisioningStartedInput {
+    startedAt: DateTime!
+}
+
+input ReportProvisioningCompletedInput {
+    completedAt: DateTime!
+}
+
+input ReportProvisioningFailedInput {
+    failedAt: DateTime!
+    failureReason: String!
 }
 
 input ActivateInstanceInput {
     activatedAt: DateTime!
-    lastModified: DateTime!
+}
+
+input SuspendForNonPaymentInput {
+    suspendedAt: DateTime!
+    outstandingAmount: Amount_Money
+    daysPastDue: Int
+}
+
+input SuspendForMaintenanceInput {
+    suspendedAt: DateTime!
+    estimatedDuration: String
+    maintenanceType: String
+}
+
+input ResumeAfterPaymentInput {
+    resumedAt: DateTime!
+    paymentReference: String
+}
+
+input ResumeAfterMaintenanceInput {
+    resumedAt: DateTime!
 }
 
 input SuspendInstanceInput {
     suspendedAt: DateTime!
     reason: String
-    lastModified: DateTime!
 }
 
 input TerminateInstanceInput {
     terminatedAt: DateTime!
-    reason: String
-    lastModified: DateTime!
-}
-
-input UpdateInstanceNameInput {
-    name: String!
-    lastModified: DateTime!
+    reason: String!
 }
 
 # Configuration Management
 
-input SetConfigurationInput {
+input SetInstanceFacetInput {
     id: OID!
-    key: String!
-    value: String!
-    source: ConfigSource!
-    lastModified: DateTime!
+    categoryKey: String!
+    categoryLabel: String!
+    selectedOption: String!
 }
 
-input RemoveConfigurationInput {
-    key: String!
-    lastModified: DateTime!
+input RemoveInstanceFacetInput {
+    categoryKey: String!
 }
 
-# Usage Tracking
-
-input RecordUsageInput {
-    id: OID!
-    metricKey: String!
-    value: Int!
-    limit: Int
-    resetPeriod: ResetPeriod
-    recordedAt: DateTime!
-    lastModified: DateTime!
+input UpdateInstanceFacetInput {
+    categoryKey: String!
+    selectedOption: String
+    categoryLabel: String
 }
 
-input ResetUsageInput {
-    metricKey: String!
-    resetAt: DateTime!
-    lastModified: DateTime!
+input ApplyConfigurationChangesInput {
+    appliedAt: DateTime!
+    changeDescription: String
+    addFacets: [SetInstanceFacetInput!]
+    updateFacets: [UpdateInstanceFacetInput!]
+    removeFacetKeys: [String!]
 }

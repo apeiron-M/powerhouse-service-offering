@@ -1,18 +1,29 @@
 import * as z from "zod";
 import type {
   ActivateInstanceInput,
+  ApplyConfigurationChangesInput,
+  ConfirmInstanceInput,
   InitializeInstanceInput,
-  InstanceConfiguration,
-  RecordUsageInput,
-  RemoveConfigurationInput,
-  ResetUsageInput,
+  InstanceFacet,
+  InstanceStatus,
+  RemoveInstanceFacetInput,
+  ReportProvisioningCompletedInput,
+  ReportProvisioningFailedInput,
+  ReportProvisioningStartedInput,
   ResourceInstanceState,
-  SetConfigurationInput,
+  ResourceProfile,
+  ResumeAfterMaintenanceInput,
+  ResumeAfterPaymentInput,
+  SetInstanceFacetInput,
+  SetResourceProfileInput,
+  SuspendForMaintenanceInput,
+  SuspendForNonPaymentInput,
   SuspendInstanceInput,
+  SuspensionType,
   TerminateInstanceInput,
-  UpdateInstanceNameInput,
+  UpdateInstanceFacetInput,
+  UpdateInstanceInfoInput,
   UpdateInstanceStatusInput,
-  UsageMetric,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -28,29 +39,18 @@ export const definedNonNullAnySchema = z
   .any()
   .refine((v) => isDefinedNonNullAny(v));
 
-export const ConfigSourceSchema = z.enum([
-  "CUSTOMER_INPUT",
-  "FACET_SELECTION",
-  "SYSTEM",
-  "TIER_DEFAULT",
-]);
-
 export const InstanceStatusSchema = z.enum([
   "ACTIVE",
-  "ERROR",
+  "DRAFT",
   "PROVISIONING",
   "SUSPENDED",
   "TERMINATED",
 ]);
 
-export const ResetPeriodSchema = z.enum([
-  "ANNUAL",
-  "DAILY",
-  "HOURLY",
-  "MONTHLY",
-  "QUARTERLY",
-  "SEMI_ANNUAL",
-  "WEEKLY",
+export const SuspensionTypeSchema = z.enum([
+  "MAINTENANCE",
+  "NON_PAYMENT",
+  "OTHER",
 ]);
 
 export function ActivateInstanceInputSchema(): z.ZodObject<
@@ -58,7 +58,28 @@ export function ActivateInstanceInputSchema(): z.ZodObject<
 > {
   return z.object({
     activatedAt: z.string().datetime(),
-    lastModified: z.string().datetime(),
+  });
+}
+
+export function ApplyConfigurationChangesInputSchema(): z.ZodObject<
+  Properties<ApplyConfigurationChangesInput>
+> {
+  return z.object({
+    addFacets: z.array(z.lazy(() => SetInstanceFacetInputSchema())).nullish(),
+    appliedAt: z.string().datetime(),
+    changeDescription: z.string().nullish(),
+    removeFacetKeys: z.array(z.string()).nullish(),
+    updateFacets: z
+      .array(z.lazy(() => UpdateInstanceFacetInputSchema()))
+      .nullish(),
+  });
+}
+
+export function ConfirmInstanceInputSchema(): z.ZodObject<
+  Properties<ConfirmInstanceInput>
+> {
+  return z.object({
+    confirmedAt: z.string().datetime(),
   });
 }
 
@@ -66,58 +87,57 @@ export function InitializeInstanceInputSchema(): z.ZodObject<
   Properties<InitializeInstanceInput>
 > {
   return z.object({
-    createdAt: z.string().datetime(),
-    customerId: z.string(),
+    customerId: z.string().nullish(),
+    description: z.string().nullish(),
+    infoLink: z.string().url().nullish(),
+    name: z.string().nullish(),
+    profileDocumentType: z.string(),
+    profileId: z.string(),
+    resourceTemplateId: z.string().nullish(),
+    thumbnailUrl: z.string().url().nullish(),
+  });
+}
+
+export function InstanceFacetSchema(): z.ZodObject<Properties<InstanceFacet>> {
+  return z.object({
+    __typename: z.literal("InstanceFacet").optional(),
+    categoryKey: z.string(),
+    categoryLabel: z.string(),
     id: z.string(),
-    lastModified: z.string().datetime(),
-    name: z.string(),
-    resourceTemplateId: z.string(),
-    subscriptionId: z.string(),
+    selectedOption: z.string(),
   });
 }
 
-export function InstanceConfigurationSchema(): z.ZodObject<
-  Properties<InstanceConfiguration>
+export function RemoveInstanceFacetInputSchema(): z.ZodObject<
+  Properties<RemoveInstanceFacetInput>
 > {
   return z.object({
-    __typename: z.literal("InstanceConfiguration").optional(),
-    id: z.string(),
-    key: z.string(),
-    source: ConfigSourceSchema,
-    value: z.string(),
+    categoryKey: z.string(),
   });
 }
 
-export function RecordUsageInputSchema(): z.ZodObject<
-  Properties<RecordUsageInput>
+export function ReportProvisioningCompletedInputSchema(): z.ZodObject<
+  Properties<ReportProvisioningCompletedInput>
 > {
   return z.object({
-    id: z.string(),
-    lastModified: z.string().datetime(),
-    limit: z.number().nullish(),
-    metricKey: z.string(),
-    recordedAt: z.string().datetime(),
-    resetPeriod: ResetPeriodSchema.nullish(),
-    value: z.number(),
+    completedAt: z.string().datetime(),
   });
 }
 
-export function RemoveConfigurationInputSchema(): z.ZodObject<
-  Properties<RemoveConfigurationInput>
+export function ReportProvisioningFailedInputSchema(): z.ZodObject<
+  Properties<ReportProvisioningFailedInput>
 > {
   return z.object({
-    key: z.string(),
-    lastModified: z.string().datetime(),
+    failedAt: z.string().datetime(),
+    failureReason: z.string(),
   });
 }
 
-export function ResetUsageInputSchema(): z.ZodObject<
-  Properties<ResetUsageInput>
+export function ReportProvisioningStartedInputSchema(): z.ZodObject<
+  Properties<ReportProvisioningStartedInput>
 > {
   return z.object({
-    lastModified: z.string().datetime(),
-    metricKey: z.string(),
-    resetAt: z.string().datetime(),
+    startedAt: z.string().datetime(),
   });
 }
 
@@ -127,32 +147,93 @@ export function ResourceInstanceStateSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("ResourceInstanceState").optional(),
     activatedAt: z.string().datetime().nullish(),
-    configuration: z.array(z.lazy(() => InstanceConfigurationSchema())),
-    createdAt: z.string().datetime(),
-    customerId: z.string(),
-    id: z.string(),
-    lastModified: z.string().datetime(),
-    name: z.string(),
-    resourceTemplateId: z.string(),
+    configuration: z.array(z.lazy(() => InstanceFacetSchema())),
+    confirmedAt: z.string().datetime().nullish(),
+    customerId: z.string().nullish(),
+    description: z.string().nullish(),
+    infoLink: z.string().url().nullish(),
+    name: z.string().nullish(),
+    profile: z.lazy(() => ResourceProfileSchema().nullish()),
+    provisioningCompletedAt: z.string().datetime().nullish(),
+    provisioningFailureReason: z.string().nullish(),
+    provisioningStartedAt: z.string().datetime().nullish(),
+    resourceTemplateId: z.string().nullish(),
+    resumedAt: z.string().datetime().nullish(),
     status: InstanceStatusSchema,
-    subscriptionId: z.string(),
     suspendedAt: z.string().datetime().nullish(),
+    suspensionDetails: z.string().nullish(),
     suspensionReason: z.string().nullish(),
+    suspensionType: SuspensionTypeSchema.nullish(),
     terminatedAt: z.string().datetime().nullish(),
     terminationReason: z.string().nullish(),
-    usageMetrics: z.array(z.lazy(() => UsageMetricSchema())),
+    thumbnailUrl: z.string().url().nullish(),
   });
 }
 
-export function SetConfigurationInputSchema(): z.ZodObject<
-  Properties<SetConfigurationInput>
+export function ResourceProfileSchema(): z.ZodObject<
+  Properties<ResourceProfile>
 > {
   return z.object({
+    __typename: z.literal("ResourceProfile").optional(),
+    documentType: z.string(),
     id: z.string(),
-    key: z.string(),
-    lastModified: z.string().datetime(),
-    source: ConfigSourceSchema,
-    value: z.string(),
+  });
+}
+
+export function ResumeAfterMaintenanceInputSchema(): z.ZodObject<
+  Properties<ResumeAfterMaintenanceInput>
+> {
+  return z.object({
+    resumedAt: z.string().datetime(),
+  });
+}
+
+export function ResumeAfterPaymentInputSchema(): z.ZodObject<
+  Properties<ResumeAfterPaymentInput>
+> {
+  return z.object({
+    paymentReference: z.string().nullish(),
+    resumedAt: z.string().datetime(),
+  });
+}
+
+export function SetInstanceFacetInputSchema(): z.ZodObject<
+  Properties<SetInstanceFacetInput>
+> {
+  return z.object({
+    categoryKey: z.string(),
+    categoryLabel: z.string(),
+    id: z.string(),
+    selectedOption: z.string(),
+  });
+}
+
+export function SetResourceProfileInputSchema(): z.ZodObject<
+  Properties<SetResourceProfileInput>
+> {
+  return z.object({
+    profileDocumentType: z.string(),
+    profileId: z.string(),
+  });
+}
+
+export function SuspendForMaintenanceInputSchema(): z.ZodObject<
+  Properties<SuspendForMaintenanceInput>
+> {
+  return z.object({
+    estimatedDuration: z.string().nullish(),
+    maintenanceType: z.string().nullish(),
+    suspendedAt: z.string().datetime(),
+  });
+}
+
+export function SuspendForNonPaymentInputSchema(): z.ZodObject<
+  Properties<SuspendForNonPaymentInput>
+> {
+  return z.object({
+    daysPastDue: z.number().nullish(),
+    outstandingAmount: z.number().nullish(),
+    suspendedAt: z.string().datetime(),
   });
 }
 
@@ -160,7 +241,6 @@ export function SuspendInstanceInputSchema(): z.ZodObject<
   Properties<SuspendInstanceInput>
 > {
   return z.object({
-    lastModified: z.string().datetime(),
     reason: z.string().nullish(),
     suspendedAt: z.string().datetime(),
   });
@@ -170,18 +250,29 @@ export function TerminateInstanceInputSchema(): z.ZodObject<
   Properties<TerminateInstanceInput>
 > {
   return z.object({
-    lastModified: z.string().datetime(),
-    reason: z.string().nullish(),
+    reason: z.string(),
     terminatedAt: z.string().datetime(),
   });
 }
 
-export function UpdateInstanceNameInputSchema(): z.ZodObject<
-  Properties<UpdateInstanceNameInput>
+export function UpdateInstanceFacetInputSchema(): z.ZodObject<
+  Properties<UpdateInstanceFacetInput>
 > {
   return z.object({
-    lastModified: z.string().datetime(),
-    name: z.string(),
+    categoryKey: z.string(),
+    categoryLabel: z.string().nullish(),
+    selectedOption: z.string().nullish(),
+  });
+}
+
+export function UpdateInstanceInfoInputSchema(): z.ZodObject<
+  Properties<UpdateInstanceInfoInput>
+> {
+  return z.object({
+    description: z.string().nullish(),
+    infoLink: z.string().url().nullish(),
+    name: z.string().nullish(),
+    thumbnailUrl: z.string().url().nullish(),
   });
 }
 
@@ -189,19 +280,6 @@ export function UpdateInstanceStatusInputSchema(): z.ZodObject<
   Properties<UpdateInstanceStatusInput>
 > {
   return z.object({
-    lastModified: z.string().datetime(),
     status: InstanceStatusSchema,
-  });
-}
-
-export function UsageMetricSchema(): z.ZodObject<Properties<UsageMetric>> {
-  return z.object({
-    __typename: z.literal("UsageMetric").optional(),
-    currentValue: z.number(),
-    id: z.string(),
-    lastUpdated: z.string().datetime(),
-    limit: z.number().nullish(),
-    metricKey: z.string(),
-    resetPeriod: ResetPeriodSchema.nullish(),
   });
 }

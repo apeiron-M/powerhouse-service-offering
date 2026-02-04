@@ -26,6 +26,10 @@
         {
             "id": "powerhouse/resource-template",
             "name": "ResourceTemplate"
+        },
+        {
+            "id": "powerhouse/subscription-instance",
+            "name": "Subscription Instance"
         }
     ],
     "editors": [],
