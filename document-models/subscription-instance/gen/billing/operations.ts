@@ -10,7 +10,6 @@ import type {
   CancelInvoiceAction,
   MarkInvoiceOverdueAction,
   RefundInvoiceAction,
-  SetInvoicePaymentUrlAction,
 } from "./actions.js";
 import type { SubscriptionInstanceState } from "../types.js";
 
@@ -63,11 +62,6 @@ export interface SubscriptionInstanceBillingOperations {
   refundInvoiceOperation: (
     state: SubscriptionInstanceState,
     action: RefundInvoiceAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  setInvoicePaymentUrlOperation: (
-    state: SubscriptionInstanceState,
-    action: SetInvoicePaymentUrlAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

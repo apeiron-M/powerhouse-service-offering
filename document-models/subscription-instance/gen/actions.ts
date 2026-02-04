@@ -4,7 +4,6 @@ import type { SubscriptionInstanceServiceGroupAction } from "./service-group/act
 import type { SubscriptionInstanceMetricsAction } from "./metrics/actions.js";
 import type { SubscriptionInstanceBillingAction } from "./billing/actions.js";
 import type { SubscriptionInstanceCustomerAction } from "./customer/actions.js";
-import type { SubscriptionInstanceRequestsAction } from "./requests/actions.js";
 
 export * from "./subscription/actions.js";
 export * from "./service/actions.js";
@@ -12,7 +11,6 @@ export * from "./service-group/actions.js";
 export * from "./metrics/actions.js";
 export * from "./billing/actions.js";
 export * from "./customer/actions.js";
-export * from "./requests/actions.js";
 
 export type SubscriptionInstanceAction =
   | SubscriptionInstanceSubscriptionAction
@@ -20,5 +18,4 @@ export type SubscriptionInstanceAction =
   | SubscriptionInstanceServiceGroupAction
   | SubscriptionInstanceMetricsAction
   | SubscriptionInstanceBillingAction
-  | SubscriptionInstanceCustomerAction
-  | SubscriptionInstanceRequestsAction;
+  | SubscriptionInstanceCustomerAction;

@@ -24,9 +24,9 @@ import {
   CancelInvoiceInputSchema,
   MarkInvoiceOverdueInputSchema,
   RefundInvoiceInputSchema,
-  setInvoicePaymentUrl,
-  SetInvoicePaymentUrlInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/subscription-instance";
+
+// Note: setInvoicePaymentUrl has been removed from the document model
 
 describe("BillingOperations", () => {
   it("should handle createInvoice operation", () => {
@@ -199,20 +199,5 @@ describe("BillingOperations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 
-  it("should handle setInvoicePaymentUrl operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(SetInvoicePaymentUrlInputSchema());
-
-    const updatedDocument = reducer(document, setInvoicePaymentUrl(input));
-
-    expect(isSubscriptionInstanceDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_INVOICE_PAYMENT_URL",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
+  // Note: setInvoicePaymentUrl test removed - operation no longer exists
 });

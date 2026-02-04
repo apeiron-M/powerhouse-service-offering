@@ -20,7 +20,6 @@ export const subscriptionInstanceBillingOperations: SubscriptionInstanceBillingO
         lineItems: [],
         payments: [],
         notes: input.notes || null,
-        paymentUrl: null,
       });
     },
 
@@ -155,11 +154,5 @@ export const subscriptionInstanceBillingOperations: SubscriptionInstanceBillingO
         }
       }
     },
-    setInvoicePaymentUrlOperation(state, action) {
-      const { input } = action;
-      const invoice = state.invoices.find((i) => i.id === input.invoiceId);
-      if (invoice) {
-        invoice.paymentUrl = input.paymentUrl || null;
-      }
-    },
+    // Note: setInvoicePaymentUrlOperation has been removed from the document model
   };

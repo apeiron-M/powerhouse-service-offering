@@ -7,15 +7,12 @@ import type {
   AddServiceInput,
   AddServiceMetricInput,
   AddServiceToGroupInput,
-  ApproveRequestInput,
   BillingCycle,
   BudgetCategory,
   CancelInvoiceInput,
   CancelSubscriptionInput,
-  ClientRequest,
   CommunicationChannel,
   CommunicationChannelType,
-  CreateClientRequestInput,
   CreateInvoiceInput,
   CustomerType,
   DecrementMetricUsageInput,
@@ -32,7 +29,6 @@ import type {
   RecordInvoicePaymentInput,
   RecurringCost,
   RefundInvoiceInput,
-  RejectRequestInput,
   RemoveBudgetCategoryInput,
   RemoveCommunicationChannelInput,
   RemoveInvoiceLineItemInput,
@@ -43,8 +39,6 @@ import type {
   RenewExpiringSubscriptionInput,
   ReportRecurringPaymentInput,
   ReportSetupPaymentInput,
-  RequestStatus,
-  RequestType,
   ResetPeriod,
   ResourceDocument,
   ResumeSubscriptionInput,
@@ -56,9 +50,7 @@ import type {
   SetBudgetCategoryInput,
   SetCustomerTypeInput,
   SetExpiringInput,
-  SetInvoicePaymentUrlInput,
   SetInvoiceTaxInput,
-  SetOperatorInfoInput,
   SetOperatorNotesInput,
   SetPrimaryCommunicationChannelInput,
   SetRenewalDateInput,
@@ -79,7 +71,6 @@ import type {
   UpdateTeamMemberCountInput,
   UpdateTierInfoInput,
   VerifyCommunicationChannelInput,
-  WithdrawRequestInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -137,24 +128,6 @@ export const PaymentMethodSchema = z.enum([
   "CRYPTO",
   "OTHER",
   "PAYPAL",
-]);
-
-export const RequestStatusSchema = z.enum([
-  "APPROVED",
-  "PENDING",
-  "REJECTED",
-  "WITHDRAWN",
-]);
-
-export const RequestTypeSchema = z.enum([
-  "ADD_SERVICE",
-  "CANCEL_SUBSCRIPTION",
-  "CHANGE_TIER",
-  "INCREASE_METRIC_LIMIT",
-  "PAUSE_SUBSCRIPTION",
-  "REMOVE_SERVICE",
-  "RESUME_SUBSCRIPTION",
-  "UPDATE_TEAM_SIZE",
 ]);
 
 export const ResetPeriodSchema = z.enum([
@@ -278,17 +251,6 @@ export function AddServiceToGroupInputSchema(): z.ZodObject<
   });
 }
 
-export function ApproveRequestInputSchema(): z.ZodObject<
-  Properties<ApproveRequestInput>
-> {
-  return z.object({
-    operatorResponse: z.string().nullish(),
-    processedAt: z.string().datetime(),
-    processedBy: z.string().nullish(),
-    requestId: z.string(),
-  });
-}
-
 export function BudgetCategorySchema(): z.ZodObject<
   Properties<BudgetCategory>
 > {
@@ -317,26 +279,6 @@ export function CancelSubscriptionInputSchema(): z.ZodObject<
   });
 }
 
-export function ClientRequestSchema(): z.ZodObject<Properties<ClientRequest>> {
-  return z.object({
-    __typename: z.literal("ClientRequest").optional(),
-    id: z.string(),
-    metricId: z.string().nullish(),
-    operatorResponse: z.string().nullish(),
-    processedAt: z.string().datetime().nullish(),
-    processedBy: z.string().nullish(),
-    reason: z.string().nullish(),
-    requestedAt: z.string().datetime(),
-    requestedBy: z.string().nullish(),
-    requestedLimit: z.number().nullish(),
-    requestedTeamSize: z.number().nullish(),
-    requestedTierName: z.string().nullish(),
-    serviceId: z.string().nullish(),
-    status: RequestStatusSchema,
-    type: RequestTypeSchema,
-  });
-}
-
 export function CommunicationChannelSchema(): z.ZodObject<
   Properties<CommunicationChannel>
 > {
@@ -347,23 +289,6 @@ export function CommunicationChannelSchema(): z.ZodObject<
     isPrimary: z.boolean(),
     type: CommunicationChannelTypeSchema,
     verifiedAt: z.string().datetime().nullish(),
-  });
-}
-
-export function CreateClientRequestInputSchema(): z.ZodObject<
-  Properties<CreateClientRequestInput>
-> {
-  return z.object({
-    metricId: z.string().nullish(),
-    reason: z.string().nullish(),
-    requestId: z.string(),
-    requestedAt: z.string().datetime(),
-    requestedBy: z.string().nullish(),
-    requestedLimit: z.number().nullish(),
-    requestedTeamSize: z.number().nullish(),
-    requestedTierName: z.string().nullish(),
-    serviceId: z.string().nullish(),
-    type: RequestTypeSchema,
   });
 }
 
@@ -433,7 +358,6 @@ export function InvoiceSchema(): z.ZodObject<Properties<Invoice>> {
     lineItems: z.array(z.lazy(() => InvoiceLineItemSchema())),
     notes: z.string().nullish(),
     paidDate: z.string().datetime().nullish(),
-    paymentUrl: z.string().url().nullish(),
     payments: z.array(z.lazy(() => InvoicePaymentSchema())),
     periodEnd: z.string().datetime(),
     periodStart: z.string().datetime(),
@@ -535,17 +459,6 @@ export function RefundInvoiceInputSchema(): z.ZodObject<
     invoiceId: z.string(),
     reason: z.string().nullish(),
     refundDate: z.string().datetime(),
-  });
-}
-
-export function RejectRequestInputSchema(): z.ZodObject<
-  Properties<RejectRequestInput>
-> {
-  return z.object({
-    operatorResponse: z.string(),
-    processedAt: z.string().datetime(),
-    processedBy: z.string().nullish(),
-    requestId: z.string(),
   });
 }
 
@@ -733,36 +646,12 @@ export function SetExpiringInputSchema(): z.ZodObject<
   });
 }
 
-export function SetInvoicePaymentUrlInputSchema(): z.ZodObject<
-  Properties<SetInvoicePaymentUrlInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-    paymentUrl: z.string().url().nullish(),
-  });
-}
-
 export function SetInvoiceTaxInputSchema(): z.ZodObject<
   Properties<SetInvoiceTaxInput>
 > {
   return z.object({
     invoiceId: z.string(),
     tax: z.number(),
-  });
-}
-
-export function SetOperatorInfoInputSchema(): z.ZodObject<
-  Properties<SetOperatorInfoInput>
-> {
-  return z.object({
-    operatorEmail: z.string().email().nullish(),
-    operatorName: z.string().nullish(),
-    operatorWalletAddress: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      })
-      .nullish(),
   });
 }
 
@@ -835,18 +724,9 @@ export function SubscriptionInstanceStateSchema(): z.ZodObject<
     expiringSince: z.string().datetime().nullish(),
     invoices: z.array(z.lazy(() => InvoiceSchema())),
     kycStatus: KycStatusSchema.nullish(),
-    operatorEmail: z.string().email().nullish(),
     operatorId: z.string().nullish(),
-    operatorName: z.string().nullish(),
     operatorNotes: z.string().nullish(),
-    operatorWalletAddress: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      })
-      .nullish(),
     pausedSince: z.string().datetime().nullish(),
-    pendingRequests: z.array(z.lazy(() => ClientRequestSchema())),
     renewalDate: z.string().datetime().nullish(),
     resource: z.lazy(() => ResourceDocumentSchema().nullish()),
     serviceGroups: z.array(z.lazy(() => ServiceGroupSchema())),
@@ -991,14 +871,5 @@ export function VerifyCommunicationChannelInputSchema(): z.ZodObject<
   return z.object({
     channelId: z.string(),
     verifiedAt: z.string().datetime(),
-  });
-}
-
-export function WithdrawRequestInputSchema(): z.ZodObject<
-  Properties<WithdrawRequestInput>
-> {
-  return z.object({
-    requestId: z.string(),
-    withdrawnAt: z.string().datetime(),
   });
 }

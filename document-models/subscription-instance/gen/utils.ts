@@ -29,9 +29,6 @@ export const initialGlobalState: SubscriptionInstanceGlobalState = {
   teamMemberCount: null,
   kycStatus: null,
   operatorId: null,
-  operatorName: null,
-  operatorEmail: null,
-  operatorWalletAddress: null,
   serviceOfferingId: null,
   tierName: null,
   tierPricingOptionId: null,
@@ -51,7 +48,6 @@ export const initialGlobalState: SubscriptionInstanceGlobalState = {
   serviceGroups: [],
   invoices: [],
   communications: [],
-  pendingRequests: [],
 };
 export const initialLocalState: SubscriptionInstanceLocalState = {};
 

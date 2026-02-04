@@ -134,13 +134,6 @@ export type AddServiceToGroupInput = {
   setupPaymentDate?: InputMaybe<Scalars["DateTime"]["input"]>;
 };
 
-export type ApproveRequestInput = {
-  operatorResponse?: InputMaybe<Scalars["String"]["input"]>;
-  processedAt: Scalars["DateTime"]["input"];
-  processedBy?: InputMaybe<Scalars["String"]["input"]>;
-  requestId: Scalars["OID"]["input"];
-};
-
 export type BillingCycle =
   | "ANNUAL"
   | "MONTHLY"
@@ -163,23 +156,6 @@ export type CancelSubscriptionInput = {
   cancelledSince: Scalars["DateTime"]["input"];
 };
 
-export type ClientRequest = {
-  id: Scalars["OID"]["output"];
-  metricId: Maybe<Scalars["OID"]["output"]>;
-  operatorResponse: Maybe<Scalars["String"]["output"]>;
-  processedAt: Maybe<Scalars["DateTime"]["output"]>;
-  processedBy: Maybe<Scalars["String"]["output"]>;
-  reason: Maybe<Scalars["String"]["output"]>;
-  requestedAt: Scalars["DateTime"]["output"];
-  requestedBy: Maybe<Scalars["String"]["output"]>;
-  requestedLimit: Maybe<Scalars["Int"]["output"]>;
-  requestedTeamSize: Maybe<Scalars["Int"]["output"]>;
-  requestedTierName: Maybe<Scalars["String"]["output"]>;
-  serviceId: Maybe<Scalars["OID"]["output"]>;
-  status: RequestStatus;
-  type: RequestType;
-};
-
 export type CommunicationChannel = {
   id: Scalars["OID"]["output"];
   identifier: Scalars["String"]["output"];
@@ -194,19 +170,6 @@ export type CommunicationChannelType =
   | "SLACK"
   | "TELEGRAM"
   | "WHATSAPP";
-
-export type CreateClientRequestInput = {
-  metricId?: InputMaybe<Scalars["OID"]["input"]>;
-  reason?: InputMaybe<Scalars["String"]["input"]>;
-  requestId: Scalars["OID"]["input"];
-  requestedAt: Scalars["DateTime"]["input"];
-  requestedBy?: InputMaybe<Scalars["String"]["input"]>;
-  requestedLimit?: InputMaybe<Scalars["Int"]["input"]>;
-  requestedTeamSize?: InputMaybe<Scalars["Int"]["input"]>;
-  requestedTierName?: InputMaybe<Scalars["String"]["input"]>;
-  serviceId?: InputMaybe<Scalars["OID"]["input"]>;
-  type: RequestType;
-};
 
 export type CreateInvoiceInput = {
   currency: Scalars["Currency"]["input"];
@@ -258,7 +221,6 @@ export type Invoice = {
   lineItems: Array<InvoiceLineItem>;
   notes: Maybe<Scalars["String"]["output"]>;
   paidDate: Maybe<Scalars["DateTime"]["output"]>;
-  paymentUrl: Maybe<Scalars["URL"]["output"]>;
   payments: Array<InvoicePayment>;
   periodEnd: Scalars["DateTime"]["output"];
   periodStart: Scalars["DateTime"]["output"];
@@ -346,13 +308,6 @@ export type RefundInvoiceInput = {
   refundDate: Scalars["DateTime"]["input"];
 };
 
-export type RejectRequestInput = {
-  operatorResponse: Scalars["String"]["input"];
-  processedAt: Scalars["DateTime"]["input"];
-  processedBy?: InputMaybe<Scalars["String"]["input"]>;
-  requestId: Scalars["OID"]["input"];
-};
-
 export type RemoveBudgetCategoryInput = {
   budgetId: Scalars["OID"]["input"];
 };
@@ -398,18 +353,6 @@ export type ReportSetupPaymentInput = {
   paymentDate: Scalars["DateTime"]["input"];
   serviceId: Scalars["OID"]["input"];
 };
-
-export type RequestStatus = "APPROVED" | "PENDING" | "REJECTED" | "WITHDRAWN";
-
-export type RequestType =
-  | "ADD_SERVICE"
-  | "CANCEL_SUBSCRIPTION"
-  | "CHANGE_TIER"
-  | "INCREASE_METRIC_LIMIT"
-  | "PAUSE_SUBSCRIPTION"
-  | "REMOVE_SERVICE"
-  | "RESUME_SUBSCRIPTION"
-  | "UPDATE_TEAM_SIZE";
 
 export type ResetPeriod =
   | "ANNUAL"
@@ -480,20 +423,9 @@ export type SetExpiringInput = {
   expiringSince: Scalars["DateTime"]["input"];
 };
 
-export type SetInvoicePaymentUrlInput = {
-  invoiceId: Scalars["OID"]["input"];
-  paymentUrl?: InputMaybe<Scalars["URL"]["input"]>;
-};
-
 export type SetInvoiceTaxInput = {
   invoiceId: Scalars["OID"]["input"];
   tax: Scalars["Amount_Money"]["input"];
-};
-
-export type SetOperatorInfoInput = {
-  operatorEmail?: InputMaybe<Scalars["EmailAddress"]["input"]>;
-  operatorName?: InputMaybe<Scalars["String"]["input"]>;
-  operatorWalletAddress?: InputMaybe<Scalars["EthereumAddress"]["input"]>;
 };
 
 export type SetOperatorNotesInput = {
@@ -537,13 +469,9 @@ export type SubscriptionInstanceState = {
   expiringSince: Maybe<Scalars["DateTime"]["output"]>;
   invoices: Array<Invoice>;
   kycStatus: Maybe<KycStatus>;
-  operatorEmail: Maybe<Scalars["EmailAddress"]["output"]>;
   operatorId: Maybe<Scalars["PHID"]["output"]>;
-  operatorName: Maybe<Scalars["String"]["output"]>;
   operatorNotes: Maybe<Scalars["String"]["output"]>;
-  operatorWalletAddress: Maybe<Scalars["EthereumAddress"]["output"]>;
   pausedSince: Maybe<Scalars["DateTime"]["output"]>;
-  pendingRequests: Array<ClientRequest>;
   renewalDate: Maybe<Scalars["DateTime"]["output"]>;
   resource: Maybe<ResourceDocument>;
   serviceGroups: Array<ServiceGroup>;
@@ -638,9 +566,4 @@ export type UpdateTierInfoInput = {
 export type VerifyCommunicationChannelInput = {
   channelId: Scalars["OID"]["input"];
   verifiedAt: Scalars["DateTime"]["input"];
-};
-
-export type WithdrawRequestInput = {
-  requestId: Scalars["OID"]["input"];
-  withdrawnAt: Scalars["DateTime"]["input"];
 };

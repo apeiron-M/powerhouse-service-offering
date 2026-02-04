@@ -1,31 +1,57 @@
 import { createAction } from "document-model/core";
 import {
-  SetConfigurationInputSchema,
-  RemoveConfigurationInputSchema,
+  SetInstanceFacetInputSchema,
+  RemoveInstanceFacetInputSchema,
+  UpdateInstanceFacetInputSchema,
+  ApplyConfigurationChangesInputSchema,
 } from "../schema/zod.js";
 import type {
-  SetConfigurationInput,
-  RemoveConfigurationInput,
+  SetInstanceFacetInput,
+  RemoveInstanceFacetInput,
+  UpdateInstanceFacetInput,
+  ApplyConfigurationChangesInput,
 } from "../types.js";
 import type {
-  SetConfigurationAction,
-  RemoveConfigurationAction,
+  SetInstanceFacetAction,
+  RemoveInstanceFacetAction,
+  UpdateInstanceFacetAction,
+  ApplyConfigurationChangesAction,
 } from "./actions.js";
 
-export const setConfiguration = (input: SetConfigurationInput) =>
-  createAction<SetConfigurationAction>(
-    "SET_CONFIGURATION",
+export const setInstanceFacet = (input: SetInstanceFacetInput) =>
+  createAction<SetInstanceFacetAction>(
+    "SET_INSTANCE_FACET",
     { ...input },
     undefined,
-    SetConfigurationInputSchema,
+    SetInstanceFacetInputSchema,
     "global",
   );
 
-export const removeConfiguration = (input: RemoveConfigurationInput) =>
-  createAction<RemoveConfigurationAction>(
-    "REMOVE_CONFIGURATION",
+export const removeInstanceFacet = (input: RemoveInstanceFacetInput) =>
+  createAction<RemoveInstanceFacetAction>(
+    "REMOVE_INSTANCE_FACET",
     { ...input },
     undefined,
-    RemoveConfigurationInputSchema,
+    RemoveInstanceFacetInputSchema,
+    "global",
+  );
+
+export const updateInstanceFacet = (input: UpdateInstanceFacetInput) =>
+  createAction<UpdateInstanceFacetAction>(
+    "UPDATE_INSTANCE_FACET",
+    { ...input },
+    undefined,
+    UpdateInstanceFacetInputSchema,
+    "global",
+  );
+
+export const applyConfigurationChanges = (
+  input: ApplyConfigurationChangesInput,
+) =>
+  createAction<ApplyConfigurationChangesAction>(
+    "APPLY_CONFIGURATION_CHANGES",
+    { ...input },
+    undefined,
+    ApplyConfigurationChangesInputSchema,
     "global",
   );

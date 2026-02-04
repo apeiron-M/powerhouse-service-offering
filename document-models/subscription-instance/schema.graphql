@@ -28,9 +28,6 @@ type SubscriptionInstanceState {
     teamMemberCount: Int
     kycStatus: KycStatus
     operatorId: PHID
-    operatorName: String
-    operatorEmail: EmailAddress
-    operatorWalletAddress: EthereumAddress
     serviceOfferingId: PHID
     tierName: String
     tierPricingOptionId: OID
@@ -50,7 +47,6 @@ type SubscriptionInstanceState {
     serviceGroups: [ServiceGroup!]!
     invoices: [Invoice!]!
     communications: [CommunicationChannel!]!
-    pendingRequests: [ClientRequest!]!
 }
 
 enum CustomerType {
@@ -161,7 +157,6 @@ type Invoice {
     lineItems: [InvoiceLineItem!]!
     payments: [InvoicePayment!]!
     notes: String
-    paymentUrl: URL
 }
 
 enum InvoiceStatus {
@@ -217,41 +212,6 @@ enum CommunicationChannelType {
     DISCORD
     SLACK
     WHATSAPP
-}
-
-type ClientRequest {
-    id: OID!
-    type: RequestType!
-    status: RequestStatus!
-    requestedAt: DateTime!
-    requestedBy: String
-    reason: String
-    serviceId: OID
-    metricId: OID
-    requestedLimit: Int
-    requestedTierName: String
-    requestedTeamSize: Int
-    processedAt: DateTime
-    processedBy: String
-    operatorResponse: String
-}
-
-enum RequestType {
-    PAUSE_SUBSCRIPTION
-    RESUME_SUBSCRIPTION
-    CANCEL_SUBSCRIPTION
-    INCREASE_METRIC_LIMIT
-    ADD_SERVICE
-    REMOVE_SERVICE
-    CHANGE_TIER
-    UPDATE_TEAM_SIZE
-}
-
-enum RequestStatus {
-    PENDING
-    APPROVED
-    REJECTED
-    WITHDRAWN
 }
 
 # Subscription
@@ -336,12 +296,6 @@ input SetAutoRenewInput {
 
 input SetRenewalDateInput {
     renewalDate: DateTime!
-}
-
-input SetOperatorInfoInput {
-    operatorName: String
-    operatorEmail: EmailAddress
-    operatorWalletAddress: EthereumAddress
 }
 
 # Service
@@ -556,11 +510,6 @@ input RefundInvoiceInput {
     reason: String
 }
 
-input SetInvoicePaymentUrlInput {
-    invoiceId: OID!
-    paymentUrl: URL
-}
-
 # Customer
 
 input UpdateCustomerWalletInput {
@@ -599,38 +548,4 @@ input SetPrimaryCommunicationChannelInput {
 input VerifyCommunicationChannelInput {
     channelId: OID!
     verifiedAt: DateTime!
-}
-
-# Requests
-
-input CreateClientRequestInput {
-    requestId: OID!
-    type: RequestType!
-    requestedAt: DateTime!
-    requestedBy: String
-    reason: String
-    serviceId: OID
-    metricId: OID
-    requestedLimit: Int
-    requestedTierName: String
-    requestedTeamSize: Int
-}
-
-input ApproveRequestInput {
-    requestId: OID!
-    processedAt: DateTime!
-    processedBy: String
-    operatorResponse: String
-}
-
-input RejectRequestInput {
-    requestId: OID!
-    processedAt: DateTime!
-    processedBy: String
-    operatorResponse: String!
-}
-
-input WithdrawRequestInput {
-    requestId: OID!
-    withdrawnAt: DateTime!
 }

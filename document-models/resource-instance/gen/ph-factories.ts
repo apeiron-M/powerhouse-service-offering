@@ -13,21 +13,27 @@ import { createDocument } from "./utils.js";
 
 export function defaultGlobalState(): ResourceInstanceGlobalState {
   return {
-    id: "",
-    subscriptionId: "",
-    resourceTemplateId: "",
-    customerId: "",
-    name: "",
-    status: "PROVISIONING",
+    resourceTemplateId: null,
+    customerId: null,
+    name: null,
+    thumbnailUrl: null,
+    infoLink: null,
+    description: null,
+    profile: null,
+    status: "DRAFT",
     configuration: [],
-    usageMetrics: [],
+    confirmedAt: null,
+    provisioningStartedAt: null,
+    provisioningCompletedAt: null,
+    provisioningFailureReason: null,
     activatedAt: null,
     suspendedAt: null,
+    suspensionType: null,
     suspensionReason: null,
+    suspensionDetails: null,
+    resumedAt: null,
     terminatedAt: null,
     terminationReason: null,
-    createdAt: "1970-01-01T00:00:00.000Z",
-    lastModified: "1970-01-01T00:00:00.000Z",
   };
 }
 

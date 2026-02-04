@@ -11,7 +11,6 @@ import { subscriptionInstanceServiceGroupOperations } from "../src/reducers/serv
 import { subscriptionInstanceMetricsOperations } from "../src/reducers/metrics.js";
 import { subscriptionInstanceBillingOperations } from "../src/reducers/billing.js";
 import { subscriptionInstanceCustomerOperations } from "../src/reducers/customer.js";
-import { subscriptionInstanceRequestsOperations } from "../src/reducers/requests.js";
 
 import {
   InitializeSubscriptionInputSchema,
@@ -30,7 +29,6 @@ import {
   SetOperatorNotesInputSchema,
   SetAutoRenewInputSchema,
   SetRenewalDateInputSchema,
-  SetOperatorInfoInputSchema,
   AddServiceInputSchema,
   RemoveServiceInputSchema,
   UpdateServiceSetupCostInputSchema,
@@ -58,7 +56,6 @@ import {
   CancelInvoiceInputSchema,
   MarkInvoiceOverdueInputSchema,
   RefundInvoiceInputSchema,
-  SetInvoicePaymentUrlInputSchema,
   UpdateCustomerWalletInputSchema,
   SetCustomerTypeInputSchema,
   UpdateTeamMemberCountInputSchema,
@@ -67,10 +64,6 @@ import {
   RemoveCommunicationChannelInputSchema,
   SetPrimaryCommunicationChannelInputSchema,
   VerifyCommunicationChannelInputSchema,
-  CreateClientRequestInputSchema,
-  ApproveRequestInputSchema,
-  RejectRequestInputSchema,
-  WithdrawRequestInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<SubscriptionInstancePHState> = (
@@ -266,18 +259,6 @@ const stateReducer: StateReducer<SubscriptionInstancePHState> = (
       SetRenewalDateInputSchema().parse(action.input);
 
       subscriptionInstanceSubscriptionOperations.setRenewalDateOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "SET_OPERATOR_INFO": {
-      SetOperatorInfoInputSchema().parse(action.input);
-
-      subscriptionInstanceSubscriptionOperations.setOperatorInfoOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -610,18 +591,6 @@ const stateReducer: StateReducer<SubscriptionInstancePHState> = (
       break;
     }
 
-    case "SET_INVOICE_PAYMENT_URL": {
-      SetInvoicePaymentUrlInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.setInvoicePaymentUrlOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
     case "UPDATE_CUSTOMER_WALLET": {
       UpdateCustomerWalletInputSchema().parse(action.input);
 
@@ -710,54 +679,6 @@ const stateReducer: StateReducer<SubscriptionInstancePHState> = (
       VerifyCommunicationChannelInputSchema().parse(action.input);
 
       subscriptionInstanceCustomerOperations.verifyCommunicationChannelOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "CREATE_CLIENT_REQUEST": {
-      CreateClientRequestInputSchema().parse(action.input);
-
-      subscriptionInstanceRequestsOperations.createClientRequestOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "APPROVE_REQUEST": {
-      ApproveRequestInputSchema().parse(action.input);
-
-      subscriptionInstanceRequestsOperations.approveRequestOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "REJECT_REQUEST": {
-      RejectRequestInputSchema().parse(action.input);
-
-      subscriptionInstanceRequestsOperations.rejectRequestOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "WITHDRAW_REQUEST": {
-      WithdrawRequestInputSchema().parse(action.input);
-
-      subscriptionInstanceRequestsOperations.withdrawRequestOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

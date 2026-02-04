@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { generateId } from "document-model/core";
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type { SubscriptionInstanceAction } from "@powerhousedao/contributor-billing/document-models/subscription-instance";
 import type { ServiceMetric } from "../../../document-models/subscription-instance/gen/schema/types.js";
@@ -8,7 +7,9 @@ import {
   decrementMetricUsage,
   updateMetric,
 } from "../../../document-models/subscription-instance/gen/metrics/creators.js";
-import { createClientRequest } from "../../../document-models/subscription-instance/gen/requests/creators.js";
+
+// Note: createClientRequest from requests module has been removed.
+// Client request for limit increase is disabled until the module is re-implemented.
 
 interface MetricActionsProps {
   serviceId: string;
@@ -78,31 +79,13 @@ export function MetricActions({
     const newLimit = parseInt(requestedLimit, 10);
     if (isNaN(newLimit) || newLimit <= 0) return;
 
-    dispatch(
-      createClientRequest({
-        requestId: generateId(),
-        type: "INCREASE_METRIC_LIMIT",
-        requestedAt: new Date().toISOString(),
-        requestedBy: customerName || null,
-        reason: requestReason || null,
-        serviceId,
-        metricId: metric.id,
-        requestedLimit: newLimit,
-      }),
-    );
+    // Requests module has been removed - functionality disabled
+    console.warn("Limit increase request functionality is currently disabled");
 
     setShowRequestModal(false);
     setRequestedLimit(metric.limit?.toString() || "");
     setRequestReason("");
-  }, [
-    dispatch,
-    customerName,
-    requestReason,
-    requestedLimit,
-    serviceId,
-    metric.id,
-    metric.limit,
-  ]);
+  }, [requestedLimit, metric.limit]);
 
   // Operator view - direct manipulation
   if (isOperator) {

@@ -10,7 +10,6 @@ import {
   CancelInvoiceInputSchema,
   MarkInvoiceOverdueInputSchema,
   RefundInvoiceInputSchema,
-  SetInvoicePaymentUrlInputSchema,
 } from "../schema/zod.js";
 import type {
   CreateInvoiceInput,
@@ -23,7 +22,6 @@ import type {
   CancelInvoiceInput,
   MarkInvoiceOverdueInput,
   RefundInvoiceInput,
-  SetInvoicePaymentUrlInput,
 } from "../types.js";
 import type {
   CreateInvoiceAction,
@@ -36,7 +34,6 @@ import type {
   CancelInvoiceAction,
   MarkInvoiceOverdueAction,
   RefundInvoiceAction,
-  SetInvoicePaymentUrlAction,
 } from "./actions.js";
 
 export const createInvoice = (input: CreateInvoiceInput) =>
@@ -126,14 +123,5 @@ export const refundInvoice = (input: RefundInvoiceInput) =>
     { ...input },
     undefined,
     RefundInvoiceInputSchema,
-    "global",
-  );
-
-export const setInvoicePaymentUrl = (input: SetInvoicePaymentUrlInput) =>
-  createAction<SetInvoicePaymentUrlAction>(
-    "SET_INVOICE_PAYMENT_URL",
-    { ...input },
-    undefined,
-    SetInvoicePaymentUrlInputSchema,
     "global",
   );

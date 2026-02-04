@@ -20,4 +20,3 @@ export * from "./service-group/operations.js";
 export * from "./metrics/operations.js";
 export * from "./billing/operations.js";
 export * from "./customer/operations.js";
-export * from "./requests/operations.js";

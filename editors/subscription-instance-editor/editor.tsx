@@ -1742,8 +1742,9 @@ const editorStyles = `
     flex-shrink: 0;
   }
 
-  /* Customer Info Wallet Editing */
-  .si-customer-info__edit-wallet {
+  /* Customer Info Field Editing */
+  .si-customer-info__edit-wallet,
+  .si-customer-info__edit-field {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1754,6 +1755,26 @@ const editorStyles = `
     display: flex;
     gap: 8px;
     justify-content: flex-end;
+  }
+
+  .si-customer-info__type-edit {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .si-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+    padding-right: 32px;
+    cursor: pointer;
+  }
+
+  .si-input--number {
+    width: 80px;
   }
 
   .si-customer-info__edit-btn {

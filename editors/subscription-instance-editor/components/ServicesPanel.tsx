@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { generateId } from "document-model/core";
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   SubscriptionInstanceAction,
@@ -11,7 +10,9 @@ import type {
 } from "../../../document-models/subscription-instance/gen/schema/types.js";
 import type { ViewMode } from "../types.js";
 import { MetricActions } from "./MetricActions.js";
-import { createClientRequest } from "../../../document-models/subscription-instance/gen/requests/creators.js";
+
+// Note: createClientRequest from requests module has been removed.
+// Service request functionality is disabled until the module is re-implemented.
 
 interface ServicesPanelProps {
   document: SubscriptionInstanceDocument;
@@ -214,20 +215,12 @@ function RequestServiceModal({
   const [reason, setReason] = useState("");
 
   const handleSubmit = useCallback(() => {
-    dispatch(
-      createClientRequest({
-        requestId: generateId(),
-        type: requestType,
-        requestedAt: new Date().toISOString(),
-        requestedBy: customerName || null,
-        reason: reason || null,
-        serviceId: service?.id || null,
-      }),
-    );
+    // Requests module has been removed - functionality disabled
+    console.warn("Service request functionality is currently disabled");
 
     setReason("");
     onClose();
-  }, [dispatch, customerName, reason, requestType, service, onClose]);
+  }, [onClose]);
 
   const handleClose = useCallback(() => {
     setReason("");

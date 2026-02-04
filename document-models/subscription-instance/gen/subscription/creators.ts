@@ -16,7 +16,6 @@ import {
   SetOperatorNotesInputSchema,
   SetAutoRenewInputSchema,
   SetRenewalDateInputSchema,
-  SetOperatorInfoInputSchema,
 } from "../schema/zod.js";
 import type {
   InitializeSubscriptionInput,
@@ -35,7 +34,6 @@ import type {
   SetOperatorNotesInput,
   SetAutoRenewInput,
   SetRenewalDateInput,
-  SetOperatorInfoInput,
 } from "../types.js";
 import type {
   InitializeSubscriptionAction,
@@ -54,7 +52,6 @@ import type {
   SetOperatorNotesAction,
   SetAutoRenewAction,
   SetRenewalDateAction,
-  SetOperatorInfoAction,
 } from "./actions.js";
 
 export const initializeSubscription = (input: InitializeSubscriptionInput) =>
@@ -202,14 +199,5 @@ export const setRenewalDate = (input: SetRenewalDateInput) =>
     { ...input },
     undefined,
     SetRenewalDateInputSchema,
-    "global",
-  );
-
-export const setOperatorInfo = (input: SetOperatorInfoInput) =>
-  createAction<SetOperatorInfoAction>(
-    "SET_OPERATOR_INFO",
-    { ...input },
-    undefined,
-    SetOperatorInfoInputSchema,
     "global",
   );

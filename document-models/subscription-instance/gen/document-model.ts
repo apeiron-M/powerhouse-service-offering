@@ -212,19 +212,6 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
               template: "Set the renewal date",
             },
-            {
-              description:
-                "Set operator/issuer information for the subscription",
-              errors: [],
-              examples: [],
-              id: "SET_OPERATOR_INFO",
-              name: "SET_OPERATOR_INFO",
-              reducer: "",
-              schema:
-                "input SetOperatorInfoInput {\n    operatorName: String\n    operatorEmail: EmailAddress\n    operatorWalletAddress: EthereumAddress\n}",
-              scope: "global",
-              template: "Set operator/issuer information for the subscription",
-            },
           ],
         },
         {
@@ -574,18 +561,6 @@ export const documentModel: DocumentModelGlobalState = {
               scope: "global",
               template: "Refund an invoice",
             },
-            {
-              description: "Set or update the payment URL for an invoice",
-              errors: [],
-              examples: [],
-              id: "SET_INVOICE_PAYMENT_URL",
-              name: "SET_INVOICE_PAYMENT_URL",
-              reducer: "",
-              schema:
-                "input SetInvoicePaymentUrlInput {\n    invoiceId: OID!\n    paymentUrl: URL\n}",
-              scope: "global",
-              template: "Set or update the payment URL for an invoice",
-            },
           ],
         },
         {
@@ -691,69 +666,14 @@ export const documentModel: DocumentModelGlobalState = {
             },
           ],
         },
-        {
-          description: "Client request and approval workflow management",
-          id: "requests",
-          name: "Requests",
-          operations: [
-            {
-              description: "Create a new client request for operator review",
-              errors: [],
-              examples: [],
-              id: "CREATE_CLIENT_REQUEST",
-              name: "CREATE_CLIENT_REQUEST",
-              reducer: "",
-              schema:
-                "input CreateClientRequestInput {\n    requestId: OID!\n    type: RequestType!\n    requestedAt: DateTime!\n    requestedBy: String\n    reason: String\n    serviceId: OID\n    metricId: OID\n    requestedLimit: Int\n    requestedTierName: String\n    requestedTeamSize: Int\n}",
-              scope: "global",
-              template: "Create a new client request for operator review",
-            },
-            {
-              description: "Approve a pending client request",
-              errors: [],
-              examples: [],
-              id: "APPROVE_REQUEST",
-              name: "APPROVE_REQUEST",
-              reducer: "",
-              schema:
-                "input ApproveRequestInput {\n    requestId: OID!\n    processedAt: DateTime!\n    processedBy: String\n    operatorResponse: String\n}",
-              scope: "global",
-              template: "Approve a pending client request",
-            },
-            {
-              description: "Reject a pending client request",
-              errors: [],
-              examples: [],
-              id: "REJECT_REQUEST",
-              name: "REJECT_REQUEST",
-              reducer: "",
-              schema:
-                "input RejectRequestInput {\n    requestId: OID!\n    processedAt: DateTime!\n    processedBy: String\n    operatorResponse: String!\n}",
-              scope: "global",
-              template: "Reject a pending client request",
-            },
-            {
-              description: "Withdraw a pending request (client action)",
-              errors: [],
-              examples: [],
-              id: "WITHDRAW_REQUEST",
-              name: "WITHDRAW_REQUEST",
-              reducer: "",
-              schema:
-                "input WithdrawRequestInput {\n    requestId: OID!\n    withdrawnAt: DateTime!\n}",
-              scope: "global",
-              template: "Withdraw a pending request (client action)",
-            },
-          ],
-        },
       ],
       state: {
         global: {
           examples: [],
           initialValue:
-            '{"customerId":null,"customerName":null,"customerEmail":null,"customerWalletAddress":null,"customerType":null,"teamMemberCount":null,"kycStatus":null,"operatorId":null,"operatorName":null,"operatorEmail":null,"operatorWalletAddress":null,"serviceOfferingId":null,"tierName":null,"tierPricingOptionId":null,"resource":null,"status":"PENDING","createdAt":null,"activatedSince":null,"pausedSince":null,"expiringSince":null,"renewalDate":null,"cancelledSince":null,"cancellationReason":null,"autoRenew":false,"operatorNotes":null,"budget":null,"services":[],"serviceGroups":[],"invoices":[],"communications":[],"pendingRequests":[]}',
+            '{"customerId":null,"customerName":null,"customerEmail":null,"customerWalletAddress":null,"customerType":null,"teamMemberCount":null,"kycStatus":null,"operatorId":null,"serviceOfferingId":null,"tierName":null,"tierPricingOptionId":null,"resource":null,"status":"PENDING","createdAt":null,"activatedSince":null,"pausedSince":null,"expiringSince":null,"renewalDate":null,"cancelledSince":null,"cancellationReason":null,"autoRenew":false,"operatorNotes":null,"budget":null,"services":[],"serviceGroups":[],"invoices":[],"communications":[]}',
           schema:
-            "type SubscriptionInstanceState {\n    customerId: PHID\n    customerName: String\n    customerEmail: EmailAddress\n    customerWalletAddress: EthereumAddress\n    customerType: CustomerType\n    teamMemberCount: Int\n    kycStatus: KycStatus\n    operatorId: PHID\n    operatorName: String\n    operatorEmail: EmailAddress\n    operatorWalletAddress: EthereumAddress\n    serviceOfferingId: PHID\n    tierName: String\n    tierPricingOptionId: OID\n    resource: ResourceDocument\n    status: SubscriptionStatus!\n    createdAt: DateTime\n    activatedSince: DateTime\n    pausedSince: DateTime\n    expiringSince: DateTime\n    renewalDate: DateTime\n    cancelledSince: DateTime\n    cancellationReason: String\n    autoRenew: Boolean!\n    operatorNotes: String\n    budget: BudgetCategory\n    services: [Service!]!\n    serviceGroups: [ServiceGroup!]!\n    invoices: [Invoice!]!\n    communications: [CommunicationChannel!]!\n    pendingRequests: [ClientRequest!]!\n}\n\nenum CustomerType {\n    INDIVIDUAL\n    TEAM\n}\n\nenum KycStatus {\n    NOT_REQUIRED\n    NOT_STARTED\n    PENDING\n    VERIFIED\n    REJECTED\n}\n\ntype ServiceGroup {\n    id: OID!\n    optional: Boolean!\n    name: String!\n    services: [Service!]!\n}\n\ntype ResourceDocument {\n    id: PHID!\n    label: String\n    thumbnailUrl: URL\n}\n\nenum SubscriptionStatus {\n    PENDING\n    ACTIVE\n    PAUSED\n    EXPIRING\n    CANCELLED\n}\n\ntype RecurringCost {\n    amount: Amount_Money!\n    currency: Currency!\n    billingCycle: BillingCycle!\n    nextBillingDate: DateTime\n    lastPaymentDate: DateTime\n}\n\ntype SetupCost {\n    amount: Amount_Money!\n    currency: Currency!\n    billingDate: DateTime\n    paymentDate: DateTime\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype BudgetCategory {\n    id: OID!\n    label: String!\n}\n\ntype Service {\n    id: OID!\n    name: String\n    description: String\n    setupCost: SetupCost\n    recurringCost: RecurringCost\n    metrics: [ServiceMetric!]!\n}\n\ntype ServiceMetric {\n    id: OID!\n    name: String!\n    unitName: String!\n    limit: Int\n    unitCost: RecurringCost\n    currentUsage: Int!\n    usageResetPeriod: ResetPeriod\n    nextUsageReset: DateTime\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype Invoice {\n    id: OID!\n    invoiceNumber: String!\n    status: InvoiceStatus!\n    periodStart: DateTime!\n    periodEnd: DateTime!\n    issueDate: DateTime!\n    dueDate: DateTime!\n    paidDate: DateTime\n    subtotal: Amount_Money!\n    tax: Amount_Money\n    total: Amount_Money!\n    currency: Currency!\n    lineItems: [InvoiceLineItem!]!\n    payments: [InvoicePayment!]!\n    notes: String\n    paymentUrl: URL\n}\n\nenum InvoiceStatus {\n    DRAFT\n    SENT\n    PAID\n    PARTIALLY_PAID\n    OVERDUE\n    CANCELLED\n    REFUNDED\n}\n\ntype InvoiceLineItem {\n    id: OID!\n    description: String!\n    serviceId: OID\n    metricId: OID\n    quantity: Int!\n    unitPrice: Amount_Money!\n    total: Amount_Money!\n}\n\ntype InvoicePayment {\n    id: OID!\n    amount: Amount_Money!\n    currency: Currency!\n    paymentMethod: PaymentMethod!\n    paymentDate: DateTime!\n    transactionHash: String\n    walletAddress: EthereumAddress\n    reference: String\n}\n\nenum PaymentMethod {\n    CRYPTO\n    BANK_TRANSFER\n    CREDIT_CARD\n    PAYPAL\n    OTHER\n}\n\ntype CommunicationChannel {\n    id: OID!\n    type: CommunicationChannelType!\n    identifier: String!\n    isPrimary: Boolean!\n    verifiedAt: DateTime\n}\n\nenum CommunicationChannelType {\n    EMAIL\n    TELEGRAM\n    DISCORD\n    SLACK\n    WHATSAPP\n}\n\ntype ClientRequest {\n    id: OID!\n    type: RequestType!\n    status: RequestStatus!\n    requestedAt: DateTime!\n    requestedBy: String\n    reason: String\n    serviceId: OID\n    metricId: OID\n    requestedLimit: Int\n    requestedTierName: String\n    requestedTeamSize: Int\n    processedAt: DateTime\n    processedBy: String\n    operatorResponse: String\n}\n\nenum RequestType {\n    PAUSE_SUBSCRIPTION\n    RESUME_SUBSCRIPTION\n    CANCEL_SUBSCRIPTION\n    INCREASE_METRIC_LIMIT\n    ADD_SERVICE\n    REMOVE_SERVICE\n    CHANGE_TIER\n    UPDATE_TEAM_SIZE\n}\n\nenum RequestStatus {\n    PENDING\n    APPROVED\n    REJECTED\n    WITHDRAWN\n}",
+            "type SubscriptionInstanceState {\n    customerId: PHID\n    customerName: String\n    customerEmail: EmailAddress\n    customerWalletAddress: EthereumAddress\n    customerType: CustomerType\n    teamMemberCount: Int\n    kycStatus: KycStatus\n    operatorId: PHID\n    serviceOfferingId: PHID\n    tierName: String\n    tierPricingOptionId: OID\n    resource: ResourceDocument\n    status: SubscriptionStatus!\n    createdAt: DateTime\n    activatedSince: DateTime\n    pausedSince: DateTime\n    expiringSince: DateTime\n    renewalDate: DateTime\n    cancelledSince: DateTime\n    cancellationReason: String\n    autoRenew: Boolean!\n    operatorNotes: String\n    budget: BudgetCategory\n    services: [Service!]!\n    serviceGroups: [ServiceGroup!]!\n    invoices: [Invoice!]!\n    communications: [CommunicationChannel!]!\n}\n\nenum CustomerType {\n    INDIVIDUAL\n    TEAM\n}\n\nenum KycStatus {\n    NOT_REQUIRED\n    NOT_STARTED\n    PENDING\n    VERIFIED\n    REJECTED\n}\n\ntype ServiceGroup {\n    id: OID!\n    optional: Boolean!\n    name: String!\n    services: [Service!]!\n}\n\ntype ResourceDocument {\n    id: PHID!\n    label: String\n    thumbnailUrl: URL\n}\n\nenum SubscriptionStatus {\n    PENDING\n    ACTIVE\n    PAUSED\n    EXPIRING\n    CANCELLED\n}\n\ntype RecurringCost {\n    amount: Amount_Money!\n    currency: Currency!\n    billingCycle: BillingCycle!\n    nextBillingDate: DateTime\n    lastPaymentDate: DateTime\n}\n\ntype SetupCost {\n    amount: Amount_Money!\n    currency: Currency!\n    billingDate: DateTime\n    paymentDate: DateTime\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype BudgetCategory {\n    id: OID!\n    label: String!\n}\n\ntype Service {\n    id: OID!\n    name: String\n    description: String\n    setupCost: SetupCost\n    recurringCost: RecurringCost\n    metrics: [ServiceMetric!]!\n}\n\ntype ServiceMetric {\n    id: OID!\n    name: String!\n    unitName: String!\n    limit: Int\n    unitCost: RecurringCost\n    currentUsage: Int!\n    usageResetPeriod: ResetPeriod\n    nextUsageReset: DateTime\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype Invoice {\n    id: OID!\n    invoiceNumber: String!\n    status: InvoiceStatus!\n    periodStart: DateTime!\n    periodEnd: DateTime!\n    issueDate: DateTime!\n    dueDate: DateTime!\n    paidDate: DateTime\n    subtotal: Amount_Money!\n    tax: Amount_Money\n    total: Amount_Money!\n    currency: Currency!\n    lineItems: [InvoiceLineItem!]!\n    payments: [InvoicePayment!]!\n    notes: String\n}\n\nenum InvoiceStatus {\n    DRAFT\n    SENT\n    PAID\n    PARTIALLY_PAID\n    OVERDUE\n    CANCELLED\n    REFUNDED\n}\n\ntype InvoiceLineItem {\n    id: OID!\n    description: String!\n    serviceId: OID\n    metricId: OID\n    quantity: Int!\n    unitPrice: Amount_Money!\n    total: Amount_Money!\n}\n\ntype InvoicePayment {\n    id: OID!\n    amount: Amount_Money!\n    currency: Currency!\n    paymentMethod: PaymentMethod!\n    paymentDate: DateTime!\n    transactionHash: String\n    walletAddress: EthereumAddress\n    reference: String\n}\n\nenum PaymentMethod {\n    CRYPTO\n    BANK_TRANSFER\n    CREDIT_CARD\n    PAYPAL\n    OTHER\n}\n\ntype CommunicationChannel {\n    id: OID!\n    type: CommunicationChannelType!\n    identifier: String!\n    isPrimary: Boolean!\n    verifiedAt: DateTime\n}\n\nenum CommunicationChannelType {\n    EMAIL\n    TELEGRAM\n    DISCORD\n    SLACK\n    WHATSAPP\n}",
         },
         local: {
           examples: [],

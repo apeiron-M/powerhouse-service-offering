@@ -10,7 +10,6 @@ import type {
   CancelInvoiceInput,
   MarkInvoiceOverdueInput,
   RefundInvoiceInput,
-  SetInvoicePaymentUrlInput,
 } from "../types.js";
 
 export type CreateInvoiceAction = Action & {
@@ -53,10 +52,6 @@ export type RefundInvoiceAction = Action & {
   type: "REFUND_INVOICE";
   input: RefundInvoiceInput;
 };
-export type SetInvoicePaymentUrlAction = Action & {
-  type: "SET_INVOICE_PAYMENT_URL";
-  input: SetInvoicePaymentUrlInput;
-};
 
 export type SubscriptionInstanceBillingAction =
   | CreateInvoiceAction
@@ -68,5 +63,4 @@ export type SubscriptionInstanceBillingAction =
   | SendInvoiceAction
   | CancelInvoiceAction
   | MarkInvoiceOverdueAction
-  | RefundInvoiceAction
-  | SetInvoicePaymentUrlAction;
+  | RefundInvoiceAction;

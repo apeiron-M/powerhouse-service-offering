@@ -36,9 +36,9 @@ import {
   SetOperatorNotesInputSchema,
   SetAutoRenewInputSchema,
   SetRenewalDateInputSchema,
-  setOperatorInfo,
-  SetOperatorInfoInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/subscription-instance";
+
+// Note: setOperatorInfo has been removed from the document model
 
 describe("SubscriptionOperations", () => {
   it("should handle initializeSubscription operation", () => {
@@ -313,20 +313,5 @@ describe("SubscriptionOperations", () => {
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
 
-  it("should handle setOperatorInfo operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(SetOperatorInfoInputSchema());
-
-    const updatedDocument = reducer(document, setOperatorInfo(input));
-
-    expect(isSubscriptionInstanceDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_OPERATOR_INFO",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
+  // Note: setOperatorInfo test removed - operation no longer exists
 });

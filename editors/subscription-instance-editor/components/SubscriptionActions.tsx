@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { generateId } from "document-model/core";
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   SubscriptionInstanceAction,
@@ -14,11 +13,10 @@ import {
   cancelSubscription,
   renewExpiringSubscription,
 } from "../../../document-models/subscription-instance/gen/subscription/creators.js";
-import {
-  createClientRequest,
-  withdrawRequest,
-} from "../../../document-models/subscription-instance/gen/requests/creators.js";
-import type { RequestType } from "../../../document-models/subscription-instance/gen/schema/types.js";
+
+// Note: The requests module (pendingRequests, ClientRequest, RequestType, etc.)
+// has been removed from the SubscriptionInstance document model.
+// Client request functionality is disabled until the module is re-implemented.
 
 interface SubscriptionActionsProps {
   document: SubscriptionInstanceDocument;
@@ -94,17 +92,6 @@ function ConfirmModal({
   );
 }
 
-const REQUEST_TYPE_LABELS: Record<RequestType, string> = {
-  PAUSE_SUBSCRIPTION: "Pause Subscription",
-  RESUME_SUBSCRIPTION: "Resume Subscription",
-  CANCEL_SUBSCRIPTION: "Cancel Subscription",
-  INCREASE_METRIC_LIMIT: "Increase Metric Limit",
-  ADD_SERVICE: "Add Service",
-  REMOVE_SERVICE: "Remove Service",
-  CHANGE_TIER: "Change Tier",
-  UPDATE_TEAM_SIZE: "Update Team Size",
-};
-
 export function SubscriptionActions({
   document,
   dispatch,
@@ -115,21 +102,6 @@ export function SubscriptionActions({
     "pause" | "cancel" | "resume" | "renew" | null
   >(null);
   const [reason, setReason] = useState("");
-
-  // Get pending requests for the current client
-  const myPendingRequests = state.pendingRequests.filter(
-    (r) => r.status === "PENDING",
-  );
-
-  const hasPendingPauseRequest = myPendingRequests.some(
-    (r) => r.type === "PAUSE_SUBSCRIPTION",
-  );
-  const hasPendingResumeRequest = myPendingRequests.some(
-    (r) => r.type === "RESUME_SUBSCRIPTION",
-  );
-  const hasPendingCancelRequest = myPendingRequests.some(
-    (r) => r.type === "CANCEL_SUBSCRIPTION",
-  );
 
   const handleToggleAutoRenew = useCallback(() => {
     dispatch(setAutoRenew({ autoRenew: !state.autoRenew }));
@@ -182,38 +154,10 @@ export function SubscriptionActions({
     setConfirmAction(null);
   }, [dispatch]);
 
-  // Client request actions
-  const handleClientRequest = useCallback(
-    (type: RequestType) => {
-      dispatch(
-        createClientRequest({
-          requestId: generateId(),
-          type,
-          requestedAt: new Date().toISOString(),
-          requestedBy: state.customerName || null,
-          reason: reason || null,
-        }),
-      );
-      setConfirmAction(null);
-      setReason("");
-    },
-    [dispatch, state.customerName, reason],
-  );
-
-  const handleWithdrawRequest = useCallback(
-    (requestId: string) => {
-      dispatch(
-        withdrawRequest({
-          requestId,
-          withdrawnAt: new Date().toISOString(),
-        }),
-      );
-    },
-    [dispatch],
-  );
-
   // Determine which handler to use based on mode
   const handleConfirm = useCallback(() => {
+    // Only operator mode can perform direct actions
+    // Client request functionality is disabled
     if (mode === "operator") {
       switch (confirmAction) {
         case "pause":
@@ -230,18 +174,10 @@ export function SubscriptionActions({
           break;
       }
     } else {
-      // Client mode - create requests
-      switch (confirmAction) {
-        case "pause":
-          handleClientRequest("PAUSE_SUBSCRIPTION");
-          break;
-        case "resume":
-          handleClientRequest("RESUME_SUBSCRIPTION");
-          break;
-        case "cancel":
-          handleClientRequest("CANCEL_SUBSCRIPTION");
-          break;
-      }
+      // Client mode - requests are disabled
+      console.warn("Client request functionality is currently disabled");
+      setConfirmAction(null);
+      setReason("");
     }
   }, [
     mode,
@@ -250,7 +186,6 @@ export function SubscriptionActions({
     handleOperatorResume,
     handleOperatorCancel,
     handleOperatorRenew,
-    handleClientRequest,
   ]);
 
   const isPending = state.status === "PENDING";
@@ -388,132 +323,48 @@ export function SubscriptionActions({
           </div>
         )}
 
-        {/* Client view - request actions */}
+        {/* Client view - request actions (disabled) */}
         {mode === "client" && !isCancelled && (
           <div className="si-actions__buttons">
-            {isActive && !hasPendingPauseRequest && (
-              <button
-                type="button"
-                className="si-btn si-btn--sm si-btn--ghost"
-                onClick={() => setConfirmAction("pause")}
-              >
-                Request Pause
-              </button>
-            )}
-            {isActive && hasPendingPauseRequest && (
-              <span className="si-actions__pending-badge">Pause Pending</span>
-            )}
-            {isPaused && !hasPendingResumeRequest && (
-              <button
-                type="button"
-                className="si-btn si-btn--sm si-btn--ghost"
-                onClick={() => setConfirmAction("resume")}
-              >
-                Request Resume
-              </button>
-            )}
-            {isPaused && hasPendingResumeRequest && (
-              <span className="si-actions__pending-badge">Resume Pending</span>
-            )}
-            {!hasPendingCancelRequest && (
-              <button
-                type="button"
-                className="si-btn si-btn--sm si-btn--danger-ghost"
-                onClick={() => setConfirmAction("cancel")}
-              >
-                Request Cancellation
-              </button>
-            )}
-            {hasPendingCancelRequest && (
-              <span className="si-actions__pending-badge si-actions__pending-badge--danger">
-                Cancellation Pending
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Client's pending requests summary */}
-        {mode === "client" && myPendingRequests.length > 0 && (
-          <div className="si-actions__pending-list">
-            <span className="si-actions__pending-title">
-              Your pending requests:
-            </span>
-            {myPendingRequests.map((request) => (
-              <div key={request.id} className="si-actions__pending-item">
-                <span className="si-actions__pending-type">
-                  {REQUEST_TYPE_LABELS[request.type]}
-                </span>
-                <button
-                  type="button"
-                  className="si-btn si-btn--xs si-btn--ghost"
-                  onClick={() => handleWithdrawRequest(request.id)}
-                >
-                  Withdraw
-                </button>
-              </div>
-            ))}
+            <p className="si-actions__disabled-note">
+              Client request functionality is currently unavailable.
+            </p>
           </div>
         )}
       </div>
 
-      {/* Confirmation Modals */}
+      {/* Confirmation Modals - operator only */}
       <ConfirmModal
         isOpen={confirmAction === "pause"}
-        title={mode === "operator" ? "Pause Subscription" : "Request Pause"}
-        message={
-          mode === "operator"
-            ? "Are you sure you want to pause this subscription? Services will be temporarily suspended."
-            : "Submit a request to pause your subscription. The operator will review your request."
-        }
-        confirmLabel={
-          mode === "operator" ? "Pause Subscription" : "Submit Request"
-        }
+        title="Pause Subscription"
+        message="Are you sure you want to pause this subscription? Services will be temporarily suspended."
+        confirmLabel="Pause Subscription"
         confirmVariant="warning"
         onConfirm={handleConfirm}
         onCancel={() => {
           setConfirmAction(null);
           setReason("");
         }}
-        showReasonInput={mode === "client"}
-        reason={reason}
-        onReasonChange={setReason}
       />
 
       <ConfirmModal
         isOpen={confirmAction === "resume"}
-        title={mode === "operator" ? "Resume Subscription" : "Request Resume"}
-        message={
-          mode === "operator"
-            ? "Are you sure you want to resume this subscription? Services will be reactivated."
-            : "Submit a request to resume your subscription. The operator will review your request."
-        }
-        confirmLabel={
-          mode === "operator" ? "Resume Subscription" : "Submit Request"
-        }
+        title="Resume Subscription"
+        message="Are you sure you want to resume this subscription? Services will be reactivated."
+        confirmLabel="Resume Subscription"
         confirmVariant="primary"
         onConfirm={handleConfirm}
         onCancel={() => {
           setConfirmAction(null);
           setReason("");
         }}
-        showReasonInput={mode === "client"}
-        reason={reason}
-        onReasonChange={setReason}
       />
 
       <ConfirmModal
         isOpen={confirmAction === "cancel"}
-        title={
-          mode === "operator" ? "Cancel Subscription" : "Request Cancellation"
-        }
-        message={
-          mode === "operator"
-            ? "Are you sure you want to cancel this subscription? This action cannot be undone."
-            : "Submit a request to cancel your subscription. The operator will review your request."
-        }
-        confirmLabel={
-          mode === "operator" ? "Cancel Subscription" : "Submit Request"
-        }
+        title="Cancel Subscription"
+        message="Are you sure you want to cancel this subscription? This action cannot be undone."
+        confirmLabel="Cancel Subscription"
         confirmVariant="danger"
         onConfirm={handleConfirm}
         onCancel={() => {

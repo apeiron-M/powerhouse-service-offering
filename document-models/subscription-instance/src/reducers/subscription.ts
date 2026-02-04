@@ -108,13 +108,5 @@ export const subscriptionInstanceSubscriptionOperations: SubscriptionInstanceSub
     setRenewalDateOperation(state, action) {
       state.renewalDate = action.input.renewalDate;
     },
-    setOperatorInfoOperation(state, action) {
-      const { input } = action;
-      if (input.operatorName !== undefined)
-        state.operatorName = input.operatorName || null;
-      if (input.operatorEmail !== undefined)
-        state.operatorEmail = input.operatorEmail || null;
-      if (input.operatorWalletAddress !== undefined)
-        state.operatorWalletAddress = input.operatorWalletAddress || null;
-    },
+    // Note: setOperatorInfoOperation has been removed from the document model
   };

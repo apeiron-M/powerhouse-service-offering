@@ -1,11 +1,20 @@
 import { type SignalDispatch } from "document-model";
 import type {
   InitializeInstanceAction,
+  UpdateInstanceInfoAction,
+  SetResourceProfileAction,
   UpdateInstanceStatusAction,
+  ConfirmInstanceAction,
+  ReportProvisioningStartedAction,
+  ReportProvisioningCompletedAction,
+  ReportProvisioningFailedAction,
   ActivateInstanceAction,
+  SuspendForNonPaymentAction,
+  SuspendForMaintenanceAction,
+  ResumeAfterPaymentAction,
+  ResumeAfterMaintenanceAction,
   SuspendInstanceAction,
   TerminateInstanceAction,
-  UpdateInstanceNameAction,
 } from "./actions.js";
 import type { ResourceInstanceState } from "../types.js";
 
@@ -15,14 +24,64 @@ export interface ResourceInstanceInstanceManagementOperations {
     action: InitializeInstanceAction,
     dispatch?: SignalDispatch,
   ) => void;
+  updateInstanceInfoOperation: (
+    state: ResourceInstanceState,
+    action: UpdateInstanceInfoAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  setResourceProfileOperation: (
+    state: ResourceInstanceState,
+    action: SetResourceProfileAction,
+    dispatch?: SignalDispatch,
+  ) => void;
   updateInstanceStatusOperation: (
     state: ResourceInstanceState,
     action: UpdateInstanceStatusAction,
     dispatch?: SignalDispatch,
   ) => void;
+  confirmInstanceOperation: (
+    state: ResourceInstanceState,
+    action: ConfirmInstanceAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  reportProvisioningStartedOperation: (
+    state: ResourceInstanceState,
+    action: ReportProvisioningStartedAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  reportProvisioningCompletedOperation: (
+    state: ResourceInstanceState,
+    action: ReportProvisioningCompletedAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  reportProvisioningFailedOperation: (
+    state: ResourceInstanceState,
+    action: ReportProvisioningFailedAction,
+    dispatch?: SignalDispatch,
+  ) => void;
   activateInstanceOperation: (
     state: ResourceInstanceState,
     action: ActivateInstanceAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  suspendForNonPaymentOperation: (
+    state: ResourceInstanceState,
+    action: SuspendForNonPaymentAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  suspendForMaintenanceOperation: (
+    state: ResourceInstanceState,
+    action: SuspendForMaintenanceAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  resumeAfterPaymentOperation: (
+    state: ResourceInstanceState,
+    action: ResumeAfterPaymentAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  resumeAfterMaintenanceOperation: (
+    state: ResourceInstanceState,
+    action: ResumeAfterMaintenanceAction,
     dispatch?: SignalDispatch,
   ) => void;
   suspendInstanceOperation: (
@@ -33,11 +92,6 @@ export interface ResourceInstanceInstanceManagementOperations {
   terminateInstanceOperation: (
     state: ResourceInstanceState,
     action: TerminateInstanceAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  updateInstanceNameOperation: (
-    state: ResourceInstanceState,
-    action: UpdateInstanceNameAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

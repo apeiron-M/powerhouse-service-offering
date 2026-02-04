@@ -6,7 +6,6 @@ import {
   metricsActions,
   billingActions,
   customerActions,
-  requestsActions,
 } from "./gen/creators.js";
 
 /** Actions for the SubscriptionInstance document model */
@@ -19,5 +18,4 @@ export const actions = {
   ...metricsActions,
   ...billingActions,
   ...customerActions,
-  ...requestsActions,
 };

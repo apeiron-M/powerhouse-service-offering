@@ -21,9 +21,6 @@ export function defaultGlobalState(): SubscriptionInstanceGlobalState {
     teamMemberCount: null,
     kycStatus: null,
     operatorId: null,
-    operatorName: null,
-    operatorEmail: null,
-    operatorWalletAddress: null,
     serviceOfferingId: null,
     tierName: null,
     tierPricingOptionId: null,
@@ -43,7 +40,6 @@ export function defaultGlobalState(): SubscriptionInstanceGlobalState {
     serviceGroups: [],
     invoices: [],
     communications: [],
-    pendingRequests: [],
   };
 }
 

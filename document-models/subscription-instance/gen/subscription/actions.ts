@@ -16,7 +16,6 @@ import type {
   SetOperatorNotesInput,
   SetAutoRenewInput,
   SetRenewalDateInput,
-  SetOperatorInfoInput,
 } from "../types.js";
 
 export type InitializeSubscriptionAction = Action & {
@@ -83,10 +82,6 @@ export type SetRenewalDateAction = Action & {
   type: "SET_RENEWAL_DATE";
   input: SetRenewalDateInput;
 };
-export type SetOperatorInfoAction = Action & {
-  type: "SET_OPERATOR_INFO";
-  input: SetOperatorInfoInput;
-};
 
 export type SubscriptionInstanceSubscriptionAction =
   | InitializeSubscriptionAction
@@ -104,5 +99,4 @@ export type SubscriptionInstanceSubscriptionAction =
   | UpdateTierInfoAction
   | SetOperatorNotesAction
   | SetAutoRenewAction
-  | SetRenewalDateAction
-  | SetOperatorInfoAction;
+  | SetRenewalDateAction;
