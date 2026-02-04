@@ -1,10 +1,13 @@
 import * as z from "zod";
 import type {
   ActivateInstanceInput,
+  ConfigSource,
   InitializeInstanceInput,
   InstanceConfiguration,
+  InstanceStatus,
   RecordUsageInput,
   RemoveConfigurationInput,
+  ResetPeriod,
   ResetUsageInput,
   ResourceInstanceState,
   SetConfigurationInput,
