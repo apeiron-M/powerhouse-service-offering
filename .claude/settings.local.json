@@ -29,8 +29,12 @@
       "mcp__reactor-mcp__createDocument",
       "Bash(npx skills add:*)",
       "Bash(git checkout:*)",
-      "Bash(bun add:*)",
-      "Bash(bun install)"
+      "Bash(npm ls:*)",
+      "Bash(bun install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(bun run build:*)"
     ],
     "deny": [
       "Write(./document-models/*/gen/**)",

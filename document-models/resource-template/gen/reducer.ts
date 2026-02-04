@@ -11,6 +11,7 @@ import { resourceTemplateFacetTargetingOperations } from "../src/reducers/facet-
 import { resourceTemplateServiceCategoryManagementOperations } from "../src/reducers/service-category-management.js";
 import { resourceTemplateServiceManagementOperations } from "../src/reducers/service-management.js";
 import { resourceTemplateOptionGroupManagementOperations } from "../src/reducers/option-group-management.js";
+import { resourceTemplateContentSectionManagementOperations } from "../src/reducers/content-section-management.js";
 
 import {
   UpdateTemplateInfoInputSchema,
@@ -33,6 +34,14 @@ import {
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
+  AddFaqInputSchema,
+  UpdateFaqInputSchema,
+  DeleteFaqInputSchema,
+  ReorderFaqsInputSchema,
+  AddContentSectionInputSchema,
+  UpdateContentSectionInputSchema,
+  DeleteContentSectionInputSchema,
+  ReorderContentSectionsInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ResourceTemplatePHState> = (
@@ -276,6 +285,102 @@ const stateReducer: StateReducer<ResourceTemplatePHState> = (
       DeleteOptionGroupInputSchema().parse(action.input);
 
       resourceTemplateOptionGroupManagementOperations.deleteOptionGroupOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "ADD_FAQ": {
+      AddFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.addFaqOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "UPDATE_FAQ": {
+      UpdateFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.updateFaqOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "DELETE_FAQ": {
+      DeleteFaqInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.deleteFaqOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REORDER_FAQS": {
+      ReorderFaqsInputSchema().parse(action.input);
+
+      resourceTemplateOptionGroupManagementOperations.reorderFaqsOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "ADD_CONTENT_SECTION": {
+      AddContentSectionInputSchema().parse(action.input);
+
+      resourceTemplateContentSectionManagementOperations.addContentSectionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "UPDATE_CONTENT_SECTION": {
+      UpdateContentSectionInputSchema().parse(action.input);
+
+      resourceTemplateContentSectionManagementOperations.updateContentSectionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "DELETE_CONTENT_SECTION": {
+      DeleteContentSectionInputSchema().parse(action.input);
+
+      resourceTemplateContentSectionManagementOperations.deleteContentSectionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REORDER_CONTENT_SECTIONS": {
+      ReorderContentSectionsInputSchema().parse(action.input);
+
+      resourceTemplateContentSectionManagementOperations.reorderContentSectionsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

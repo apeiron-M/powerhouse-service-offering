@@ -3,6 +3,10 @@ import type {
   AddOptionGroupAction,
   UpdateOptionGroupAction,
   DeleteOptionGroupAction,
+  AddFaqAction,
+  UpdateFaqAction,
+  DeleteFaqAction,
+  ReorderFaqsAction,
 } from "./actions.js";
 import type { ResourceTemplateState } from "../types.js";
 
@@ -20,6 +24,26 @@ export interface ResourceTemplateOptionGroupManagementOperations {
   deleteOptionGroupOperation: (
     state: ResourceTemplateState,
     action: DeleteOptionGroupAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  addFaqOperation: (
+    state: ResourceTemplateState,
+    action: AddFaqAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  updateFaqOperation: (
+    state: ResourceTemplateState,
+    action: UpdateFaqAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  deleteFaqOperation: (
+    state: ResourceTemplateState,
+    action: DeleteFaqAction,
+    dispatch?: SignalDispatch,
+  ) => void;
+  reorderFaqsOperation: (
+    state: ResourceTemplateState,
+    action: ReorderFaqsAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

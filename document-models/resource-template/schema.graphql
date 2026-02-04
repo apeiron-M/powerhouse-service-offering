@@ -35,6 +35,8 @@ type ResourceTemplateState {
     facetTargets: [FacetTarget!]!
     services: [Service!]!
     optionGroups: [OptionGroup!]!
+    faqFields: [FaqField!]
+    contentSections: [ContentSection!]!
 }
 
 enum TemplateStatus {
@@ -81,6 +83,20 @@ type OptionGroup {
     description: String
     isAddOn: Boolean!
     defaultSelected: Boolean!
+}
+
+type FaqField {
+    id: OID!
+    question: String
+    answer: String
+    displayOrder: Int!
+}
+
+type ContentSection {
+    id: OID!
+    title: String!
+    content: String!
+    displayOrder: Int!
 }
 
 # Template Management
@@ -228,5 +244,55 @@ input UpdateOptionGroupInput {
 
 input DeleteOptionGroupInput {
     id: OID!
+    lastModified: DateTime!
+}
+
+input AddFaqInput {
+    id: OID!
+    question: String
+    answer: String
+    displayOrder: Int!
+}
+
+input UpdateFaqInput {
+  id: OID!
+  question: String
+  answer: String
+}
+
+input DeleteFaqInput {
+  id:OID!
+}
+
+input ReorderFaqsInput {
+    faqIds: [OID!]!
+    lastModified: DateTime!
+}
+
+# Content Section Management
+
+input AddContentSectionInput {
+    id: OID!
+    title: String!
+    content: String!
+    displayOrder: Int!
+    lastModified: DateTime!
+}
+
+input UpdateContentSectionInput {
+    id: OID!
+    title: String
+    content: String
+    displayOrder: Int
+    lastModified: DateTime!
+}
+
+input DeleteContentSectionInput {
+    id: OID!
+    lastModified: DateTime!
+}
+
+input ReorderContentSectionsInput {
+    sectionIds: [OID!]!
     lastModified: DateTime!
 }

@@ -28,6 +28,8 @@ export function defaultGlobalState(): ResourceTemplateGlobalState {
     facetTargets: [],
     services: [],
     optionGroups: [],
+    faqFields: [],
+    contentSections: [],
   };
 }
 

@@ -59,6 +59,14 @@ export type Scalars = {
   Upload: { input: File; output: File };
 };
 
+export type AddContentSectionInput = {
+  content: Scalars["String"]["input"];
+  displayOrder: Scalars["Int"]["input"];
+  id: Scalars["OID"]["input"];
+  lastModified: Scalars["DateTime"]["input"];
+  title: Scalars["String"]["input"];
+};
+
 export type AddFacetBindingInput = {
   bindingId: Scalars["OID"]["input"];
   facetName: Scalars["String"]["input"];
@@ -72,6 +80,13 @@ export type AddFacetOptionInput = {
   categoryKey: Scalars["String"]["input"];
   lastModified: Scalars["DateTime"]["input"];
   optionId: Scalars["String"]["input"];
+};
+
+export type AddFaqInput = {
+  answer?: InputMaybe<Scalars["String"]["input"]>;
+  displayOrder: Scalars["Int"]["input"];
+  id: Scalars["OID"]["input"];
+  question?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type AddOptionGroupInput = {
@@ -101,6 +116,22 @@ export type AddTargetAudienceInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
+export type ContentSection = {
+  content: Scalars["String"]["output"];
+  displayOrder: Scalars["Int"]["output"];
+  id: Scalars["OID"]["output"];
+  title: Scalars["String"]["output"];
+};
+
+export type DeleteContentSectionInput = {
+  id: Scalars["OID"]["input"];
+  lastModified: Scalars["DateTime"]["input"];
+};
+
+export type DeleteFaqInput = {
+  id: Scalars["OID"]["input"];
+};
+
 export type DeleteOptionGroupInput = {
   id: Scalars["OID"]["input"];
   lastModified: Scalars["DateTime"]["input"];
@@ -116,6 +147,13 @@ export type FacetTarget = {
   categoryLabel: Scalars["String"]["output"];
   id: Scalars["OID"]["output"];
   selectedOptions: Array<Scalars["String"]["output"]>;
+};
+
+export type FaqField = {
+  answer: Maybe<Scalars["String"]["output"]>;
+  displayOrder: Scalars["Int"]["output"];
+  id: Scalars["OID"]["output"];
+  question: Maybe<Scalars["String"]["output"]>;
 };
 
 export type OptionGroup = {
@@ -148,6 +186,16 @@ export type RemoveTargetAudienceInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
+export type ReorderContentSectionsInput = {
+  lastModified: Scalars["DateTime"]["input"];
+  sectionIds: Array<Scalars["OID"]["input"]>;
+};
+
+export type ReorderFaqsInput = {
+  faqIds: Array<Scalars["OID"]["input"]>;
+  lastModified: Scalars["DateTime"]["input"];
+};
+
 export type ResourceFacetBinding = {
   facetName: Scalars["String"]["output"];
   facetType: Scalars["PHID"]["output"];
@@ -156,8 +204,10 @@ export type ResourceFacetBinding = {
 };
 
 export type ResourceTemplateState = {
+  contentSections: Array<ContentSection>;
   description: Maybe<Scalars["String"]["output"]>;
   facetTargets: Array<FacetTarget>;
+  faqFields: Maybe<Array<FaqField>>;
   id: Scalars["PHID"]["output"];
   infoLink: Maybe<Scalars["URL"]["output"]>;
   lastModified: Scalars["DateTime"]["output"];
@@ -219,6 +269,20 @@ export type TargetAudience = {
 };
 
 export type TemplateStatus = "ACTIVE" | "COMING_SOON" | "DEPRECATED" | "DRAFT";
+
+export type UpdateContentSectionInput = {
+  content?: InputMaybe<Scalars["String"]["input"]>;
+  displayOrder?: InputMaybe<Scalars["Int"]["input"]>;
+  id: Scalars["OID"]["input"];
+  lastModified: Scalars["DateTime"]["input"];
+  title?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type UpdateFaqInput = {
+  answer?: InputMaybe<Scalars["String"]["input"]>;
+  id: Scalars["OID"]["input"];
+  question?: InputMaybe<Scalars["String"]["input"]>;
+};
 
 export type UpdateOptionGroupInput = {
   defaultSelected?: InputMaybe<Scalars["Boolean"]["input"]>;
