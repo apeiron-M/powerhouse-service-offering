@@ -25,6 +25,7 @@ import {
   deleteContentSection,
   reorderContentSections,
 } from "../../../document-models/resource-template/gen/creators.js";
+import { MarkdownEditor } from "./markdown-editor.js";
 
 interface TemplateInfoProps {
   document: ResourceTemplateDocument;
@@ -360,7 +361,8 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
     direction: "up" | "down",
   ) => {
     const newIndex = direction === "up" ? index - 1 : index + 1;
-    if (newIndex < 0 || newIndex >= globalState.recurringServices.length) return;
+    if (newIndex < 0 || newIndex >= globalState.recurringServices.length)
+      return;
 
     const reorderedServices = [...globalState.recurringServices];
     [reorderedServices[index], reorderedServices[newIndex]] = [
@@ -728,7 +730,7 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
         </section>
 
         {/* Description */}
-        <section className="template-editor__card template-editor__card--full">
+        {/* <section className="template-editor__card template-editor__card--full">
           <div className="template-editor__card-header">
             <div className="template-editor__card-icon template-editor__card-icon--violet">
               <svg
@@ -754,6 +756,36 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
             className="template-editor__textarea"
             placeholder="Provide a comprehensive description of your product, including what makes it unique and valuable..."
             rows={4}
+          />
+        </section> */}
+
+        <section className="template-editor__card template-editor__card--full">
+          <div className="template-editor__card-header">
+            <div className="template-editor__card-icon template-editor__card-icon--violet">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.75"
+              >
+                <path d="M4 6h16M4 12h16M4 18h10" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="template-editor__card-title">Description</h3>
+              <p className="template-editor__card-subtitle">
+                Detailed description of your product
+              </p>
+            </div>
+          </div>
+          <MarkdownEditor
+            label=""
+            height={350}
+            value={formData.description}
+            onChange={(value: string) =>
+              handleFieldChange("description", value)
+            }
+            onBlur={handleInfoBlur}
           />
         </section>
 
@@ -1283,7 +1315,9 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                         type="button"
                         onClick={() => handleMoveSetupService(index, "down")}
                         className="template-editor__service-reorder-btn"
-                        disabled={index === globalState.setupServices.length - 1}
+                        disabled={
+                          index === globalState.setupServices.length - 1
+                        }
                         title="Move down"
                       >
                         <svg
@@ -1462,9 +1496,13 @@ export function TemplateInfo({ document, dispatch }: TemplateInfoProps) {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleMoveRecurringService(index, "down")}
+                        onClick={() =>
+                          handleMoveRecurringService(index, "down")
+                        }
                         className="template-editor__service-reorder-btn"
-                        disabled={index === globalState.recurringServices.length - 1}
+                        disabled={
+                          index === globalState.recurringServices.length - 1
+                        }
                         title="Move down"
                       >
                         <svg

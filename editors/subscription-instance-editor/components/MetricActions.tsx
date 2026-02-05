@@ -24,7 +24,6 @@ export function MetricActions({
   metric,
   dispatch,
   isOperator,
-  customerName,
 }: MetricActionsProps) {
   const [showAdjustModal, setShowAdjustModal] = useState(false);
   const [showRequestModal, setShowRequestModal] = useState(false);

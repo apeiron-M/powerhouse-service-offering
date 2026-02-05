@@ -209,8 +209,6 @@ function RequestServiceModal({
   onClose,
   service,
   requestType,
-  dispatch,
-  customerName,
 }: RequestServiceModalProps) {
   const [reason, setReason] = useState("");
 
