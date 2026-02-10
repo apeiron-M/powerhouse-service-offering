@@ -36,7 +36,6 @@ export function TiersList({ document, dispatch }: TiersListProps) {
     description: "",
     amount: "",
     currency: "USD",
-    billingCycle: "MONTHLY",
   });
 
   const handleAddTier = () => {
@@ -49,7 +48,6 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         description: formData.description || undefined,
         amount: parseFloat(formData.amount),
         currency: formData.currency,
-        billingCycle: formData.billingCycle as any,
         lastModified: new Date().toISOString(),
       }),
     );
@@ -59,7 +57,6 @@ export function TiersList({ document, dispatch }: TiersListProps) {
       description: "",
       amount: "",
       currency: "USD",
-      billingCycle: "MONTHLY",
     });
     setIsAdding(false);
   };
@@ -135,8 +132,8 @@ export function TiersList({ document, dispatch }: TiersListProps) {
         limitId: generateId(),
         serviceId,
         metric,
-        limit,
-        resetPeriod: "MONTHLY",
+        freeLimit: limit,
+        resetCycle: "MONTHLY",
         notes: undefined,
         lastModified: new Date().toISOString(),
       }),
@@ -235,25 +232,6 @@ export function TiersList({ document, dispatch }: TiersListProps) {
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Billing Cycle
-              </label>
-              <select
-                value={formData.billingCycle}
-                onChange={(e) =>
-                  setFormData({ ...formData, billingCycle: e.target.value })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="MONTHLY">Monthly</option>
-                <option value="QUARTERLY">Quarterly</option>
-                <option value="SEMI_ANNUAL">Semi-Annual</option>
-                <option value="ANNUAL">Annual</option>
-                <option value="ONE_TIME">One-Time</option>
-              </select>
-            </div>
-
             <div className="col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
@@ -286,7 +264,6 @@ export function TiersList({ document, dispatch }: TiersListProps) {
                   description: "",
                   amount: "",
                   currency: "USD",
-                  billingCycle: "MONTHLY",
                 });
               }}
               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
@@ -325,9 +302,6 @@ export function TiersList({ document, dispatch }: TiersListProps) {
                     <div className="mt-2 flex items-center gap-4">
                       <span className="text-2xl font-bold text-gray-900">
                         {tier.pricing.currency} {tier.pricing.amount}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        / {tier.pricing.billingCycle.replace("_", " ")}
                       </span>
                     </div>
                   </div>
@@ -478,13 +452,13 @@ export function TiersList({ document, dispatch }: TiersListProps) {
                                   {limit.metric}
                                 </span>
                                 <span className="text-sm text-gray-600 ml-2">
-                                  {limit.limit
-                                    ? `Up to ${limit.limit}`
+                                  {limit.freeLimit
+                                    ? `Up to ${limit.freeLimit}`
                                     : "Unlimited"}
                                 </span>
-                                {limit.resetPeriod && (
+                                {limit.resetCycle && (
                                   <span className="text-xs text-gray-500 ml-2">
-                                    / {limit.resetPeriod}
+                                    / {limit.resetCycle}
                                   </span>
                                 )}
                               </div>

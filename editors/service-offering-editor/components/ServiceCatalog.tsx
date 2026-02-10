@@ -6,7 +6,11 @@ import type {
   ServiceOfferingAction,
   Service,
   OptionGroup,
+  BillingCycle,
+  GroupCostType,
+  ServiceCostType,
 } from "@powerhousedao/contributor-billing/document-models/service-offering";
+import { BILLING_CYCLE_SHORT_LABELS } from "./pricing-utils.js";
 import {
   addService,
   updateService,
@@ -104,27 +108,12 @@ const SERVICE_TEMPLATES: Record<string, ServiceTemplate[]> = {
 };
 import type { ServiceSubscriptionTier } from "../../../document-models/service-offering/gen/schema/types.js";
 
-// Extended group info for UI (tracks setup status and fee locally since schema doesn't support it yet)
-export interface GroupMetadata {
-  isSetupFormation: boolean;
-  setupFee: number | null;
-}
-
 interface ServiceCatalogProps {
   document: ServiceOfferingDocument;
   dispatch: DocumentDispatch<ServiceOfferingAction>;
-  groupMetadata: Record<string, GroupMetadata>;
-  setGroupMetadata: React.Dispatch<
-    React.SetStateAction<Record<string, GroupMetadata>>
-  >;
 }
 
-export function ServiceCatalog({
-  document,
-  dispatch,
-  groupMetadata,
-  setGroupMetadata,
-}: ServiceCatalogProps) {
+export function ServiceCatalog({ document, dispatch }: ServiceCatalogProps) {
   const { state } = document;
   const services = state.global.services ?? [];
   const optionGroups = state.global.optionGroups ?? [];
@@ -138,8 +127,13 @@ export function ServiceCatalog({
   const [newGroupType, setNewGroupType] = useState<
     "setup" | "recurring" | "addon"
   >("recurring");
-  const [newGroupSetupFee, setNewGroupSetupFee] = useState("");
+  const [newGroupPrice, setNewGroupPrice] = useState("");
+  const [newGroupBillingCycle, setNewGroupBillingCycle] =
+    useState<BillingCycle>("MONTHLY");
   const [newService, setNewService] = useState({ title: "", description: "" });
+  const [newServiceCostType, setNewServiceCostType] =
+    useState<ServiceCostType>("RECURRING");
+  const [newServicePrice, setNewServicePrice] = useState("");
   const [selectedTierIds, setSelectedTierIds] = useState<Set<string>>(
     new Set(),
   );
@@ -150,25 +144,12 @@ export function ServiceCatalog({
   const [editGroupType, setEditGroupType] = useState<
     "setup" | "recurring" | "addon"
   >("recurring");
-  const [editGroupSetupFee, setEditGroupSetupFee] = useState("");
+  const [editGroupPrice, setEditGroupPrice] = useState("");
+  const [editGroupBillingCycle, setEditGroupBillingCycle] =
+    useState<BillingCycle>("MONTHLY");
 
   // Service templates quick-add state
   const [showServiceTemplates, setShowServiceTemplates] = useState(false);
-
-  // Initialize metadata from existing services in groups when optionGroups change
-  useEffect(() => {
-    const metadata: Record<string, GroupMetadata> = {};
-    optionGroups.forEach((group) => {
-      const groupServices = getServicesForGroup(group.id);
-      const hasSetupServices = groupServices.some((s) => s.isSetupFormation);
-      metadata[group.id] = {
-        isSetupFormation:
-          groupMetadata[group.id]?.isSetupFormation ?? hasSetupServices,
-        setupFee: groupMetadata[group.id]?.setupFee ?? null,
-      };
-    });
-    setGroupMetadata(metadata);
-  }, [optionGroups.length]);
 
   // Get services that belong to a specific group (via service.optionGroupId)
   const getServicesForGroup = (groupId: string): Service[] => {
@@ -180,16 +161,14 @@ export function ServiceCatalog({
     return services.filter((s) => !s.optionGroupId);
   }, [services]);
 
-  // Categorize option groups based on metadata
+  // Categorize option groups based on schema costType
   const setupGroups = useMemo(() => {
-    return optionGroups.filter((g) => groupMetadata[g.id]?.isSetupFormation);
-  }, [optionGroups, groupMetadata]);
+    return optionGroups.filter((g) => g.costType === "SETUP");
+  }, [optionGroups]);
 
   const regularGroups = useMemo(() => {
-    return optionGroups.filter(
-      (g) => !groupMetadata[g.id]?.isSetupFormation && !g.isAddOn,
-    );
-  }, [optionGroups, groupMetadata]);
+    return optionGroups.filter((g) => g.costType !== "SETUP" && !g.isAddOn);
+  }, [optionGroups]);
 
   const addonGroups = useMemo(() => {
     return optionGroups.filter((g) => g.isAddOn);
@@ -200,31 +179,28 @@ export function ServiceCatalog({
 
     const groupId = generateId();
     const isSetup = newGroupType === "setup";
-    const setupFee =
-      isSetup && newGroupSetupFee ? parseFloat(newGroupSetupFee) : null;
+    const isAddOn = newGroupType === "addon";
+    const costType: GroupCostType = isSetup ? "SETUP" : "RECURRING";
+    const price = newGroupPrice ? parseFloat(newGroupPrice) : null;
 
     dispatch(
       addOptionGroup({
         id: groupId,
         name: newGroupName.trim(),
-        isAddOn: newGroupType === "addon",
-        defaultSelected: newGroupType !== "addon",
+        isAddOn,
+        defaultSelected: !isAddOn,
+        costType,
+        billingCycle: isSetup ? "ONE_TIME" : newGroupBillingCycle,
+        price: price ?? undefined,
+        currency: price ? "USD" : undefined,
         lastModified: new Date().toISOString(),
       }),
     );
 
-    // Store metadata locally
-    setGroupMetadata((prev) => ({
-      ...prev,
-      [groupId]: {
-        isSetupFormation: isSetup,
-        setupFee,
-      },
-    }));
-
     setNewGroupName("");
     setNewGroupType("recurring");
-    setNewGroupSetupFee("");
+    setNewGroupPrice("");
+    setNewGroupBillingCycle("MONTHLY");
     setIsAddingGroup(false);
     setSelectedGroupId(groupId);
   };
@@ -242,24 +218,23 @@ export function ServiceCatalog({
         lastModified: new Date().toISOString(),
       }),
     );
-    setGroupMetadata((prev) => {
-      const next = { ...prev };
-      delete next[groupId];
-      return next;
-    });
     if (selectedGroupId === groupId) {
       setSelectedGroupId(null);
     }
   };
 
   const handleOpenEditGroup = (group: OptionGroup) => {
-    const meta = groupMetadata[group.id];
     setEditingGroup(group);
     setEditGroupName(group.name);
     setEditGroupType(
-      meta?.isSetupFormation ? "setup" : group.isAddOn ? "addon" : "recurring",
+      group.costType === "SETUP"
+        ? "setup"
+        : group.isAddOn
+          ? "addon"
+          : "recurring",
     );
-    setEditGroupSetupFee(meta?.setupFee?.toString() || "");
+    setEditGroupPrice(group.price?.toString() || "");
+    setEditGroupBillingCycle(group.billingCycle || "MONTHLY");
   };
 
   const handleSaveGroupEdit = () => {
@@ -267,8 +242,8 @@ export function ServiceCatalog({
 
     const isSetup = editGroupType === "setup";
     const isAddOn = editGroupType === "addon";
-    const setupFee =
-      isSetup && editGroupSetupFee ? parseFloat(editGroupSetupFee) : null;
+    const costType: GroupCostType = isSetup ? "SETUP" : "RECURRING";
+    const price = editGroupPrice ? parseFloat(editGroupPrice) : null;
 
     // Update the option group in the document
     dispatch(
@@ -277,18 +252,13 @@ export function ServiceCatalog({
         name: editGroupName.trim(),
         isAddOn,
         defaultSelected: !isAddOn,
+        costType,
+        billingCycle: isSetup ? "ONE_TIME" : editGroupBillingCycle,
+        price: price ?? undefined,
+        currency: price ? "USD" : undefined,
         lastModified: new Date().toISOString(),
       }),
     );
-
-    // Update local metadata
-    setGroupMetadata((prev) => ({
-      ...prev,
-      [editingGroup.id]: {
-        isSetupFormation: isSetup,
-        setupFee,
-      },
-    }));
 
     // Update all services in this group to reflect the new setup status
     const groupServices = getServicesForGroup(editingGroup.id);
@@ -313,10 +283,14 @@ export function ServiceCatalog({
     const serviceId = generateId();
     const now = new Date().toISOString();
 
-    // Determine if this is a setup service based on the selected group's metadata
-    const isSetupFormation = selectedGroupId
-      ? (groupMetadata[selectedGroupId]?.isSetupFormation ?? false)
-      : false;
+    // Determine if this is a setup service based on the selected group's costType
+    // or the per-service costType toggle (for add-on groups)
+    const isAddonGroup = selectedGroup?.isAddOn;
+    const isSetupFormation =
+      selectedGroup?.costType === "SETUP" ||
+      (isAddonGroup && newServiceCostType === "SETUP");
+    const servicePrice =
+      isAddonGroup && newServicePrice ? parseFloat(newServicePrice) : undefined;
 
     // Add the service with optionGroupId directly on the service
     dispatch(
@@ -325,6 +299,9 @@ export function ServiceCatalog({
         title: newService.title.trim(),
         description: newService.description.trim() || undefined,
         isSetupFormation,
+        costType: isAddonGroup ? newServiceCostType : undefined,
+        price: servicePrice,
+        currency: servicePrice ? "USD" : undefined,
         optionGroupId: selectedGroupId || undefined,
         lastModified: now,
       }),
@@ -345,6 +322,8 @@ export function ServiceCatalog({
     });
 
     setNewService({ title: "", description: "" });
+    setNewServiceCostType("RECURRING");
+    setNewServicePrice("");
     setSelectedTierIds(new Set());
     setIsAddingService(false);
   };
@@ -356,8 +335,7 @@ export function ServiceCatalog({
     const serviceId = generateId();
     const now = new Date().toISOString();
 
-    const isSetupFormation =
-      groupMetadata[selectedGroupId]?.isSetupFormation ?? false;
+    const isSetupFormation = selectedGroup?.costType === "SETUP";
 
     dispatch(
       addService({
@@ -392,7 +370,13 @@ export function ServiceCatalog({
     updates: Partial<
       Pick<
         Service,
-        "title" | "description" | "isSetupFormation" | "optionGroupId"
+        | "title"
+        | "description"
+        | "isSetupFormation"
+        | "optionGroupId"
+        | "costType"
+        | "price"
+        | "currency"
       >
     >,
   ) => {
@@ -474,9 +458,6 @@ export function ServiceCatalog({
   const selectedGroup = selectedGroupId
     ? optionGroups.find((g) => g.id === selectedGroupId)
     : null;
-  const selectedGroupMeta = selectedGroupId
-    ? groupMetadata[selectedGroupId]
-    : null;
 
   return (
     <>
@@ -544,15 +525,43 @@ export function ServiceCatalog({
                 </div>
               </div>
 
-              {editGroupType === "setup" && (
+              {editGroupType !== "setup" && (
+                <div className="catalog__field">
+                  <label className="catalog__label">Billing Cycle</label>
+                  <select
+                    value={editGroupBillingCycle}
+                    onChange={(e) =>
+                      setEditGroupBillingCycle(e.target.value as BillingCycle)
+                    }
+                    className="catalog__select"
+                  >
+                    {(
+                      Object.entries(BILLING_CYCLE_SHORT_LABELS) as [
+                        BillingCycle,
+                        string,
+                      ][]
+                    ).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(editGroupType === "addon" || editGroupType === "setup") && (
                 <div className="catalog__fee-field">
-                  <span className="catalog__fee-label">One-time Fee</span>
+                  <span className="catalog__fee-label">
+                    {editGroupType === "setup"
+                      ? "One-time Fee"
+                      : "Add-on Price"}
+                  </span>
                   <div className="catalog__fee-input-wrapper">
                     <span className="catalog__fee-prefix">$</span>
                     <input
                       type="number"
-                      value={editGroupSetupFee}
-                      onChange={(e) => setEditGroupSetupFee(e.target.value)}
+                      value={editGroupPrice}
+                      onChange={(e) => setEditGroupPrice(e.target.value)}
                       placeholder="0"
                       className="catalog__fee-input"
                       step="0.01"
@@ -638,15 +647,41 @@ export function ServiceCatalog({
                 </div>
               </div>
 
-              {newGroupType === "setup" && (
+              {newGroupType !== "setup" && (
+                <div className="catalog__field">
+                  <label className="catalog__label">Billing Cycle</label>
+                  <select
+                    value={newGroupBillingCycle}
+                    onChange={(e) =>
+                      setNewGroupBillingCycle(e.target.value as BillingCycle)
+                    }
+                    className="catalog__select"
+                  >
+                    {(
+                      Object.entries(BILLING_CYCLE_SHORT_LABELS) as [
+                        BillingCycle,
+                        string,
+                      ][]
+                    ).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(newGroupType === "addon" || newGroupType === "setup") && (
                 <div className="catalog__fee-field">
-                  <span className="catalog__fee-label">One-time Fee</span>
+                  <span className="catalog__fee-label">
+                    {newGroupType === "setup" ? "One-time Fee" : "Add-on Price"}
+                  </span>
                   <div className="catalog__fee-input-wrapper">
                     <span className="catalog__fee-prefix">$</span>
                     <input
                       type="number"
-                      value={newGroupSetupFee}
-                      onChange={(e) => setNewGroupSetupFee(e.target.value)}
+                      value={newGroupPrice}
+                      onChange={(e) => setNewGroupPrice(e.target.value)}
                       placeholder="0"
                       className="catalog__fee-input"
                       step="0.01"
@@ -668,7 +703,7 @@ export function ServiceCatalog({
                     setIsAddingGroup(false);
                     setNewGroupName("");
                     setNewGroupType("recurring");
-                    setNewGroupSetupFee("");
+                    setNewGroupPrice("");
                   }}
                   className="catalog__btn catalog__btn--secondary"
                 >
@@ -686,7 +721,6 @@ export function ServiceCatalog({
                 color="amber"
                 groups={setupGroups}
                 selectedGroupId={selectedGroupId}
-                groupMetadata={groupMetadata}
                 getServicesForGroup={getServicesForGroup}
                 onSelect={setSelectedGroupId}
                 onEdit={handleOpenEditGroup}
@@ -701,7 +735,6 @@ export function ServiceCatalog({
                 color="emerald"
                 groups={regularGroups}
                 selectedGroupId={selectedGroupId}
-                groupMetadata={groupMetadata}
                 getServicesForGroup={getServicesForGroup}
                 onSelect={setSelectedGroupId}
                 onEdit={handleOpenEditGroup}
@@ -716,7 +749,6 @@ export function ServiceCatalog({
                 color="violet"
                 groups={addonGroups}
                 selectedGroupId={selectedGroupId}
-                groupMetadata={groupMetadata}
                 getServicesForGroup={getServicesForGroup}
                 onSelect={setSelectedGroupId}
                 onEdit={handleOpenEditGroup}
@@ -759,21 +791,44 @@ export function ServiceCatalog({
                 {selectedGroup?.name || "Ungrouped Services"}
               </h2>
               <p className="catalog__main-subtitle">
-                {selectedGroupMeta?.isSetupFormation ? (
+                {selectedGroup?.costType === "SETUP" ? (
                   <span className="catalog__main-meta">
                     <span className="catalog__badge catalog__badge--amber">
                       Setup & Formation
                     </span>
-                    {selectedGroupMeta.setupFee && (
+                    {selectedGroup.price != null
+                      ? `One-time fee: $${selectedGroup.price}`
+                      : "Included in tier price"}
+                  </span>
+                ) : selectedGroup?.isAddOn ? (
+                  <span className="catalog__main-meta">
+                    Optional add-on group
+                    {selectedGroup.billingCycle && (
+                      <span
+                        className="catalog__badge catalog__badge--violet"
+                        style={{ marginLeft: 8 }}
+                      >
+                        {BILLING_CYCLE_SHORT_LABELS[selectedGroup.billingCycle]}
+                      </span>
+                    )}
+                    {selectedGroup.price != null && (
                       <span className="catalog__fee-display">
-                        ${selectedGroupMeta.setupFee} one-time fee
+                        ${selectedGroup.price}
                       </span>
                     )}
                   </span>
-                ) : selectedGroup?.isAddOn ? (
-                  "Optional add-on group"
                 ) : selectedGroup ? (
-                  "Included in subscription"
+                  <span className="catalog__main-meta">
+                    Included in subscription
+                    {selectedGroup.billingCycle && (
+                      <span
+                        className="catalog__badge catalog__badge--emerald"
+                        style={{ marginLeft: 8 }}
+                      >
+                        {BILLING_CYCLE_SHORT_LABELS[selectedGroup.billingCycle]}
+                      </span>
+                    )}
+                  </span>
                 ) : (
                   "Services not assigned to any group"
                 )}
@@ -940,6 +995,57 @@ export function ServiceCatalog({
                 />
               </div>
 
+              {/* Per-service cost type for add-on groups */}
+              {selectedGroup?.isAddOn && (
+                <div className="catalog__field">
+                  <label className="catalog__label">Service Type</label>
+                  <div className="catalog__type-options">
+                    {(
+                      [
+                        {
+                          type: "RECURRING",
+                          label: "Recurring",
+                          color: "emerald",
+                        },
+                        {
+                          type: "SETUP",
+                          label: "One-time Setup",
+                          color: "amber",
+                        },
+                      ] as const
+                    ).map(({ type, label, color }) => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setNewServiceCostType(type)}
+                        className={`catalog__type-btn catalog__type-btn--${color} ${newServiceCostType === type ? "catalog__type-btn--active" : ""}`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  {newServiceCostType === "SETUP" && (
+                    <div
+                      className="catalog__fee-field"
+                      style={{ marginTop: 8 }}
+                    >
+                      <span className="catalog__fee-label">One-time Fee</span>
+                      <div className="catalog__fee-input-wrapper">
+                        <span className="catalog__fee-prefix">$</span>
+                        <input
+                          type="number"
+                          value={newServicePrice}
+                          onChange={(e) => setNewServicePrice(e.target.value)}
+                          placeholder="0"
+                          className="catalog__fee-input"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Tier Selection */}
               {tiers.length > 0 && (
                 <div className="catalog__field">
@@ -971,8 +1077,7 @@ export function ServiceCatalog({
                           </span>
                           {tier.pricing.amount !== null && (
                             <span className="catalog__tier-price">
-                              ${tier.pricing.amount}/
-                              {tier.pricing.billingCycle.toLowerCase()}
+                              ${tier.pricing.amount}
                             </span>
                           )}
                         </label>
@@ -1016,6 +1121,8 @@ export function ServiceCatalog({
                   onClick={() => {
                     setIsAddingService(false);
                     setNewService({ title: "", description: "" });
+                    setNewServiceCostType("RECURRING");
+                    setNewServicePrice("");
                     setSelectedTierIds(new Set());
                   }}
                   className="catalog__btn catalog__btn--secondary"
@@ -1055,7 +1162,6 @@ export function ServiceCatalog({
                   service={service}
                   tiers={tiers}
                   optionGroups={optionGroups}
-                  groupMetadata={groupMetadata}
                   onUpdate={handleUpdateService}
                   onDelete={() => handleDeleteService(service.id)}
                   onToggleTier={handleToggleTier}
@@ -1074,7 +1180,6 @@ interface GroupSectionProps {
   color: string;
   groups: OptionGroup[];
   selectedGroupId: string | null;
-  groupMetadata: Record<string, GroupMetadata>;
   getServicesForGroup: (groupId: string) => Service[];
   onSelect: (groupId: string) => void;
   onEdit: (group: OptionGroup) => void;
@@ -1086,7 +1191,6 @@ function GroupSection({
   color,
   groups,
   selectedGroupId,
-  groupMetadata,
   getServicesForGroup,
   onSelect,
   onEdit,
@@ -1110,8 +1214,6 @@ function GroupSection({
             onSelect={() => onSelect(group.id)}
             onEdit={() => onEdit(group)}
             onDelete={() => onDelete(group.id)}
-            setupFee={groupMetadata[group.id]?.setupFee}
-            isSetup={groupMetadata[group.id]?.isSetupFormation}
             color={color}
           />
         ))}
@@ -1127,8 +1229,6 @@ interface GroupButtonProps {
   onSelect: () => void;
   onEdit: () => void;
   onDelete: () => void;
-  setupFee?: number | null;
-  isSetup?: boolean;
   color: string;
 }
 
@@ -1139,11 +1239,10 @@ function GroupButton({
   onSelect,
   onEdit,
   onDelete,
-  setupFee,
-  isSetup,
   color,
 }: GroupButtonProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const isSetup = group.costType === "SETUP";
 
   return (
     <div
@@ -1167,12 +1266,18 @@ function GroupButton({
               OPTIONAL
             </span>
           )}
+          {group.billingCycle && !isSetup && (
+            <span className="catalog__group-tag catalog__group-tag--emerald">
+              {BILLING_CYCLE_SHORT_LABELS[group.billingCycle]}
+            </span>
+          )}
         </div>
         <div className="catalog__group-meta">
           <span>{serviceCount} services</span>
-          {setupFee && (
-            <span className="catalog__group-fee">${setupFee} fee</span>
-          )}
+          {(group.isAddOn || group.costType === "SETUP") &&
+            group.price != null && (
+              <span className="catalog__group-fee">${group.price}</span>
+            )}
         </div>
       </button>
       {isHovered && (
@@ -1225,13 +1330,18 @@ interface ServiceCardProps {
   service: Service;
   tiers: ServiceSubscriptionTier[];
   optionGroups: OptionGroup[];
-  groupMetadata: Record<string, GroupMetadata>;
   onUpdate: (
     service: Service,
     updates: Partial<
       Pick<
         Service,
-        "title" | "description" | "isSetupFormation" | "optionGroupId"
+        | "title"
+        | "description"
+        | "isSetupFormation"
+        | "optionGroupId"
+        | "costType"
+        | "price"
+        | "currency"
       >
     >,
   ) => void;
@@ -1247,7 +1357,6 @@ function ServiceCard({
   service,
   tiers,
   optionGroups,
-  groupMetadata,
   onUpdate,
   onDelete,
   onToggleTier,
@@ -1299,6 +1408,11 @@ function ServiceCard({
             {service.isSetupFormation && (
               <span className="catalog__badge catalog__badge--amber">
                 Setup Service
+              </span>
+            )}
+            {service.costType === "SETUP" && service.price != null && (
+              <span className="catalog__badge catalog__badge--slate">
+                ${service.price}
               </span>
             )}
           </div>
@@ -1372,9 +1486,10 @@ function ServiceCard({
               value={service.optionGroupId || ""}
               onChange={(e) => {
                 const newGroupId = e.target.value || null;
-                const isSetupGroup = newGroupId
-                  ? (groupMetadata[newGroupId]?.isSetupFormation ?? false)
-                  : false;
+                const targetGroup = newGroupId
+                  ? optionGroups.find((g) => g.id === newGroupId)
+                  : null;
+                const isSetupGroup = targetGroup?.costType === "SETUP";
 
                 onUpdate(service, {
                   optionGroupId: newGroupId,
@@ -1385,12 +1500,12 @@ function ServiceCard({
             >
               <option value="">No group (ungrouped)</option>
               {optionGroups.map((group) => {
-                const meta = groupMetadata[group.id];
-                const label = meta?.isSetupFormation
-                  ? `${group.name} (Setup)`
-                  : group.isAddOn
-                    ? `${group.name} (Add-on)`
-                    : `${group.name} (Recurring)`;
+                const label =
+                  group.costType === "SETUP"
+                    ? `${group.name} (Setup)`
+                    : group.isAddOn
+                      ? `${group.name} (Add-on)`
+                      : `${group.name} (Recurring)`;
                 return (
                   <option key={group.id} value={group.id}>
                     {label}
@@ -1399,6 +1514,71 @@ function ServiceCard({
               })}
             </select>
           </div>
+
+          {/* Per-service cost type for add-on group services */}
+          {(() => {
+            const serviceGroup = service.optionGroupId
+              ? optionGroups.find((g) => g.id === service.optionGroupId)
+              : null;
+            if (!serviceGroup?.isAddOn) return null;
+            return (
+              <div className="catalog__service-section">
+                <label className="catalog__label">Service Type</label>
+                <div className="catalog__type-options">
+                  {[
+                    {
+                      type: "RECURRING" as ServiceCostType,
+                      label: "Recurring",
+                      color: "emerald",
+                    },
+                    {
+                      type: "SETUP" as ServiceCostType,
+                      label: "One-time Setup",
+                      color: "amber",
+                    },
+                  ].map(({ type, label, color }) => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() =>
+                        onUpdate(service, {
+                          costType: type,
+                          isSetupFormation: type === "SETUP",
+                        })
+                      }
+                      className={`catalog__type-btn catalog__type-btn--${color} ${(service.costType || "RECURRING") === type ? "catalog__type-btn--active" : ""}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                {service.costType === "SETUP" && (
+                  <div className="catalog__fee-field" style={{ marginTop: 8 }}>
+                    <span className="catalog__fee-label">One-time Fee</span>
+                    <div className="catalog__fee-input-wrapper">
+                      <span className="catalog__fee-prefix">$</span>
+                      <input
+                        type="number"
+                        defaultValue={service.price?.toString() || ""}
+                        onBlur={(e) => {
+                          const val = e.target.value
+                            ? parseFloat(e.target.value)
+                            : null;
+                          onUpdate(service, {
+                            price: val,
+                            currency: val ? "USD" : null,
+                          });
+                        }}
+                        placeholder="0"
+                        className="catalog__fee-input"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Tier inclusion */}
           {tiers.length > 0 && (
@@ -1423,8 +1603,7 @@ function ServiceCard({
                       <span className="catalog__tier-name">{tier.name}</span>
                       {tier.pricing.amount !== null && (
                         <span className="catalog__tier-price">
-                          ${tier.pricing.amount}/
-                          {tier.pricing.billingCycle.toLowerCase()}
+                          ${tier.pricing.amount}
                         </span>
                       )}
                     </label>
@@ -1780,6 +1959,11 @@ const styles = `
   .catalog__group-tag--violet {
     background: var(--so-violet-100);
     color: var(--so-violet-700);
+  }
+
+  .catalog__group-tag--emerald {
+    background: var(--so-emerald-100);
+    color: var(--so-emerald-700);
   }
 
   .catalog__group-meta {

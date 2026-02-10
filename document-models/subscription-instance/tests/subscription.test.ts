@@ -36,6 +36,8 @@ import {
   SetOperatorNotesInputSchema,
   SetAutoRenewInputSchema,
   SetRenewalDateInputSchema,
+  updateBillingProjection,
+  UpdateBillingProjectionInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/subscription-instance";
 
 // Note: setOperatorInfo has been removed from the document model
@@ -314,4 +316,21 @@ describe("SubscriptionOperations", () => {
   });
 
   // Note: setOperatorInfo test removed - operation no longer exists
+
+  it("should handle updateBillingProjection operation", () => {
+    const document = utils.createDocument();
+    const input = generateMock(UpdateBillingProjectionInputSchema());
+
+    const updatedDocument = reducer(document, updateBillingProjection(input));
+
+    expect(isSubscriptionInstanceDocument(updatedDocument)).toBe(true);
+    expect(updatedDocument.operations.global).toHaveLength(1);
+    expect(updatedDocument.operations.global[0].action.type).toBe(
+      "UPDATE_BILLING_PROJECTION",
+    );
+    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
+      input,
+    );
+    expect(updatedDocument.operations.global[0].index).toEqual(0);
+  });
 });

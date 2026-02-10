@@ -10,8 +10,6 @@ import { ServicesPanel } from "./components/ServicesPanel.js";
 import { BillingPanel } from "./components/BillingPanel.js";
 import { CustomerInfo } from "./components/CustomerInfo.js";
 import { OperatorNotes } from "./components/OperatorNotes.js";
-import { CommunicationChannelsPanel } from "./components/CommunicationChannelsPanel.js";
-import { PendingRequestsPanel } from "./components/PendingRequestsPanel.js";
 
 export default function SubscriptionInstanceEditor() {
   const [document, dispatch] = useSelectedSubscriptionInstanceDocument();
@@ -86,15 +84,7 @@ export default function SubscriptionInstanceEditor() {
 
           {/* Right Column - Info & Notes */}
           <div className="si-editor__sidebar">
-            {mode === "operator" && (
-              <PendingRequestsPanel document={document} dispatch={dispatch} />
-            )}
             <CustomerInfo document={document} dispatch={dispatch} mode={mode} />
-            <CommunicationChannelsPanel
-              document={document}
-              dispatch={dispatch}
-              mode={mode}
-            />
             {mode === "operator" && (
               <OperatorNotes document={document} dispatch={dispatch} />
             )}

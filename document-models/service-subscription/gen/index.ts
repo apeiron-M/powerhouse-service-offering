@@ -18,3 +18,4 @@ export * from "./subscription-management/operations.js";
 export * from "./tier-selection/operations.js";
 export * from "./add-on-management/operations.js";
 export * from "./facet-selection/operations.js";
+export * from "./billing-projection/operations.js";

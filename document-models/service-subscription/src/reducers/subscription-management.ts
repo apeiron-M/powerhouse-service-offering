@@ -1,3 +1,4 @@
+import { SubscriptionStillActiveError } from "../../gen/subscription-management/error.js";
 import type { ServiceSubscriptionSubscriptionManagementOperations } from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 export const serviceSubscriptionSubscriptionManagementOperations: ServiceSubscriptionSubscriptionManagementOperations =
@@ -5,15 +6,14 @@ export const serviceSubscriptionSubscriptionManagementOperations: ServiceSubscri
     initializeSubscriptionOperation(state, action) {
       state.id = action.input.id;
       state.customerId = action.input.customerId;
+      state.customerName = action.input.customerName || null;
       state.serviceOfferingId = action.input.serviceOfferingId;
+      state.serviceOfferingTitle = action.input.serviceOfferingTitle || null;
       state.resourceTemplateId = action.input.resourceTemplateId;
       state.selectedTierId = action.input.selectedTierId;
       state.status = "PENDING";
+      state.autoRenew = true;
       state.createdAt = action.input.createdAt;
-      state.lastModified = action.input.lastModified;
-    },
-    updateSubscriptionStatusOperation(state, action) {
-      state.status = action.input.status;
       state.lastModified = action.input.lastModified;
     },
     activateSubscriptionOperation(state, action) {
@@ -24,14 +24,16 @@ export const serviceSubscriptionSubscriptionManagementOperations: ServiceSubscri
       state.lastModified = action.input.lastModified;
     },
     cancelSubscriptionOperation(state, action) {
-      state.status = "CANCELLED";
+      state.autoRenew = false;
       state.cancelledAt = action.input.cancelledAt;
+      state.cancelEffectiveDate = action.input.cancelEffectiveDate || null;
       state.cancellationReason = action.input.reason || null;
       state.lastModified = action.input.lastModified;
     },
-    renewSubscriptionOperation(state, action) {
-      state.currentPeriodStart = action.input.periodStart;
-      state.currentPeriodEnd = action.input.periodEnd;
+    expireSubscriptionOperation(state, action) {
+      if (!state.autoRenew) {
+        state.status = "EXPIRED";
+      }
       state.lastModified = action.input.lastModified;
     },
   };

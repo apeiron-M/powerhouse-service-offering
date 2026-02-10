@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { generateId } from "document-model/core";
 import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
@@ -12,8 +12,6 @@ import {
   setOperator,
   addTargetAudience,
   removeTargetAudience,
-  setSetupServices,
-  setRecurringServices,
   setFacetTarget,
   removeFacetTarget,
   addFacetOption,
@@ -101,12 +99,8 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
     status: globalState.status,
   });
 
-  const [newSetupService, setNewSetupService] = useState("");
-  const [newRecurringService, setNewRecurringService] = useState("");
   const [newAudienceLabel, setNewAudienceLabel] = useState("");
   const [showAudienceInput, setShowAudienceInput] = useState(false);
-  const setupServiceInputRef = useRef<HTMLInputElement>(null);
-  const recurringServiceInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setFormData({
@@ -207,62 +201,6 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
     dispatch(
       removeTargetAudience({
         id,
-        lastModified: new Date().toISOString(),
-      }),
-    );
-  };
-
-  const handleAddSetupService = () => {
-    if (!newSetupService.trim()) return;
-    const updatedServices = [
-      ...globalState.setupServices,
-      newSetupService.trim(),
-    ];
-    dispatch(
-      setSetupServices({
-        services: updatedServices,
-        lastModified: new Date().toISOString(),
-      }),
-    );
-    setNewSetupService("");
-    setupServiceInputRef.current?.focus();
-  };
-
-  const handleRemoveSetupService = (index: number) => {
-    const updatedServices = globalState.setupServices.filter(
-      (_, i) => i !== index,
-    );
-    dispatch(
-      setSetupServices({
-        services: updatedServices,
-        lastModified: new Date().toISOString(),
-      }),
-    );
-  };
-
-  const handleAddRecurringService = () => {
-    if (!newRecurringService.trim()) return;
-    const updatedServices = [
-      ...globalState.recurringServices,
-      newRecurringService.trim(),
-    ];
-    dispatch(
-      setRecurringServices({
-        services: updatedServices,
-        lastModified: new Date().toISOString(),
-      }),
-    );
-    setNewRecurringService("");
-    recurringServiceInputRef.current?.focus();
-  };
-
-  const handleRemoveRecurringService = (index: number) => {
-    const updatedServices = globalState.recurringServices.filter(
-      (_, i) => i !== index,
-    );
-    dispatch(
-      setRecurringServices({
-        services: updatedServices,
         lastModified: new Date().toISOString(),
       }),
     );
@@ -540,158 +478,6 @@ export function ScopeAndFacets({ document, dispatch }: ScopeAndFacetsProps) {
             rows={4}
           />
         </section>
-
-        {/* Services Grid */}
-        <div className="offering-editor__grid">
-          <section className="offering-editor__card">
-            <div className="offering-editor__card-header">
-              <div className="offering-editor__card-icon offering-editor__card-icon--emerald">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="offering-editor__card-title">
-                  Formation & Setup
-                </h3>
-                <p className="offering-editor__card-subtitle">
-                  One-time setup services
-                </p>
-              </div>
-            </div>
-            <div className="offering-editor__services">
-              {globalState.setupServices.map(
-                (service: string, index: number) => (
-                  <div key={index} className="offering-editor__service">
-                    <span className="offering-editor__service-bullet" />
-                    <span className="offering-editor__service-text">
-                      {service}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSetupService(index)}
-                      className="offering-editor__service-remove"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <path d="M18 6L6 18M6 6l12 12" strokeWidth="2" />
-                      </svg>
-                    </button>
-                  </div>
-                ),
-              )}
-              <div className="offering-editor__add-service">
-                <span className="offering-editor__service-bullet offering-editor__service-bullet--ghost" />
-                <input
-                  ref={setupServiceInputRef}
-                  type="text"
-                  value={newSetupService}
-                  onChange={(e) => setNewSetupService(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddSetupService();
-                  }}
-                  placeholder="Add a setup service..."
-                  className="offering-editor__service-new-input"
-                />
-                {newSetupService && (
-                  <button
-                    type="button"
-                    onClick={handleAddSetupService}
-                    className="offering-editor__service-add-btn"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M12 5v14M5 12h14" strokeWidth="2" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
-
-          <section className="offering-editor__card">
-            <div className="offering-editor__card-header">
-              <div className="offering-editor__card-icon offering-editor__card-icon--amber">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.75"
-                >
-                  <path d="M12 8v4l3 3" />
-                  <circle cx="12" cy="12" r="9" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="offering-editor__card-title">
-                  Recurring Services
-                </h3>
-                <p className="offering-editor__card-subtitle">
-                  Ongoing services included
-                </p>
-              </div>
-            </div>
-            <div className="offering-editor__services">
-              {globalState.recurringServices.map(
-                (service: string, index: number) => (
-                  <div key={index} className="offering-editor__service">
-                    <span className="offering-editor__service-bullet offering-editor__service-bullet--recurring" />
-                    <span className="offering-editor__service-text">
-                      {service}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveRecurringService(index)}
-                      className="offering-editor__service-remove"
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                      >
-                        <path d="M18 6L6 18M6 6l12 12" strokeWidth="2" />
-                      </svg>
-                    </button>
-                  </div>
-                ),
-              )}
-              <div className="offering-editor__add-service">
-                <span className="offering-editor__service-bullet offering-editor__service-bullet--ghost" />
-                <input
-                  ref={recurringServiceInputRef}
-                  type="text"
-                  value={newRecurringService}
-                  onChange={(e) => setNewRecurringService(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleAddRecurringService();
-                  }}
-                  placeholder="Add a recurring service..."
-                  className="offering-editor__service-new-input"
-                />
-                {newRecurringService && (
-                  <button
-                    type="button"
-                    onClick={handleAddRecurringService}
-                    className="offering-editor__service-add-btn"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path d="M12 5v14M5 12h14" strokeWidth="2" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
-        </div>
 
         {/* Facet Targeting Section */}
         <section className="offering-editor__facets">

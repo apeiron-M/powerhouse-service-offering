@@ -14,8 +14,6 @@ import {
   removeFacetTarget,
   addFacetOption,
   removeFacetOption,
-  setSetupServices,
-  setRecurringServices,
   selectResourceTemplate,
   changeResourceTemplate,
   UpdateOfferingInfoInputSchema,
@@ -28,8 +26,6 @@ import {
   RemoveFacetTargetInputSchema,
   AddFacetOptionInputSchema,
   RemoveFacetOptionInputSchema,
-  SetSetupServicesInputSchema,
-  SetRecurringServicesInputSchema,
   SelectResourceTemplateInputSchema,
   ChangeResourceTemplateInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/service-offering";
@@ -198,40 +194,6 @@ describe("OfferingManagementOperations", () => {
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "REMOVE_FACET_OPTION",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
-
-  it("should handle setSetupServices operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(SetSetupServicesInputSchema());
-
-    const updatedDocument = reducer(document, setSetupServices(input));
-
-    expect(isServiceOfferingDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_SETUP_SERVICES",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
-
-  it("should handle setRecurringServices operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(SetRecurringServicesInputSchema());
-
-    const updatedDocument = reducer(document, setRecurringServices(input));
-
-    expect(isServiceOfferingDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "SET_RECURRING_SERVICES",
     );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,

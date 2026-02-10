@@ -105,7 +105,6 @@ interface TierPreset {
   tiers: Array<{
     name: string;
     amount: number | null;
-    billingCycle: BillingCycle;
     isCustomPricing: boolean;
   }>;
 }
@@ -119,19 +118,16 @@ const TIER_PRESETS: TierPreset[] = [
       {
         name: "Basic",
         amount: 99,
-        billingCycle: "MONTHLY",
         isCustomPricing: false,
       },
       {
         name: "Professional",
         amount: 299,
-        billingCycle: "MONTHLY",
         isCustomPricing: false,
       },
       {
         name: "Enterprise",
         amount: null,
-        billingCycle: "MONTHLY",
         isCustomPricing: true,
       },
     ],
@@ -144,19 +140,16 @@ const TIER_PRESETS: TierPreset[] = [
       {
         name: "Free",
         amount: 0,
-        billingCycle: "MONTHLY",
         isCustomPricing: false,
       },
       {
         name: "Pro",
         amount: 49,
-        billingCycle: "MONTHLY",
         isCustomPricing: false,
       },
       {
         name: "Business",
         amount: 149,
-        billingCycle: "MONTHLY",
         isCustomPricing: false,
       },
     ],
@@ -169,13 +162,11 @@ const TIER_PRESETS: TierPreset[] = [
       {
         name: "Starter",
         amount: 79,
-        billingCycle: "MONTHLY",
         isCustomPricing: false,
       },
       {
         name: "Growth",
         amount: 199,
-        billingCycle: "MONTHLY",
         isCustomPricing: false,
       },
     ],
@@ -188,19 +179,16 @@ const TIER_PRESETS: TierPreset[] = [
       {
         name: "Essential",
         amount: 990,
-        billingCycle: "ANNUAL",
         isCustomPricing: false,
       },
       {
         name: "Professional",
         amount: 2990,
-        billingCycle: "ANNUAL",
         isCustomPricing: false,
       },
       {
         name: "Enterprise",
         amount: null,
-        billingCycle: "ANNUAL",
         isCustomPricing: true,
       },
     ],
@@ -971,7 +959,6 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
     name: "",
     amount: "",
     currency: "USD",
-    billingCycle: "MONTHLY" as BillingCycle,
     isCustomPricing: false,
   });
 
@@ -987,7 +974,6 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
           ? undefined
           : parseFloat(newTier.amount),
         currency: newTier.currency,
-        billingCycle: newTier.billingCycle,
         isCustomPricing: newTier.isCustomPricing,
         lastModified: new Date().toISOString(),
       }),
@@ -997,7 +983,6 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
       name: "",
       amount: "",
       currency: "USD",
-      billingCycle: "MONTHLY",
       isCustomPricing: false,
     });
     setIsAddingTier(false);
@@ -1025,7 +1010,6 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
             ? undefined
             : (tierConfig.amount ?? undefined),
           currency: "USD",
-          billingCycle: tierConfig.billingCycle,
           isCustomPricing: tierConfig.isCustomPricing,
           lastModified: now,
         }),
@@ -1147,23 +1131,7 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
                       className="tier-form-card__amount-input"
                       step="0.01"
                     />
-                    <span className="tier-form-card__separator">/</span>
-                    <select
-                      value={newTier.billingCycle}
-                      onChange={(e) =>
-                        setNewTier({
-                          ...newTier,
-                          billingCycle: e.target.value as BillingCycle,
-                        })
-                      }
-                      className="tier-form-card__cycle-select"
-                    >
-                      {BILLING_CYCLES.map((cycle) => (
-                        <option key={cycle.value} value={cycle.value}>
-                          {cycle.label}
-                        </option>
-                      ))}
-                    </select>
+                    {/* Billing cycle is configured at the ServiceGroup level */}
                   </div>
                 </div>
               )}
@@ -1186,7 +1154,6 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
                       name: "",
                       amount: "",
                       currency: "USD",
-                      billingCycle: "MONTHLY",
                       isCustomPricing: false,
                     });
                   }}
@@ -1237,12 +1204,12 @@ export function TierDefinition({ document, dispatch }: TierDefinitionProps) {
           </svg>
           <div className="tier-notice__content">
             <p className="tier-notice__title">
-              Setup fees are managed at the service group level
+              Pricing is managed at the option group level
             </p>
             <p className="tier-notice__text">
-              Configure setup fees for "Setup & Formation" service groups in the
-              Service Catalog. The setup fee applies to all tiers when those
-              services are included.
+              Billing cycles and pricing are configured per option group in the
+              Service Catalog. Setup fees, recurring prices, and billing cycles
+              apply to all tiers within each group.
             </p>
           </div>
         </div>
@@ -1269,9 +1236,6 @@ function TierCard({
   const [localName, setLocalName] = useState(tier.name);
   const [localAmount, setLocalAmount] = useState(
     tier.pricing.amount?.toString() || "",
-  );
-  const [localBillingCycle, setLocalBillingCycle] = useState(
-    tier.pricing.billingCycle,
   );
   const [localDescription, setLocalDescription] = useState(
     tier.description || "",
@@ -1302,17 +1266,13 @@ function TierCard({
     }
   };
 
-  const handlePricingChange = (
-    amount?: string,
-    billingCycle?: BillingCycle,
-  ) => {
+  const handlePricingChange = (amount?: string) => {
     const newAmount =
       amount !== undefined
         ? amount
           ? parseFloat(amount)
           : null
         : tier.pricing.amount;
-    const newCycle = billingCycle || tier.pricing.billingCycle;
 
     if (!isCustomPricing && (newAmount == null || isNaN(newAmount))) return;
 
@@ -1320,7 +1280,6 @@ function TierCard({
       updateTierPricing({
         tierId: tier.id,
         amount: newAmount,
-        billingCycle: newCycle,
         lastModified: new Date().toISOString(),
       }),
     );
@@ -1406,51 +1365,8 @@ function TierCard({
                 className="tier-card__amount-input"
                 step="0.01"
               />
-              <span className="tier-card__divider">/</span>
-              <select
-                value={localBillingCycle}
-                onChange={(e) => {
-                  const newCycle = e.target.value as BillingCycle;
-                  setLocalBillingCycle(newCycle);
-                  handlePricingChange(undefined, newCycle);
-                }}
-                className="tier-card__cycle-select"
-              >
-                {BILLING_CYCLES.map((cycle) => (
-                  <option key={cycle.value} value={cycle.value}>
-                    {cycle.label}
-                  </option>
-                ))}
-              </select>
+              {/* Billing cycle is configured at the ServiceGroup level */}
             </div>
-            {/* Price Per Day - Mental Accounting */}
-            {localAmount &&
-              parseFloat(localAmount) > 0 &&
-              localBillingCycle !== "ONE_TIME" && (
-                <div className="tier-card__price-breakdown">
-                  <div className="tier-card__per-day">
-                    <span className="tier-card__per-day-amount">
-                      $
-                      {getPricePerDay(
-                        parseFloat(localAmount),
-                        localBillingCycle,
-                      )}
-                    </span>
-                    <span className="tier-card__per-day-label">/day</span>
-                  </div>
-                  {parseFloat(localAmount) > 0 &&
-                    parseFloat(
-                      getPricePerDay(
-                        parseFloat(localAmount),
-                        localBillingCycle,
-                      ),
-                    ) < 10 && (
-                      <span className="tier-card__comparison">
-                        Less than a coffee
-                      </span>
-                    )}
-                </div>
-              )}
             {/* Charm Pricing Suggestions - Left-Digit Bias */}
             {localAmount && parseFloat(localAmount) > 0 && (
               <div className="tier-card__charm-pricing">

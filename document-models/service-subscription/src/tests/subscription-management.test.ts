@@ -11,14 +11,12 @@ import {
   isServiceSubscriptionDocument,
   initializeSubscription,
   InitializeSubscriptionInputSchema,
-  updateSubscriptionStatus,
-  UpdateSubscriptionStatusInputSchema,
   activateSubscription,
   ActivateSubscriptionInputSchema,
   cancelSubscription,
   CancelSubscriptionInputSchema,
-  renewSubscription,
-  RenewSubscriptionInputSchema,
+  expireSubscription,
+  ExpireSubscriptionInputSchema,
 } from "@powerhousedao/contributor-billing/document-models/service-subscription";
 
 describe("SubscriptionManagement Operations", () => {
@@ -32,22 +30,6 @@ describe("SubscriptionManagement Operations", () => {
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
       "INITIALIZE_SUBSCRIPTION",
-    );
-    expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
-      input,
-    );
-    expect(updatedDocument.operations.global[0].index).toEqual(0);
-  });
-  it("should handle updateSubscriptionStatus operation", () => {
-    const document = utils.createDocument();
-    const input = generateMock(UpdateSubscriptionStatusInputSchema());
-
-    const updatedDocument = reducer(document, updateSubscriptionStatus(input));
-
-    expect(isServiceSubscriptionDocument(updatedDocument)).toBe(true);
-    expect(updatedDocument.operations.global).toHaveLength(1);
-    expect(updatedDocument.operations.global[0].action.type).toBe(
-      "UPDATE_SUBSCRIPTION_STATUS",
     );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,
@@ -86,16 +68,16 @@ describe("SubscriptionManagement Operations", () => {
     );
     expect(updatedDocument.operations.global[0].index).toEqual(0);
   });
-  it("should handle renewSubscription operation", () => {
+  it("should handle expireSubscription operation", () => {
     const document = utils.createDocument();
-    const input = generateMock(RenewSubscriptionInputSchema());
+    const input = generateMock(ExpireSubscriptionInputSchema());
 
-    const updatedDocument = reducer(document, renewSubscription(input));
+    const updatedDocument = reducer(document, expireSubscription(input));
 
     expect(isServiceSubscriptionDocument(updatedDocument)).toBe(true);
     expect(updatedDocument.operations.global).toHaveLength(1);
     expect(updatedDocument.operations.global[0].action.type).toBe(
-      "RENEW_SUBSCRIPTION",
+      "EXPIRE_SUBSCRIPTION",
     );
     expect(updatedDocument.operations.global[0].action.input).toStrictEqual(
       input,

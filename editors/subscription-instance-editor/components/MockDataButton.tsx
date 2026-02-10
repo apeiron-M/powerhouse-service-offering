@@ -10,6 +10,7 @@ import {
   activateSubscription,
   setAutoRenew,
   setRenewalDate,
+  updateBillingProjection,
 } from "../../../document-models/subscription-instance/gen/subscription/creators.js";
 import { addService } from "../../../document-models/subscription-instance/gen/service/creators.js";
 import {
@@ -17,17 +18,7 @@ import {
   addServiceToGroup,
 } from "../../../document-models/subscription-instance/gen/service-group/creators.js";
 import { addServiceMetric } from "../../../document-models/subscription-instance/gen/metrics/creators.js";
-import {
-  createInvoice,
-  addInvoiceLineItem,
-  sendInvoice,
-  recordInvoicePayment,
-} from "../../../document-models/subscription-instance/gen/billing/creators.js";
-import {
-  addCommunicationChannel,
-  setCustomerType,
-  updateKycStatus,
-} from "../../../document-models/subscription-instance/gen/customer/creators.js";
+import { setCustomerType } from "../../../document-models/subscription-instance/gen/customer/creators.js";
 
 interface MockDataButtonProps {
   document: SubscriptionInstanceDocument;
@@ -40,7 +31,6 @@ export function MockDataButton({ document, dispatch }: MockDataButtonProps) {
     document.state.global.serviceGroups.length > 0;
 
   const populateMockData = useCallback(() => {
-    const now = new Date().toISOString();
     const oneMonthAgo = new Date(
       Date.now() - 30 * 24 * 60 * 60 * 1000,
     ).toISOString();
@@ -83,20 +73,6 @@ export function MockDataButton({ document, dispatch }: MockDataButtonProps) {
       setCustomerType({
         customerType: "TEAM",
         teamMemberCount: 12,
-      }),
-    );
-
-    // 5. Update KYC status
-    dispatch(updateKycStatus({ kycStatus: "VERIFIED" }));
-
-    // 6. Add communication channel
-    dispatch(
-      addCommunicationChannel({
-        channelId: generateId(),
-        type: "EMAIL",
-        identifier: "billing@acme.example.com",
-        isPrimary: true,
-        verifiedAt: oneMonthAgo,
       }),
     );
 
@@ -374,170 +350,13 @@ export function MockDataButton({ document, dispatch }: MockDataButtonProps) {
       }),
     );
 
-    // === INVOICES (2 invoices) ===
-
-    const invoice1Id = generateId();
-    const invoice2Id = generateId();
-
-    // Invoice 1: Paid (last month)
-    const lastMonthStart = new Date(
-      Date.now() - 60 * 24 * 60 * 60 * 1000,
-    ).toISOString();
-    const lastMonthEnd = new Date(
-      Date.now() - 30 * 24 * 60 * 60 * 1000,
-    ).toISOString();
-
+    // === BILLING PROJECTION ===
+    // Total recurring: 299 + 149 + 199 + 79 = 726 (core) + 99 + 79 + 299 + 199 = 1402 (with addons)
     dispatch(
-      createInvoice({
-        invoiceId: invoice1Id,
-        invoiceNumber: "INV-2024-001",
-        periodStart: lastMonthStart,
-        periodEnd: lastMonthEnd,
-        issueDate: lastMonthEnd,
-        dueDate: oneMonthAgo,
-        currency: "USD",
-        notes: "Thank you for your business!",
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice1Id,
-        lineItemId: generateId(),
-        description: "Cloud Compute - Monthly",
-        serviceId: service1Id,
-        quantity: 1,
-        unitPrice: 299,
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice1Id,
-        lineItemId: generateId(),
-        description: "Object Storage - Monthly",
-        serviceId: service2Id,
-        quantity: 1,
-        unitPrice: 149,
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice1Id,
-        lineItemId: generateId(),
-        description: "Managed Database - Monthly",
-        serviceId: service3Id,
-        quantity: 1,
-        unitPrice: 199,
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice1Id,
-        lineItemId: generateId(),
-        description: "Setup Fee - Cloud Compute",
-        serviceId: service1Id,
-        quantity: 1,
-        unitPrice: 500,
-      }),
-    );
-
-    dispatch(
-      sendInvoice({
-        invoiceId: invoice1Id,
-        sentDate: lastMonthEnd,
-      }),
-    );
-
-    dispatch(
-      recordInvoicePayment({
-        invoiceId: invoice1Id,
-        paymentId: generateId(),
-        amount: 1147,
-        currency: "USD",
-        paymentMethod: "CREDIT_CARD",
-        paymentDate: oneMonthAgo,
-        reference: "CC-4242-****-1234",
-      }),
-    );
-
-    // Invoice 2: Current month (sent, awaiting payment)
-    const thisMonthStart = oneMonthAgo;
-    const thisMonthEnd = now;
-
-    dispatch(
-      createInvoice({
-        invoiceId: invoice2Id,
-        invoiceNumber: "INV-2024-002",
-        periodStart: thisMonthStart,
-        periodEnd: thisMonthEnd,
-        issueDate: now,
-        dueDate: oneMonthFromNow,
-        currency: "USD",
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice2Id,
-        lineItemId: generateId(),
-        description: "Cloud Compute - Monthly",
-        serviceId: service1Id,
-        quantity: 1,
-        unitPrice: 299,
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice2Id,
-        lineItemId: generateId(),
-        description: "Object Storage - Monthly",
-        serviceId: service2Id,
-        quantity: 1,
-        unitPrice: 149,
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice2Id,
-        lineItemId: generateId(),
-        description: "Managed Database - Monthly",
-        serviceId: service3Id,
-        quantity: 1,
-        unitPrice: 199,
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice2Id,
-        lineItemId: generateId(),
-        description: "Global CDN - Monthly",
-        serviceId: service4Id,
-        quantity: 1,
-        unitPrice: 79,
-      }),
-    );
-
-    dispatch(
-      addInvoiceLineItem({
-        invoiceId: invoice2Id,
-        lineItemId: generateId(),
-        description: "Overage: vCPU Hours (250 extra)",
-        serviceId: service1Id,
-        quantity: 250,
-        unitPrice: 0.05,
-      }),
-    );
-
-    dispatch(
-      sendInvoice({
-        invoiceId: invoice2Id,
-        sentDate: now,
+      updateBillingProjection({
+        nextBillingDate: oneMonthFromNow,
+        projectedBillAmount: 1402,
+        projectedBillCurrency: "USD",
       }),
     );
   }, [document.state.global.customerId, dispatch]);

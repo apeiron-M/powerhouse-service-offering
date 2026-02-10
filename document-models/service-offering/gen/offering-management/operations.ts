@@ -10,8 +10,6 @@ import type {
   RemoveFacetTargetAction,
   AddFacetOptionAction,
   RemoveFacetOptionAction,
-  SetSetupServicesAction,
-  SetRecurringServicesAction,
   SelectResourceTemplateAction,
   ChangeResourceTemplateAction,
 } from "./actions.js";
@@ -66,16 +64,6 @@ export interface ServiceOfferingOfferingManagementOperations {
   removeFacetOptionOperation: (
     state: ServiceOfferingState,
     action: RemoveFacetOptionAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  setSetupServicesOperation: (
-    state: ServiceOfferingState,
-    action: SetSetupServicesAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  setRecurringServicesOperation: (
-    state: ServiceOfferingState,
-    action: SetRecurringServicesAction,
     dispatch?: SignalDispatch,
   ) => void;
   selectResourceTemplateOperation: (

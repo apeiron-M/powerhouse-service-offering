@@ -4,7 +4,6 @@ export type ErrorCode =
   | "UpdatePricingTierNotFoundError"
   | "DeleteTierNotFoundError"
   | "AddPricingOptionTierNotFoundError"
-  | "DuplicateBillingCycleError"
   | "UpdatePricingOptionTierNotFoundError"
   | "PricingOptionNotFoundError"
   | "RemovePricingOptionTierNotFoundError"
@@ -63,13 +62,6 @@ export class AddPricingOptionTierNotFoundError
 {
   errorCode = "AddPricingOptionTierNotFoundError" as ErrorCode;
   constructor(message = "AddPricingOptionTierNotFoundError") {
-    super(message);
-  }
-}
-
-export class DuplicateBillingCycleError extends Error implements ReducerError {
-  errorCode = "DuplicateBillingCycleError" as ErrorCode;
-  constructor(message = "DuplicateBillingCycleError") {
     super(message);
   }
 }
@@ -233,10 +225,7 @@ export const errors = {
   UpdateTier: { UpdateTierNotFoundError },
   UpdateTierPricing: { UpdatePricingTierNotFoundError },
   DeleteTier: { DeleteTierNotFoundError },
-  AddTierPricingOption: {
-    AddPricingOptionTierNotFoundError,
-    DuplicateBillingCycleError,
-  },
+  AddTierPricingOption: { AddPricingOptionTierNotFoundError },
   UpdateTierPricingOption: {
     UpdatePricingOptionTierNotFoundError,
     PricingOptionNotFoundError,

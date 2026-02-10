@@ -6,7 +6,7 @@ export const documentModel: DocumentModelGlobalState = {
     website: "https://www.powerhouse.inc/",
   },
   description:
-    "Document model for a customer's subscription to a service offering. Created programmatically during checkout, capturing selected tier, optional add-ons, and billing information.",
+    "Document model for a customer's subscription to a service offering. Tracks active subscriptions, usage, billing projections, and auto-renewal status.",
   extension: "",
   id: "powerhouse/service-subscription",
   name: "ServiceSubscription",
@@ -15,7 +15,7 @@ export const documentModel: DocumentModelGlobalState = {
       changeLog: [],
       modules: [
         {
-          description: "Operations for managing subscription metadata",
+          description: "Operations for managing subscription lifecycle",
           id: "subscription-management",
           name: "Subscription Management",
           operations: [
@@ -27,27 +27,16 @@ export const documentModel: DocumentModelGlobalState = {
               id: "initialize-subscription",
               name: "INITIALIZE_SUBSCRIPTION",
               reducer:
-                'state.id = action.input.id;\nstate.customerId = action.input.customerId;\nstate.serviceOfferingId = action.input.serviceOfferingId;\nstate.resourceTemplateId = action.input.resourceTemplateId;\nstate.selectedTierId = action.input.selectedTierId;\nstate.status = "PENDING";\nstate.createdAt = action.input.createdAt;\nstate.lastModified = action.input.lastModified;',
+                'state.id = action.input.id;\nstate.customerId = action.input.customerId;\nstate.customerName = action.input.customerName || null;\nstate.serviceOfferingId = action.input.serviceOfferingId;\nstate.serviceOfferingTitle = action.input.serviceOfferingTitle || null;\nstate.resourceTemplateId = action.input.resourceTemplateId;\nstate.selectedTierId = action.input.selectedTierId;\nstate.status = "PENDING";\nstate.autoRenew = true;\nstate.createdAt = action.input.createdAt;\nstate.lastModified = action.input.lastModified;',
               schema:
-                "input InitializeSubscriptionInput {\n    id: PHID!\n    customerId: PHID!\n    serviceOfferingId: PHID!\n    resourceTemplateId: PHID!\n    selectedTierId: OID!\n    createdAt: DateTime!\n    lastModified: DateTime!\n}",
+                "input InitializeSubscriptionInput {\n    id: PHID!\n    customerId: PHID!\n    customerName: String\n    serviceOfferingId: PHID!\n    serviceOfferingTitle: String\n    resourceTemplateId: PHID!\n    selectedTierId: OID!\n    createdAt: DateTime!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Initializes the subscription",
+              template:
+                "Initializes the subscription with offering and customer details",
             },
             {
-              description: "Updates the subscription status",
-              errors: [],
-              examples: [],
-              id: "update-subscription-status",
-              name: "UPDATE_SUBSCRIPTION_STATUS",
-              reducer:
-                "state.status = action.input.status;\nstate.lastModified = action.input.lastModified;",
-              schema:
-                "input UpdateSubscriptionStatusInput {\n    status: SubscriptionStatus!\n    lastModified: DateTime!\n}",
-              scope: "global",
-              template: "Updates the subscription status",
-            },
-            {
-              description: "Activates the subscription with start date",
+              description:
+                "Activates the subscription with start date and billing period",
               errors: [],
               examples: [],
               id: "activate-subscription",
@@ -57,33 +46,47 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input ActivateSubscriptionInput {\n    startDate: DateTime!\n    currentPeriodStart: DateTime!\n    currentPeriodEnd: DateTime!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Activates the subscription",
+              template:
+                "Activates the subscription with start date and billing period",
             },
             {
-              description: "Cancels the subscription",
+              description:
+                "Cancels the subscription by setting autoRenew to false. Subscription remains ACTIVE until period ends, then becomes EXPIRED.",
               errors: [],
               examples: [],
               id: "cancel-subscription",
               name: "CANCEL_SUBSCRIPTION",
               reducer:
-                'state.status = "CANCELLED";\nstate.cancelledAt = action.input.cancelledAt;\nstate.cancellationReason = action.input.reason || null;\nstate.lastModified = action.input.lastModified;',
+                "state.autoRenew = false;\nstate.cancelledAt = action.input.cancelledAt;\nstate.cancelEffectiveDate = action.input.cancelEffectiveDate || null;\nstate.cancellationReason = action.input.reason || null;\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input CancelSubscriptionInput {\n    cancelledAt: DateTime!\n    reason: String\n    lastModified: DateTime!\n}",
+                "input CancelSubscriptionInput {\n    cancelledAt: DateTime!\n    cancelEffectiveDate: DateTime\n    reason: String\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Cancels the subscription",
+              template:
+                "Cancels the subscription by setting autoRenew to false. Subscription remains ACTIVE until period ends, then becomes EXPIRED.",
             },
             {
-              description: "Renews the subscription for a new period",
-              errors: [],
+              description:
+                "Marks the subscription as expired when period ends and autoRenew is false",
+              errors: [
+                {
+                  code: "SUBSCRIPTION_STILL_ACTIVE",
+                  description:
+                    "Cannot expire a subscription that has autoRenew enabled",
+                  id: "subscription-still-active",
+                  name: "SubscriptionStillActiveError",
+                  template: "",
+                },
+              ],
               examples: [],
-              id: "renew-subscription",
-              name: "RENEW_SUBSCRIPTION",
+              id: "expire-subscription",
+              name: "EXPIRE_SUBSCRIPTION",
               reducer:
-                "state.currentPeriodStart = action.input.periodStart;\nstate.currentPeriodEnd = action.input.periodEnd;\nstate.lastModified = action.input.lastModified;",
+                'if (!state.autoRenew) {\n    state.status = "EXPIRED";\n}\nstate.lastModified = action.input.lastModified;',
               schema:
-                "input RenewSubscriptionInput {\n    periodStart: DateTime!\n    periodEnd: DateTime!\n    lastModified: DateTime!\n}",
+                "input ExpireSubscriptionInput {\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Renews the subscription",
+              template:
+                "Marks the subscription as expired when period ends and autoRenew is false",
             },
           ],
         },
@@ -125,7 +128,7 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input SetPricingInput {\n    amount: Amount_Money!\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Sets the pricing details",
+              template: "Sets the pricing details for the subscription",
             },
           ],
         },
@@ -153,7 +156,7 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input AddAddonInput {\n    id: OID!\n    optionGroupId: OID!\n    addedAt: DateTime!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Adds an optional add-on",
+              template: "Adds an optional add-on to the subscription",
             },
             {
               description: "Removes an add-on from the subscription",
@@ -174,7 +177,7 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input RemoveAddonInput {\n    id: OID!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Removes an add-on",
+              template: "Removes an add-on from the subscription",
             },
           ],
         },
@@ -194,7 +197,7 @@ export const documentModel: DocumentModelGlobalState = {
               schema:
                 "input SetFacetSelectionInput {\n    id: OID!\n    categoryKey: String!\n    selectedOptionId: String!\n    lastModified: DateTime!\n}",
               scope: "global",
-              template: "Sets a facet selection",
+              template: "Sets the selected facet option for a category",
             },
             {
               description: "Removes a facet selection",
@@ -211,14 +214,52 @@ export const documentModel: DocumentModelGlobalState = {
             },
           ],
         },
+        {
+          description:
+            "Operations for processor-driven billing projections and cached snippets",
+          id: "billing-projection",
+          name: "Billing Projection",
+          operations: [
+            {
+              description:
+                "Updates computed billing projection fields. Called by processor, not by editor.",
+              errors: [],
+              examples: [],
+              id: "update-billing-projection",
+              name: "UPDATE_BILLING_PROJECTION",
+              reducer:
+                "state.nextBillingDate = action.input.nextBillingDate || null;\nstate.projectedBillAmount = action.input.projectedBillAmount || null;\nstate.projectedBillCurrency = action.input.projectedBillCurrency || null;\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input UpdateBillingProjectionInput {\n    nextBillingDate: DateTime\n    projectedBillAmount: Amount_Money\n    projectedBillCurrency: Currency\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template:
+                "Updates computed billing projection fields. Called by processor, not by editor.",
+            },
+            {
+              description:
+                "Updates cached display names for customer and offering. Called by processor.",
+              errors: [],
+              examples: [],
+              id: "set-cached-snippets",
+              name: "SET_CACHED_SNIPPETS",
+              reducer:
+                "if (action.input.customerName !== undefined) {\n    state.customerName = action.input.customerName || null;\n}\nif (action.input.serviceOfferingTitle !== undefined) {\n    state.serviceOfferingTitle = action.input.serviceOfferingTitle || null;\n}\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input SetCachedSnippetsInput {\n    customerName: String\n    serviceOfferingTitle: String\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template:
+                "Updates cached display names for customer and offering. Called by processor.",
+            },
+          ],
+        },
       ],
       state: {
         global: {
           examples: [],
           initialValue:
-            '{\n    "id": "",\n    "customerId": "",\n    "serviceOfferingId": "",\n    "resourceTemplateId": "",\n    "selectedTierId": "",\n    "status": "PENDING",\n    "pricing": null,\n    "selectedAddons": [],\n    "facetSelections": [],\n    "startDate": null,\n    "currentPeriodStart": null,\n    "currentPeriodEnd": null,\n    "cancelledAt": null,\n    "cancellationReason": null,\n    "createdAt": "1970-01-01T00:00:00.000Z",\n    "lastModified": "1970-01-01T00:00:00.000Z"\n}',
+            '{\n    "id": "",\n    "customerId": "",\n    "customerName": null,\n    "serviceOfferingId": "",\n    "serviceOfferingTitle": null,\n    "resourceTemplateId": "",\n    "selectedTierId": "",\n    "status": "PENDING",\n    "autoRenew": true,\n    "pricing": null,\n    "selectedAddons": [],\n    "facetSelections": [],\n    "startDate": null,\n    "currentPeriodStart": null,\n    "currentPeriodEnd": null,\n    "cancelledAt": null,\n    "cancellationReason": null,\n    "cancelEffectiveDate": null,\n    "nextBillingDate": null,\n    "projectedBillAmount": null,\n    "projectedBillCurrency": null,\n    "createdAt": "1970-01-01T00:00:00.000Z",\n    "lastModified": "1970-01-01T00:00:00.000Z"\n}',
           schema:
-            "type ServiceSubscriptionState {\n    id: PHID!\n    customerId: PHID!\n    serviceOfferingId: PHID!\n    resourceTemplateId: PHID!\n    selectedTierId: OID!\n    status: SubscriptionStatus!\n    pricing: SubscriptionPricing\n    selectedAddons: [SelectedAddon!]!\n    facetSelections: [FacetSelection!]!\n    startDate: DateTime\n    currentPeriodStart: DateTime\n    currentPeriodEnd: DateTime\n    cancelledAt: DateTime\n    cancellationReason: String\n    createdAt: DateTime!\n    lastModified: DateTime!\n}\n\nenum SubscriptionStatus {\n    PENDING\n    ACTIVE\n    PAUSED\n    CANCELLED\n    EXPIRED\n}\n\ntype SubscriptionPricing {\n    amount: Amount_Money!\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype SelectedAddon {\n    id: OID!\n    optionGroupId: OID!\n    addedAt: DateTime!\n}\n\ntype FacetSelection {\n    id: OID!\n    categoryKey: String!\n    selectedOptionId: String!\n}",
+            "type ServiceSubscriptionState {\n    id: PHID!\n    customerId: PHID!\n    customerName: String\n    serviceOfferingId: PHID!\n    serviceOfferingTitle: String\n    resourceTemplateId: PHID!\n    selectedTierId: OID!\n    status: SubscriptionStatus!\n    autoRenew: Boolean!\n    pricing: SubscriptionPricing\n    selectedAddons: [SelectedAddon!]!\n    facetSelections: [FacetSelection!]!\n    startDate: DateTime\n    currentPeriodStart: DateTime\n    currentPeriodEnd: DateTime\n    cancelledAt: DateTime\n    cancellationReason: String\n    cancelEffectiveDate: DateTime\n    nextBillingDate: DateTime\n    projectedBillAmount: Amount_Money\n    projectedBillCurrency: Currency\n    createdAt: DateTime!\n    lastModified: DateTime!\n}\n\nenum SubscriptionStatus {\n    PENDING\n    ACTIVE\n    EXPIRED\n}\n\ntype SubscriptionPricing {\n    amount: Amount_Money!\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype SelectedAddon {\n    id: OID!\n    optionGroupId: OID!\n    addedAt: DateTime!\n}\n\ntype FacetSelection {\n    id: OID!\n    categoryKey: String!\n    selectedOptionId: String!\n}",
         },
         local: {
           examples: [],

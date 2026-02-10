@@ -9,19 +9,21 @@ import { serviceSubscriptionSubscriptionManagementOperations } from "../src/redu
 import { serviceSubscriptionTierSelectionOperations } from "../src/reducers/tier-selection.js";
 import { serviceSubscriptionAddOnManagementOperations } from "../src/reducers/add-on-management.js";
 import { serviceSubscriptionFacetSelectionOperations } from "../src/reducers/facet-selection.js";
+import { serviceSubscriptionBillingProjectionOperations } from "../src/reducers/billing-projection.js";
 
 import {
   InitializeSubscriptionInputSchema,
-  UpdateSubscriptionStatusInputSchema,
   ActivateSubscriptionInputSchema,
   CancelSubscriptionInputSchema,
-  RenewSubscriptionInputSchema,
+  ExpireSubscriptionInputSchema,
   ChangeTierInputSchema,
   SetPricingInputSchema,
   AddAddonInputSchema,
   RemoveAddonInputSchema,
   SetFacetSelectionInputSchema,
   RemoveFacetSelectionInputSchema,
+  UpdateBillingProjectionInputSchema,
+  SetCachedSnippetsInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ServiceSubscriptionPHState> = (
@@ -37,18 +39,6 @@ const stateReducer: StateReducer<ServiceSubscriptionPHState> = (
       InitializeSubscriptionInputSchema().parse(action.input);
 
       serviceSubscriptionSubscriptionManagementOperations.initializeSubscriptionOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "UPDATE_SUBSCRIPTION_STATUS": {
-      UpdateSubscriptionStatusInputSchema().parse(action.input);
-
-      serviceSubscriptionSubscriptionManagementOperations.updateSubscriptionStatusOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -81,10 +71,10 @@ const stateReducer: StateReducer<ServiceSubscriptionPHState> = (
       break;
     }
 
-    case "RENEW_SUBSCRIPTION": {
-      RenewSubscriptionInputSchema().parse(action.input);
+    case "EXPIRE_SUBSCRIPTION": {
+      ExpireSubscriptionInputSchema().parse(action.input);
 
-      serviceSubscriptionSubscriptionManagementOperations.renewSubscriptionOperation(
+      serviceSubscriptionSubscriptionManagementOperations.expireSubscriptionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -157,6 +147,30 @@ const stateReducer: StateReducer<ServiceSubscriptionPHState> = (
       RemoveFacetSelectionInputSchema().parse(action.input);
 
       serviceSubscriptionFacetSelectionOperations.removeFacetSelectionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "UPDATE_BILLING_PROJECTION": {
+      UpdateBillingProjectionInputSchema().parse(action.input);
+
+      serviceSubscriptionBillingProjectionOperations.updateBillingProjectionOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "SET_CACHED_SNIPPETS": {
+      SetCachedSnippetsInputSchema().parse(action.input);
+
+      serviceSubscriptionBillingProjectionOperations.setCachedSnippetsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

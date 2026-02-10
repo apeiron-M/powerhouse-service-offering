@@ -1,24 +1,21 @@
 import { createAction } from "document-model/core";
 import {
   InitializeSubscriptionInputSchema,
-  UpdateSubscriptionStatusInputSchema,
   ActivateSubscriptionInputSchema,
   CancelSubscriptionInputSchema,
-  RenewSubscriptionInputSchema,
+  ExpireSubscriptionInputSchema,
 } from "../schema/zod.js";
 import type {
   InitializeSubscriptionInput,
-  UpdateSubscriptionStatusInput,
   ActivateSubscriptionInput,
   CancelSubscriptionInput,
-  RenewSubscriptionInput,
+  ExpireSubscriptionInput,
 } from "../types.js";
 import type {
   InitializeSubscriptionAction,
-  UpdateSubscriptionStatusAction,
   ActivateSubscriptionAction,
   CancelSubscriptionAction,
-  RenewSubscriptionAction,
+  ExpireSubscriptionAction,
 } from "./actions.js";
 
 export const initializeSubscription = (input: InitializeSubscriptionInput) =>
@@ -27,17 +24,6 @@ export const initializeSubscription = (input: InitializeSubscriptionInput) =>
     { ...input },
     undefined,
     InitializeSubscriptionInputSchema,
-    "global",
-  );
-
-export const updateSubscriptionStatus = (
-  input: UpdateSubscriptionStatusInput,
-) =>
-  createAction<UpdateSubscriptionStatusAction>(
-    "UPDATE_SUBSCRIPTION_STATUS",
-    { ...input },
-    undefined,
-    UpdateSubscriptionStatusInputSchema,
     "global",
   );
 
@@ -59,11 +45,11 @@ export const cancelSubscription = (input: CancelSubscriptionInput) =>
     "global",
   );
 
-export const renewSubscription = (input: RenewSubscriptionInput) =>
-  createAction<RenewSubscriptionAction>(
-    "RENEW_SUBSCRIPTION",
+export const expireSubscription = (input: ExpireSubscriptionInput) =>
+  createAction<ExpireSubscriptionAction>(
+    "EXPIRE_SUBSCRIPTION",
     { ...input },
     undefined,
-    RenewSubscriptionInputSchema,
+    ExpireSubscriptionInputSchema,
     "global",
   );

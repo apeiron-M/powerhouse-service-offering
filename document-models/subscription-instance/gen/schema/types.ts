@@ -63,24 +63,6 @@ export type ActivateSubscriptionInput = {
   activatedSince: Scalars["DateTime"]["input"];
 };
 
-export type AddCommunicationChannelInput = {
-  channelId: Scalars["OID"]["input"];
-  identifier: Scalars["String"]["input"];
-  isPrimary: Scalars["Boolean"]["input"];
-  type: CommunicationChannelType;
-  verifiedAt?: InputMaybe<Scalars["DateTime"]["input"]>;
-};
-
-export type AddInvoiceLineItemInput = {
-  description: Scalars["String"]["input"];
-  invoiceId: Scalars["OID"]["input"];
-  lineItemId: Scalars["OID"]["input"];
-  metricId?: InputMaybe<Scalars["OID"]["input"]>;
-  quantity: Scalars["Int"]["input"];
-  serviceId?: InputMaybe<Scalars["OID"]["input"]>;
-  unitPrice: Scalars["Amount_Money"]["input"];
-};
-
 export type AddServiceGroupInput = {
   groupId: Scalars["OID"]["input"];
   name: Scalars["String"]["input"];
@@ -146,40 +128,9 @@ export type BudgetCategory = {
   label: Scalars["String"]["output"];
 };
 
-export type CancelInvoiceInput = {
-  invoiceId: Scalars["OID"]["input"];
-  reason?: InputMaybe<Scalars["String"]["input"]>;
-};
-
 export type CancelSubscriptionInput = {
   cancellationReason?: InputMaybe<Scalars["String"]["input"]>;
   cancelledSince: Scalars["DateTime"]["input"];
-};
-
-export type CommunicationChannel = {
-  id: Scalars["OID"]["output"];
-  identifier: Scalars["String"]["output"];
-  isPrimary: Scalars["Boolean"]["output"];
-  type: CommunicationChannelType;
-  verifiedAt: Maybe<Scalars["DateTime"]["output"]>;
-};
-
-export type CommunicationChannelType =
-  | "DISCORD"
-  | "EMAIL"
-  | "SLACK"
-  | "TELEGRAM"
-  | "WHATSAPP";
-
-export type CreateInvoiceInput = {
-  currency: Scalars["Currency"]["input"];
-  dueDate: Scalars["DateTime"]["input"];
-  invoiceId: Scalars["OID"]["input"];
-  invoiceNumber: Scalars["String"]["input"];
-  issueDate: Scalars["DateTime"]["input"];
-  notes?: InputMaybe<Scalars["String"]["input"]>;
-  periodEnd: Scalars["DateTime"]["input"];
-  periodStart: Scalars["DateTime"]["input"];
 };
 
 export type CustomerType = "INDIVIDUAL" | "TEAM";
@@ -212,86 +163,8 @@ export type InitializeSubscriptionInput = {
   tierPricingOptionId?: InputMaybe<Scalars["OID"]["input"]>;
 };
 
-export type Invoice = {
-  currency: Scalars["Currency"]["output"];
-  dueDate: Scalars["DateTime"]["output"];
-  id: Scalars["OID"]["output"];
-  invoiceNumber: Scalars["String"]["output"];
-  issueDate: Scalars["DateTime"]["output"];
-  lineItems: Array<InvoiceLineItem>;
-  notes: Maybe<Scalars["String"]["output"]>;
-  paidDate: Maybe<Scalars["DateTime"]["output"]>;
-  payments: Array<InvoicePayment>;
-  periodEnd: Scalars["DateTime"]["output"];
-  periodStart: Scalars["DateTime"]["output"];
-  status: InvoiceStatus;
-  subtotal: Scalars["Amount_Money"]["output"];
-  tax: Maybe<Scalars["Amount_Money"]["output"]>;
-  total: Scalars["Amount_Money"]["output"];
-};
-
-export type InvoiceLineItem = {
-  description: Scalars["String"]["output"];
-  id: Scalars["OID"]["output"];
-  metricId: Maybe<Scalars["OID"]["output"]>;
-  quantity: Scalars["Int"]["output"];
-  serviceId: Maybe<Scalars["OID"]["output"]>;
-  total: Scalars["Amount_Money"]["output"];
-  unitPrice: Scalars["Amount_Money"]["output"];
-};
-
-export type InvoicePayment = {
-  amount: Scalars["Amount_Money"]["output"];
-  currency: Scalars["Currency"]["output"];
-  id: Scalars["OID"]["output"];
-  paymentDate: Scalars["DateTime"]["output"];
-  paymentMethod: PaymentMethod;
-  reference: Maybe<Scalars["String"]["output"]>;
-  transactionHash: Maybe<Scalars["String"]["output"]>;
-  walletAddress: Maybe<Scalars["EthereumAddress"]["output"]>;
-};
-
-export type InvoiceStatus =
-  | "CANCELLED"
-  | "DRAFT"
-  | "OVERDUE"
-  | "PAID"
-  | "PARTIALLY_PAID"
-  | "REFUNDED"
-  | "SENT";
-
-export type KycStatus =
-  | "NOT_REQUIRED"
-  | "NOT_STARTED"
-  | "PENDING"
-  | "REJECTED"
-  | "VERIFIED";
-
-export type MarkInvoiceOverdueInput = {
-  invoiceId: Scalars["OID"]["input"];
-};
-
 export type PauseSubscriptionInput = {
   pausedSince: Scalars["DateTime"]["input"];
-};
-
-export type PaymentMethod =
-  | "BANK_TRANSFER"
-  | "CREDIT_CARD"
-  | "CRYPTO"
-  | "OTHER"
-  | "PAYPAL";
-
-export type RecordInvoicePaymentInput = {
-  amount: Scalars["Amount_Money"]["input"];
-  currency: Scalars["Currency"]["input"];
-  invoiceId: Scalars["OID"]["input"];
-  paymentDate: Scalars["DateTime"]["input"];
-  paymentId: Scalars["OID"]["input"];
-  paymentMethod: PaymentMethod;
-  reference?: InputMaybe<Scalars["String"]["input"]>;
-  transactionHash?: InputMaybe<Scalars["String"]["input"]>;
-  walletAddress?: InputMaybe<Scalars["EthereumAddress"]["input"]>;
 };
 
 export type RecurringCost = {
@@ -302,23 +175,8 @@ export type RecurringCost = {
   nextBillingDate: Maybe<Scalars["DateTime"]["output"]>;
 };
 
-export type RefundInvoiceInput = {
-  invoiceId: Scalars["OID"]["input"];
-  reason?: InputMaybe<Scalars["String"]["input"]>;
-  refundDate: Scalars["DateTime"]["input"];
-};
-
 export type RemoveBudgetCategoryInput = {
   budgetId: Scalars["OID"]["input"];
-};
-
-export type RemoveCommunicationChannelInput = {
-  channelId: Scalars["OID"]["input"];
-};
-
-export type RemoveInvoiceLineItemInput = {
-  invoiceId: Scalars["OID"]["input"];
-  lineItemId: Scalars["OID"]["input"];
 };
 
 export type RemoveServiceFromGroupInput = {
@@ -373,11 +231,6 @@ export type ResumeSubscriptionInput = {
   timestamp: Scalars["DateTime"]["input"];
 };
 
-export type SendInvoiceInput = {
-  invoiceId: Scalars["OID"]["input"];
-  sentDate: Scalars["DateTime"]["input"];
-};
-
 export type Service = {
   description: Maybe<Scalars["String"]["output"]>;
   id: Scalars["OID"]["output"];
@@ -423,17 +276,8 @@ export type SetExpiringInput = {
   expiringSince: Scalars["DateTime"]["input"];
 };
 
-export type SetInvoiceTaxInput = {
-  invoiceId: Scalars["OID"]["input"];
-  tax: Scalars["Amount_Money"]["input"];
-};
-
 export type SetOperatorNotesInput = {
   operatorNotes?: InputMaybe<Scalars["String"]["input"]>;
-};
-
-export type SetPrimaryCommunicationChannelInput = {
-  channelId: Scalars["OID"]["input"];
 };
 
 export type SetRenewalDateInput = {
@@ -459,19 +303,18 @@ export type SubscriptionInstanceState = {
   budget: Maybe<BudgetCategory>;
   cancellationReason: Maybe<Scalars["String"]["output"]>;
   cancelledSince: Maybe<Scalars["DateTime"]["output"]>;
-  communications: Array<CommunicationChannel>;
   createdAt: Maybe<Scalars["DateTime"]["output"]>;
   customerEmail: Maybe<Scalars["EmailAddress"]["output"]>;
   customerId: Maybe<Scalars["PHID"]["output"]>;
   customerName: Maybe<Scalars["String"]["output"]>;
   customerType: Maybe<CustomerType>;
-  customerWalletAddress: Maybe<Scalars["EthereumAddress"]["output"]>;
   expiringSince: Maybe<Scalars["DateTime"]["output"]>;
-  invoices: Array<Invoice>;
-  kycStatus: Maybe<KycStatus>;
+  nextBillingDate: Maybe<Scalars["DateTime"]["output"]>;
   operatorId: Maybe<Scalars["PHID"]["output"]>;
   operatorNotes: Maybe<Scalars["String"]["output"]>;
   pausedSince: Maybe<Scalars["DateTime"]["output"]>;
+  projectedBillAmount: Maybe<Scalars["Amount_Money"]["output"]>;
+  projectedBillCurrency: Maybe<Scalars["Currency"]["output"]>;
   renewalDate: Maybe<Scalars["DateTime"]["output"]>;
   resource: Maybe<ResourceDocument>;
   serviceGroups: Array<ServiceGroup>;
@@ -490,24 +333,16 @@ export type SubscriptionStatus =
   | "PAUSED"
   | "PENDING";
 
+export type UpdateBillingProjectionInput = {
+  nextBillingDate?: InputMaybe<Scalars["DateTime"]["input"]>;
+  projectedBillAmount?: InputMaybe<Scalars["Amount_Money"]["input"]>;
+  projectedBillCurrency?: InputMaybe<Scalars["Currency"]["input"]>;
+};
+
 export type UpdateCustomerInfoInput = {
   customerEmail?: InputMaybe<Scalars["EmailAddress"]["input"]>;
   customerId?: InputMaybe<Scalars["PHID"]["input"]>;
   customerName?: InputMaybe<Scalars["String"]["input"]>;
-};
-
-export type UpdateCustomerWalletInput = {
-  walletAddress?: InputMaybe<Scalars["EthereumAddress"]["input"]>;
-};
-
-export type UpdateInvoiceStatusInput = {
-  invoiceId: Scalars["OID"]["input"];
-  paidDate?: InputMaybe<Scalars["DateTime"]["input"]>;
-  status: InvoiceStatus;
-};
-
-export type UpdateKycStatusInput = {
-  kycStatus: KycStatus;
 };
 
 export type UpdateMetricInput = {
@@ -561,9 +396,4 @@ export type UpdateTeamMemberCountInput = {
 export type UpdateTierInfoInput = {
   tierName?: InputMaybe<Scalars["String"]["input"]>;
   tierPricingOptionId?: InputMaybe<Scalars["OID"]["input"]>;
-};
-
-export type VerifyCommunicationChannelInput = {
-  channelId: Scalars["OID"]["input"];
-  verifiedAt: Scalars["DateTime"]["input"];
 };

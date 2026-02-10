@@ -4,7 +4,6 @@ import {
   serviceActions,
   serviceGroupActions,
   metricsActions,
-  billingActions,
   customerActions,
 } from "./gen/creators.js";
 
@@ -16,6 +15,5 @@ export const actions = {
   ...serviceActions,
   ...serviceGroupActions,
   ...metricsActions,
-  ...billingActions,
   ...customerActions,
 };

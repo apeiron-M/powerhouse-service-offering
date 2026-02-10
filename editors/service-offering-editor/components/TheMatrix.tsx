@@ -11,12 +11,12 @@ import type {
   OptionGroup,
   ServiceUsageLimit,
   BillingCycle,
+  UsageResetCycle,
 } from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   RECURRING_BILLING_CYCLES,
   BILLING_CYCLE_SHORT_LABELS,
   formatPrice,
-  getMonthlyEquivalent,
 } from "./pricing-utils.js";
 import {
   addServiceLevel,
@@ -31,7 +31,6 @@ import {
 interface TheMatrixProps {
   document: ServiceOfferingDocument;
   dispatch: DocumentDispatch<ServiceOfferingAction>;
-  groupSetupFees?: Record<string, number | null>;
 }
 
 const SERVICE_LEVELS: {
@@ -468,6 +467,30 @@ const matrixStyles = `
     color: var(--so-sky-700);
   }
 
+  .matrix__group-billing-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--so-radius-sm);
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: var(--so-violet-100);
+    color: var(--so-violet-700);
+    margin-left: 8px;
+  }
+
+  .matrix__group-price-badge {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--so-radius-sm);
+    font-size: 0.625rem;
+    font-weight: 600;
+    background: var(--so-amber-100);
+    color: var(--so-amber-700);
+    margin-left: 6px;
+  }
+
   /* Service Row */
   .matrix__service-row {
     transition: var(--so-transition-fast);
@@ -518,6 +541,33 @@ const matrixStyles = `
   .matrix__service-title--clickable:hover {
     background: var(--so-slate-100);
     color: var(--so-violet-700);
+  }
+
+  .matrix__service-setup-badge {
+    display: inline-block;
+    padding: 0.0625rem 0.375rem;
+    margin-left: 0.375rem;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-radius: var(--so-radius-sm);
+    background: var(--so-amber-100);
+    color: var(--so-amber-700);
+    vertical-align: middle;
+  }
+
+  .matrix__service-setup-price {
+    display: inline-block;
+    padding: 0.0625rem 0.375rem;
+    margin-left: 0.25rem;
+    font-family: var(--so-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border-radius: var(--so-radius-sm);
+    background: var(--so-slate-100);
+    color: var(--so-slate-700);
+    vertical-align: middle;
   }
 
   /* Premium Only Badge - Exclusivity Signal (Toggle Button) */
@@ -1019,6 +1069,13 @@ const matrixStyles = `
     white-space: nowrap;
   }
 
+  .matrix__metric-reset-cycle {
+    font-size: 0.5625rem;
+    font-weight: 500;
+    color: #64748b;
+    text-transform: capitalize;
+  }
+
   /* Add Metric Button on Service Row */
   .matrix__service-cell-wrapper {
     display: flex;
@@ -1186,6 +1243,39 @@ const matrixStyles = `
     color: var(--so-white);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
     position: relative;
+  }
+
+  .matrix__grand-total-row--setup {
+    background: var(--so-violet-50);
+    border-top: none;
+  }
+
+  .matrix__grand-total-row--setup td {
+    border-top: 1px dashed var(--so-violet-200);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--so-violet-700);
+    padding: 0.5rem 1rem;
+  }
+
+  .matrix__grand-total-row--setup td:first-child {
+    background: var(--so-violet-50);
+  }
+
+  .matrix__grand-total-row--addon {
+    background: var(--so-violet-50);
+  }
+
+  .matrix__grand-total-row--addon td {
+    border-top: 1px dashed var(--so-violet-200);
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: var(--so-violet-700);
+    padding: 0.5rem 1rem;
+  }
+
+  .matrix__grand-total-row--addon td:first-child {
+    background: var(--so-violet-50);
   }
 
   /* Empty State */
@@ -1945,11 +2035,7 @@ const matrixStyles = `
   }
 `;
 
-export function TheMatrix({
-  document,
-  dispatch,
-  groupSetupFees = {},
-}: TheMatrixProps) {
+export function TheMatrix({ document, dispatch }: TheMatrixProps) {
   const { state } = document;
   const services = state.global.services ?? [];
   const tiers = state.global.tiers ?? [];
@@ -2049,6 +2135,13 @@ export function TheMatrix({
   >({});
   // Unit name for the metric (e.g., "entity", "user", "API call")
   const [metricUnitName, setMetricUnitName] = useState("");
+  // Per-tier paid limits for the metric modal (dual limits: freeLimit + paidLimit)
+  const [metricPaidLimits, setMetricPaidLimits] = useState<
+    Record<string, string>
+  >({});
+  // Reset cycle for the metric (shared across tiers)
+  const [metricResetCycle, setMetricResetCycle] =
+    useState<UsageResetCycle>("MONTHLY");
 
   // Service reordering state (not used - arrow buttons handle reorder directly)
 
@@ -2082,16 +2175,12 @@ export function TheMatrix({
   }, [services, tiers, optionGroups]);
 
   const setupGroups = useMemo(() => {
-    // Groups are setup groups if they're in groupSetupFees (passed from parent)
-    return optionGroups.filter((g) => groupSetupFees && g.id in groupSetupFees);
-  }, [optionGroups, groupSetupFees]);
+    return optionGroups.filter((g) => g.costType === "SETUP");
+  }, [optionGroups]);
 
   const regularGroups = useMemo(() => {
-    // Regular groups are not setup groups and not add-ons
-    const isSetupGroup = (groupId: string) =>
-      groupSetupFees && groupId in groupSetupFees;
-    return optionGroups.filter((g) => !isSetupGroup(g.id) && !g.isAddOn);
-  }, [optionGroups, groupSetupFees]);
+    return optionGroups.filter((g) => g.costType !== "SETUP" && !g.isAddOn);
+  }, [optionGroups]);
 
   const addonGroups = useMemo(() => {
     return optionGroups.filter((g) => g.isAddOn);
@@ -2337,22 +2426,26 @@ export function TheMatrix({
     setMetricName("");
     // Initialize limits for all tiers to empty string
     const initialLimits: Record<string, string> = {};
+    const initialPaidLimits: Record<string, string> = {};
     const initialOveragePrices: Record<string, string> = {};
     const initialOverageCycles: Record<string, BillingCycle | ""> = {};
     // For new metrics, enable all tiers by default
     const allTierIds = new Set<string>();
     tiers.forEach((tier) => {
       initialLimits[tier.id] = "";
+      initialPaidLimits[tier.id] = "";
       initialOveragePrices[tier.id] = "";
       initialOverageCycles[tier.id] = "";
       allTierIds.add(tier.id);
     });
     setMetricLimits(initialLimits);
+    setMetricPaidLimits(initialPaidLimits);
     setMetricEnabledTiers(allTierIds);
     // Reset per-tier overage pricing and unit name
     setMetricOveragePrices(initialOveragePrices);
     setMetricOverageCycles(initialOverageCycles);
     setMetricUnitName("");
+    setMetricResetCycle("MONTHLY");
   };
 
   const handleEditMetric = (serviceId: string, metric: string) => {
@@ -2360,33 +2453,42 @@ export function TheMatrix({
     setMetricName(metric);
     // Initialize limits with existing values and track which tiers have this metric
     const existingLimits: Record<string, string> = {};
+    const existingPaidLimits: Record<string, string> = {};
     const existingOveragePrices: Record<string, string> = {};
     const existingOverageCycles: Record<string, BillingCycle | ""> = {};
     const enabledTiers = new Set<string>();
     let existingUnitName = "";
+    let existingResetCycle: UsageResetCycle = "MONTHLY";
     tiers.forEach((tier) => {
       const usageLimit = tier.usageLimits.find(
         (ul) => ul.serviceId === serviceId && ul.metric === metric,
       );
       // Load value from either limit (numeric) or notes (string)
       existingLimits[tier.id] =
-        usageLimit?.limit?.toString() || usageLimit?.notes || "";
+        usageLimit?.freeLimit?.toString() || usageLimit?.notes || "";
+      existingPaidLimits[tier.id] = usageLimit?.paidLimit?.toString() || "";
       // Load per-tier overage pricing
       existingOveragePrices[tier.id] = usageLimit?.unitPrice?.toString() || "";
-      existingOverageCycles[tier.id] = usageLimit?.unitPriceBillingCycle || "";
+      existingOverageCycles[tier.id] = "";
       if (usageLimit) {
         enabledTiers.add(tier.id);
         // Get unit name from first tier that has it
         if (!existingUnitName && usageLimit.unitName) {
           existingUnitName = usageLimit.unitName;
         }
+        // Get reset cycle from first tier that has it
+        if (usageLimit.resetCycle) {
+          existingResetCycle = usageLimit.resetCycle;
+        }
       }
     });
     setMetricLimits(existingLimits);
+    setMetricPaidLimits(existingPaidLimits);
     setMetricEnabledTiers(enabledTiers);
     setMetricOveragePrices(existingOveragePrices);
     setMetricOverageCycles(existingOverageCycles);
     setMetricUnitName(existingUnitName);
+    setMetricResetCycle(existingResetCycle);
   };
 
   const handleRemoveMetric = (serviceId: string, metric: string) => {
@@ -2470,13 +2572,20 @@ export function TheMatrix({
       const parsedLimit = limitValue ? parseInt(limitValue, 10) : null;
       const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
 
+      // Parse paid limit
+      const paidLimitValue = metricPaidLimits[tier.id];
+      const parsedPaidLimit = paidLimitValue
+        ? parseInt(paidLimitValue, 10)
+        : null;
+      const isPaidNumeric = parsedPaidLimit !== null && !isNaN(parsedPaidLimit);
+
       // Get per-tier overage pricing
       const tierOveragePrice = metricOveragePrices[tier.id];
-      const tierOverageCycle = metricOverageCycles[tier.id];
       const parsedOveragePrice = tierOveragePrice
         ? parseFloat(tierOveragePrice)
         : null;
-      const hasOveragePricing = parsedOveragePrice && tierOverageCycle;
+      const hasOveragePricing =
+        parsedOveragePrice !== null && !isNaN(parsedOveragePrice);
 
       if (existingLimit && !isEnabled) {
         // Remove limit - tier was disabled
@@ -2495,13 +2604,12 @@ export function TheMatrix({
             limitId: existingLimit.id,
             metric: metricName.trim(),
             unitName: metricUnitName.trim() || undefined,
-            limit: isNumeric ? parsedLimit : null,
+            freeLimit: isNumeric ? parsedLimit : null,
+            paidLimit: isPaidNumeric ? parsedPaidLimit : null,
             notes: !isNumeric && limitValue ? limitValue.trim() : null,
+            resetCycle: metricResetCycle,
             unitPrice: hasOveragePricing ? parsedOveragePrice : null,
             unitPriceCurrency: hasOveragePricing ? "USD" : undefined,
-            unitPriceBillingCycle: hasOveragePricing
-              ? tierOverageCycle
-              : undefined,
             lastModified: now,
           }),
         );
@@ -2514,14 +2622,12 @@ export function TheMatrix({
             serviceId,
             metric: metricName.trim(),
             unitName: metricUnitName.trim() || undefined,
-            limit: isNumeric ? parsedLimit : null,
+            freeLimit: isNumeric ? parsedLimit : null,
+            paidLimit: isPaidNumeric ? parsedPaidLimit : null,
             notes: !isNumeric && limitValue ? limitValue.trim() : null,
-            resetPeriod: "MONTHLY",
+            resetCycle: metricResetCycle,
             unitPrice: hasOveragePricing ? parsedOveragePrice : undefined,
             unitPriceCurrency: hasOveragePricing ? "USD" : undefined,
-            unitPriceBillingCycle: hasOveragePricing
-              ? tierOverageCycle
-              : undefined,
             lastModified: now,
           }),
         );
@@ -2531,10 +2637,12 @@ export function TheMatrix({
     setMetricModal(null);
     setMetricName("");
     setMetricLimits({});
+    setMetricPaidLimits({});
     setMetricEnabledTiers(new Set());
     setMetricOveragePrices({});
     setMetricOverageCycles({});
     setMetricUnitName("");
+    setMetricResetCycle("MONTHLY");
   };
 
   const getLevelDisplay = (
@@ -2702,15 +2810,6 @@ export function TheMatrix({
                   const displayAmount = activePricingOption
                     ? activePricingOption.amount
                     : tier.pricing.amount;
-                  const displayCycle = activePricingOption
-                    ? activePricingOption.billingCycle
-                    : tier.pricing.billingCycle;
-                  const monthlyEquivalent =
-                    displayAmount &&
-                    displayCycle !== "MONTHLY" &&
-                    displayCycle !== "ONE_TIME"
-                      ? getMonthlyEquivalent(displayAmount, displayCycle)
-                      : null;
 
                   return (
                     <th
@@ -2728,11 +2827,9 @@ export function TheMatrix({
                         <span className="matrix__tier-price">
                           {tier.isCustomPricing
                             ? "Custom"
-                            : monthlyEquivalent
-                              ? `$${monthlyEquivalent.toFixed(0)}/mo`
-                              : displayAmount !== null
-                                ? `$${displayAmount}/mo`
-                                : "$null/mo"}
+                            : displayAmount !== null
+                              ? `$${displayAmount}/mo`
+                              : "$null/mo"}
                         </span>
                         {/* Billing Cycle Selector for tiers with multiple options */}
                         {hasPricingOptions &&
@@ -2753,8 +2850,7 @@ export function TheMatrix({
                             >
                               {tier.pricingOptions.map((po) => (
                                 <option key={po.id} value={po.id}>
-                                  {BILLING_CYCLE_SHORT_LABELS[po.billingCycle]}{" "}
-                                  - ${po.amount}
+                                  ${po.amount}
                                 </option>
                               ))}
                             </select>
@@ -2819,7 +2915,6 @@ export function TheMatrix({
                   setSelectedCell={setSelectedCell}
                   handleSetServiceLevel={handleSetServiceLevel}
                   dispatch={dispatch}
-                  setupFee={groupSetupFees[group.id]}
                   onAddService={openAddServiceModal}
                   selectedTierIdx={selectedTierIdx}
                   onAddMetric={handleAddMetric}
@@ -2839,6 +2934,10 @@ export function TheMatrix({
                     description: null,
                     isAddOn: false,
                     defaultSelected: true,
+                    billingCycle: null,
+                    costType: null,
+                    currency: null,
+                    price: null,
                   }}
                   services={ungroupedSetupServices}
                   tiers={tiers}
@@ -2854,7 +2953,6 @@ export function TheMatrix({
                   setSelectedCell={setSelectedCell}
                   handleSetServiceLevel={handleSetServiceLevel}
                   dispatch={dispatch}
-                  setupFee={groupSetupFees[UNGROUPED_ID]}
                   selectedTierIdx={selectedTierIdx}
                   onAddMetric={handleAddMetric}
                   onEditMetric={handleEditMetric}
@@ -2924,6 +3022,10 @@ export function TheMatrix({
                     description: null,
                     isAddOn: false,
                     defaultSelected: true,
+                    billingCycle: null,
+                    costType: null,
+                    currency: null,
+                    price: null,
                   }}
                   services={ungroupedRegularServices}
                   tiers={tiers}
@@ -2987,27 +3089,125 @@ export function TheMatrix({
                 />
               ))}
 
+              {/* 1. Recurring Tier Price */}
               <tr className="matrix__grand-total-row">
-                <td>Grand Total (Recurring)</td>
-                {tiers.map((tier, idx) => {
-                  const tierPrice = tier.pricing.amount || 0;
-                  const grandTotal = tierPrice;
+                <td>Recurring Tier Price</td>
+                {tiers.map((tier, idx) => (
+                  <td
+                    key={tier.id}
+                    className={
+                      idx === selectedTierIdx
+                        ? "matrix__grand-total-cell--selected"
+                        : ""
+                    }
+                    style={{ textAlign: "center" }}
+                  >
+                    {idx === selectedTierIdx
+                      ? tier.isCustomPricing
+                        ? "Custom"
+                        : `${formatPrice(tier.pricing.amount || 0, tier.pricing.currency || "USD")}/mo`
+                      : null}
+                  </td>
+                ))}
+              </tr>
 
+              {/* 2. Recurring Add-on Prices - each add-on shown separately with its billing cycle */}
+              {addonGroups
+                .filter(
+                  (g) => enabledOptionalGroups.has(g.id) && g.price != null,
+                )
+                .map((g) => {
+                  const billingLabel = g.billingCycle
+                    ? `/${BILLING_CYCLE_SHORT_LABELS[g.billingCycle].toLowerCase()}`
+                    : "/mo";
                   return (
-                    <td
-                      key={tier.id}
-                      className={
-                        idx === selectedTierIdx
-                          ? "matrix__grand-total-cell--selected"
-                          : ""
-                      }
-                      style={{ textAlign: "center" }}
+                    <tr
+                      key={`addon-recurring-${g.id}`}
+                      className="matrix__grand-total-row matrix__grand-total-row--addon"
                     >
-                      {tier.isCustomPricing ? "Custom" : `$${grandTotal}/mo`}
-                    </td>
+                      <td>+ {g.name}</td>
+                      {tiers.map((tier, idx) => (
+                        <td
+                          key={tier.id}
+                          className={
+                            idx === selectedTierIdx
+                              ? "matrix__grand-total-cell--selected"
+                              : ""
+                          }
+                          style={{ textAlign: "center" }}
+                        >
+                          {idx === selectedTierIdx
+                            ? `${formatPrice(g.price || 0, g.currency || "USD")}${billingLabel}`
+                            : null}
+                        </td>
+                      ))}
+                    </tr>
                   );
                 })}
-              </tr>
+
+              {/* 3. Setup fees for services in add-on groups (one-time) */}
+              {(() => {
+                const addonSetupServices = addonGroups.flatMap((g) => {
+                  if (!enabledOptionalGroups.has(g.id)) return [];
+                  return (groupedServices.get(g.id) || []).filter(
+                    (s) => s.costType === "SETUP" && s.price != null,
+                  );
+                });
+                const addonSetupTotal = addonSetupServices.reduce(
+                  (sum, s) => sum + (s.price || 0),
+                  0,
+                );
+                if (addonSetupTotal === 0) return null;
+                return (
+                  <tr className="matrix__grand-total-row matrix__grand-total-row--setup">
+                    <td>+ Add-on Setup Fees</td>
+                    {tiers.map((tier, idx) => (
+                      <td
+                        key={tier.id}
+                        className={
+                          idx === selectedTierIdx
+                            ? "matrix__grand-total-cell--selected"
+                            : ""
+                        }
+                        style={{ textAlign: "center" }}
+                      >
+                        {idx === selectedTierIdx
+                          ? `${formatPrice(addonSetupTotal, "USD")} one-time`
+                          : null}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })()}
+
+              {/* 4. Setup & Formation Fees from setup groups (one-time) */}
+              {(() => {
+                const totalSetupGroupFee = setupGroups.reduce(
+                  (sum, g) => sum + (g.price || 0),
+                  0,
+                );
+                if (totalSetupGroupFee === 0) return null;
+                return (
+                  <tr className="matrix__grand-total-row matrix__grand-total-row--setup">
+                    <td>+ Setup & Formation Fees</td>
+                    {tiers.map((tier, idx) => (
+                      <td
+                        key={tier.id}
+                        className={
+                          idx === selectedTierIdx
+                            ? "matrix__grand-total-cell--selected"
+                            : ""
+                        }
+                        style={{ textAlign: "center" }}
+                      >
+                        {idx === selectedTierIdx
+                          ? `${formatPrice(totalSetupGroupFee, "USD")} one-time`
+                          : null}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })()}
             </tbody>
           </table>
         </div>
@@ -3089,8 +3289,7 @@ export function TheMatrix({
                           </span>
                           {tier.pricing.amount !== null && (
                             <span className="matrix__modal-tier-price">
-                              ${tier.pricing.amount}/
-                              {tier.pricing.billingCycle.toLowerCase()}
+                              ${tier.pricing.amount}/mo
                             </span>
                           )}
                         </label>
@@ -3210,8 +3409,7 @@ export function TheMatrix({
                           </span>
                           {tier.pricing.amount !== null && (
                             <span className="matrix__modal-tier-price">
-                              ${tier.pricing.amount}/
-                              {tier.pricing.billingCycle.toLowerCase()}
+                              ${tier.pricing.amount}/mo
                             </span>
                           )}
                         </label>
@@ -3280,8 +3478,29 @@ export function TheMatrix({
                   className="matrix__modal-hint"
                   style={{ marginTop: "0.375rem" }}
                 >
-                  Used for overage pricing display (e.g., "$50 per entity per
-                  month")
+                  Used for overage pricing (e.g., "$50/entity above free limit")
+                </p>
+              </div>
+
+              <div className="matrix__modal-field">
+                <label className="matrix__modal-label">Reset Cycle</label>
+                <select
+                  value={metricResetCycle}
+                  onChange={(e) =>
+                    setMetricResetCycle(e.target.value as UsageResetCycle)
+                  }
+                  className="matrix__modal-input"
+                  style={{ cursor: "pointer" }}
+                >
+                  <option value="DAILY">Daily</option>
+                  <option value="WEEKLY">Weekly</option>
+                  <option value="MONTHLY">Monthly</option>
+                </select>
+                <p
+                  className="matrix__modal-hint"
+                  style={{ marginTop: "0.375rem" }}
+                >
+                  How often usage limits reset
                 </p>
               </div>
 
@@ -3305,7 +3524,6 @@ export function TheMatrix({
                   {tiers.map((tier) => {
                     const isEnabled = metricEnabledTiers.has(tier.id);
                     const tierOveragePrice = metricOveragePrices[tier.id] || "";
-                    const tierOverageCycle = metricOverageCycles[tier.id] || "";
                     return (
                       <div
                         key={tier.id}
@@ -3380,7 +3598,25 @@ export function TheMatrix({
                                 [tier.id]: e.target.value,
                               }))
                             }
-                            placeholder={isEnabled ? "Limit value" : "—"}
+                            placeholder={isEnabled ? "Free limit" : "—"}
+                            className="matrix__modal-input"
+                            disabled={!isEnabled}
+                            style={{
+                              flex: 1,
+                              opacity: isEnabled ? 1 : 0.5,
+                              cursor: isEnabled ? "text" : "not-allowed",
+                            }}
+                          />
+                          <input
+                            type="text"
+                            value={metricPaidLimits[tier.id] || ""}
+                            onChange={(e) =>
+                              setMetricPaidLimits((prev) => ({
+                                ...prev,
+                                [tier.id]: e.target.value,
+                              }))
+                            }
+                            placeholder={isEnabled ? "Paid limit" : "—"}
                             className="matrix__modal-input"
                             disabled={!isEnabled}
                             style={{
@@ -3410,7 +3646,7 @@ export function TheMatrix({
                                 whiteSpace: "nowrap",
                               }}
                             >
-                              Overage:
+                              Overage price:
                             </span>
                             <span
                               style={{
@@ -3446,45 +3682,15 @@ export function TheMatrix({
                               }}
                             />
                             <span
-                              style={{ fontSize: "0.75rem", color: "#94a3b8" }}
-                            >
-                              /
-                            </span>
-                            <select
-                              value={tierOverageCycle}
-                              onChange={(e) =>
-                                setMetricOverageCycles((prev) => ({
-                                  ...prev,
-                                  [tier.id]:
-                                    (e.target.value as BillingCycle) || "",
-                                }))
-                              }
-                              style={{
-                                fontFamily: "var(--so-font-sans)",
-                                fontSize: "0.75rem",
-                                color: "#334155",
-                                background: "#ffffff",
-                                border: "1px solid #cbd5e1",
-                                borderRadius: "4px",
-                                padding: "0.25rem 0.375rem",
-                                cursor: "pointer",
-                                outline: "none",
-                              }}
-                            >
-                              <option value="">None</option>
-                              {RECURRING_BILLING_CYCLES.map((cycle) => (
-                                <option key={cycle} value={cycle}>
-                                  {BILLING_CYCLE_SHORT_LABELS[cycle]}
-                                </option>
-                              ))}
-                            </select>
-                            <span
                               style={{
                                 fontSize: "0.6875rem",
                                 color: "#64748b",
                               }}
                             >
-                              per extra {metricUnitName || "unit"}
+                              per {metricUnitName || "unit"} above free limit
+                              {metricResetCycle
+                                ? ` / ${metricResetCycle.toLowerCase()}`
+                                : ""}
                             </span>
                           </div>
                         )}
@@ -3501,9 +3707,11 @@ export function TheMatrix({
                     setMetricName("");
                     setMetricUnitName("");
                     setMetricLimits({});
+                    setMetricPaidLimits({});
                     setMetricEnabledTiers(new Set());
                     setMetricOveragePrices({});
                     setMetricOverageCycles({});
+                    setMetricResetCycle("MONTHLY");
                   }}
                   className="matrix__modal-btn matrix__modal-btn--cancel"
                 >
@@ -3557,7 +3765,6 @@ interface ServiceGroupSectionProps {
     optionGroupId?: string,
   ) => void;
   dispatch: DocumentDispatch<ServiceOfferingAction>;
-  setupFee?: number | null;
   onAddService?: (groupId: string, isSetupFormation: boolean) => void;
   selectedTierIdx: number;
   onAddMetric: (serviceId: string) => void;
@@ -3585,7 +3792,6 @@ function ServiceGroupSection({
   getLevelDisplay,
   selectedCell,
   setSelectedCell,
-  setupFee,
   onAddService,
   selectedTierIdx,
   onAddMetric,
@@ -3623,6 +3829,16 @@ function ServiceGroupSection({
               </button>
             )}
             <span className="matrix__group-name">{group.name}</span>
+            {group.billingCycle && (
+              <span className="matrix__group-billing-badge">
+                {BILLING_CYCLE_SHORT_LABELS[group.billingCycle]}
+              </span>
+            )}
+            {group.isAddOn && group.price != null && (
+              <span className="matrix__group-price-badge">
+                {formatPrice(group.price, group.currency || "USD")}
+              </span>
+            )}
           </div>
         </td>
         <td
@@ -3704,39 +3920,69 @@ function ServiceGroupSection({
         <tr className="matrix__setup-total-row">
           <td>TOTAL SETUP FEE</td>
           <td colSpan={tiers.length} style={{ textAlign: "center" }}>
-            {setupFee
-              ? `$${setupFee} flat fee (applied to all tiers)`
+            {group.price
+              ? `${formatPrice(group.price, group.currency || "USD")} flat fee (applied to all tiers)`
               : "No setup fee configured"}
           </td>
         </tr>
       )}
 
       {isOptional && (
-        <tr className={`matrix__total-row ${headerClass}`}>
-          <td className={headerClass}>SUBTOTAL</td>
-          {tiers.map((tier, tierIdx) => {
-            const priceDisplay = "$0";
-
-            return (
-              <td
-                key={tier.id}
-                style={{
-                  textAlign: "center",
-                  background:
-                    tierIdx === selectedTierIdx && isEnabled
-                      ? "var(--so-violet-200)"
-                      : undefined,
-                  color:
-                    tierIdx === selectedTierIdx && isEnabled
-                      ? "var(--so-violet-900)"
-                      : undefined,
-                }}
-              >
-                {isEnabled ? priceDisplay : "$0"}
-              </td>
+        <>
+          {/* Show setup services within this add-on as a separate line */}
+          {(() => {
+            const setupServicesInGroup = services.filter(
+              (s) => s.costType === "SETUP" && s.price != null,
             );
-          })}
-        </tr>
+            if (setupServicesInGroup.length === 0) return null;
+            const setupTotal = setupServicesInGroup.reduce(
+              (sum, s) => sum + (s.price || 0),
+              0,
+            );
+            return (
+              <tr className="matrix__setup-total-row">
+                <td>Setup fees ({group.name})</td>
+                <td colSpan={tiers.length} style={{ textAlign: "center" }}>
+                  {isEnabled
+                    ? `${formatPrice(setupTotal, group.currency || "USD")} one-time`
+                    : "—"}
+                </td>
+              </tr>
+            );
+          })()}
+          <tr className={`matrix__total-row ${headerClass}`}>
+            <td className={headerClass}>SUBTOTAL</td>
+            {tiers.map((tier, tierIdx) => {
+              const recurringPrice = isEnabled && group.price ? group.price : 0;
+              const billingLabel = group.billingCycle
+                ? `/${BILLING_CYCLE_SHORT_LABELS[group.billingCycle].toLowerCase()}`
+                : "/mo";
+
+              return (
+                <td
+                  key={tier.id}
+                  style={{
+                    textAlign: "center",
+                    background:
+                      tierIdx === selectedTierIdx && isEnabled
+                        ? "var(--so-violet-200)"
+                        : undefined,
+                    color:
+                      tierIdx === selectedTierIdx && isEnabled
+                        ? "var(--so-violet-900)"
+                        : undefined,
+                  }}
+                >
+                  {isEnabled && recurringPrice > 0
+                    ? `+${formatPrice(recurringPrice, group.currency || "USD")}${billingLabel}`
+                    : isEnabled
+                      ? "Included"
+                      : "—"}
+                </td>
+              );
+            })}
+          </tr>
+        </>
       )}
     </>
   );
@@ -3852,6 +4098,14 @@ function ServiceRowWithMetrics({
             >
               {service.title}
             </button>
+            {service.costType === "SETUP" && (
+              <span className="matrix__service-setup-badge">Setup</span>
+            )}
+            {service.costType === "SETUP" && service.price != null && (
+              <span className="matrix__service-setup-price">
+                {formatPrice(service.price, service.currency || "USD")}
+              </span>
+            )}
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -3986,28 +4240,29 @@ function ServiceRowWithMetrics({
                 <div className="matrix__metric-value-container">
                   <span className="matrix__metric-value">
                     {usageLimit
-                      ? usageLimit.limit
-                        ? `Up to ${usageLimit.limit}`
+                      ? usageLimit.freeLimit
+                        ? `Free: ${usageLimit.freeLimit}${usageLimit.paidLimit ? ` / Paid: ${usageLimit.paidLimit}` : ""}`
                         : usageLimit.notes || "Unlimited"
                       : "—"}
                   </span>
-                  {usageLimit?.unitPrice &&
-                    usageLimit?.unitPriceBillingCycle && (
-                      <span className="matrix__metric-overage">
-                        +
-                        {formatPrice(
-                          usageLimit.unitPrice,
-                          usageLimit.unitPriceCurrency || "USD",
-                        )}
-                        {usageLimit.unitName
-                          ? ` per ${usageLimit.unitName}`
-                          : ""}{" "}
-                        per{" "}
-                        {BILLING_CYCLE_SHORT_LABELS[
-                          usageLimit.unitPriceBillingCycle
-                        ].toLowerCase()}
-                      </span>
-                    )}
+                  {usageLimit?.resetCycle && (
+                    <span className="matrix__metric-reset-cycle">
+                      {usageLimit.resetCycle.toLowerCase()}
+                    </span>
+                  )}
+                  {usageLimit?.unitPrice != null && (
+                    <span className="matrix__metric-overage">
+                      +
+                      {formatPrice(
+                        usageLimit.unitPrice,
+                        usageLimit.unitPriceCurrency || "USD",
+                      )}
+                      /{usageLimit.unitName || "unit"} above free
+                      {usageLimit.resetCycle
+                        ? ` / ${usageLimit.resetCycle.toLowerCase()}`
+                        : ""}
+                    </span>
+                  )}
                 </div>
               </td>
             );
@@ -4132,9 +4387,9 @@ function ServiceLevelDetailPanel({
         limitId: generateId(),
         serviceId: service.id,
         metric: newMetric.trim(),
-        limit: isNumeric ? parsedLimit : undefined,
+        freeLimit: isNumeric ? parsedLimit : undefined,
         notes: !isNumeric && newLimit ? newLimit.trim() : undefined,
-        resetPeriod: "MONTHLY",
+        resetCycle: "MONTHLY",
         lastModified: new Date().toISOString(),
       }),
     );
@@ -4300,20 +4555,25 @@ function MetricLimitItem({
   const [editMetric, setEditMetric] = useState(limit.metric);
   const [editUnitName, setEditUnitName] = useState(limit.unitName || "");
   const [editLimit, setEditLimit] = useState(
-    limit.limit?.toString() || limit.notes || "",
+    limit.freeLimit?.toString() || limit.notes || "",
+  );
+  const [editPaidLimit, setEditPaidLimit] = useState(
+    limit.paidLimit?.toString() || "",
+  );
+  const [editResetCycle, setEditResetCycle] = useState<UsageResetCycle>(
+    limit.resetCycle || "MONTHLY",
   );
   // Overage pricing state
   const [editUnitPrice, setEditUnitPrice] = useState(
     limit.unitPrice?.toString() || "",
   );
   const [editUnitPriceCurrency] = useState(limit.unitPriceCurrency || "USD");
-  const [editUnitPriceBillingCycle, setEditUnitPriceBillingCycle] = useState<
-    BillingCycle | ""
-  >(limit.unitPriceBillingCycle || "");
 
   const handleSave = () => {
     const parsedLimit = editLimit ? parseInt(editLimit, 10) : null;
     const isNumeric = parsedLimit !== null && !isNaN(parsedLimit);
+    const parsedPaidLimit = editPaidLimit ? parseInt(editPaidLimit, 10) : null;
+    const isPaidNumeric = parsedPaidLimit !== null && !isNaN(parsedPaidLimit);
     const parsedUnitPrice = editUnitPrice ? parseFloat(editUnitPrice) : null;
     dispatch(
       updateUsageLimit({
@@ -4321,17 +4581,12 @@ function MetricLimitItem({
         limitId: limit.id,
         metric: editMetric.trim() || limit.metric,
         unitName: editUnitName.trim() || undefined,
-        limit: isNumeric ? parsedLimit : undefined,
+        freeLimit: isNumeric ? parsedLimit : undefined,
+        paidLimit: isPaidNumeric ? parsedPaidLimit : undefined,
         notes: !isNumeric && editLimit ? editLimit.trim() : undefined,
+        resetCycle: editResetCycle,
         unitPrice: parsedUnitPrice,
-        unitPriceCurrency:
-          parsedUnitPrice && editUnitPriceBillingCycle
-            ? editUnitPriceCurrency
-            : undefined,
-        unitPriceBillingCycle:
-          parsedUnitPrice && editUnitPriceBillingCycle
-            ? editUnitPriceBillingCycle
-            : undefined,
+        unitPriceCurrency: parsedUnitPrice ? editUnitPriceCurrency : undefined,
         lastModified: new Date().toISOString(),
       }),
     );
@@ -4341,19 +4596,18 @@ function MetricLimitItem({
   const handleCancel = () => {
     setEditMetric(limit.metric);
     setEditUnitName(limit.unitName || "");
-    setEditLimit(limit.limit?.toString() || limit.notes || "");
+    setEditLimit(limit.freeLimit?.toString() || limit.notes || "");
+    setEditPaidLimit(limit.paidLimit?.toString() || "");
+    setEditResetCycle(limit.resetCycle || "MONTHLY");
     setEditUnitPrice(limit.unitPrice?.toString() || "");
-    setEditUnitPriceBillingCycle(limit.unitPriceBillingCycle || "");
     setIsEditing(false);
   };
 
   // Format overage display string
   const getOverageDisplay = () => {
-    if (!limit.unitPrice || !limit.unitPriceBillingCycle) return null;
-    const cycleLabel =
-      BILLING_CYCLE_SHORT_LABELS[limit.unitPriceBillingCycle].toLowerCase();
+    if (!limit.unitPrice) return null;
     const unitLabel = limit.unitName || "unit";
-    return `+${formatPrice(limit.unitPrice, limit.unitPriceCurrency || "USD")} per ${unitLabel}/${cycleLabel}`;
+    return `+${formatPrice(limit.unitPrice, limit.unitPriceCurrency || "USD")} per ${unitLabel}`;
   };
 
   const overageDisplay = getOverageDisplay();
@@ -4386,7 +4640,7 @@ function MetricLimitItem({
           </p>
         </div>
         <div>
-          <label className="matrix__panel-edit-label">Included Value</label>
+          <label className="matrix__panel-edit-label">Free Limit</label>
           <input
             type="text"
             value={editLimit}
@@ -4395,8 +4649,36 @@ function MetricLimitItem({
             className="matrix__panel-input"
           />
           <p className="matrix__panel-edit-hint">
-            Enter limit included in tier or leave empty
+            Included free limit for this tier
           </p>
+        </div>
+        <div>
+          <label className="matrix__panel-edit-label">Paid Limit</label>
+          <input
+            type="text"
+            value={editPaidLimit}
+            onChange={(e) => setEditPaidLimit(e.target.value)}
+            placeholder="e.g., 500, 1000"
+            className="matrix__panel-input"
+          />
+          <p className="matrix__panel-edit-hint">
+            Maximum paid usage beyond the free limit (optional)
+          </p>
+        </div>
+        <div>
+          <label className="matrix__panel-edit-label">Reset Cycle</label>
+          <select
+            value={editResetCycle}
+            onChange={(e) =>
+              setEditResetCycle(e.target.value as UsageResetCycle)
+            }
+            className="matrix__panel-input"
+            style={{ cursor: "pointer" }}
+          >
+            <option value="DAILY">Daily</option>
+            <option value="WEEKLY">Weekly</option>
+            <option value="MONTHLY">Monthly</option>
+          </select>
         </div>
         <div className="matrix__panel-overage-section">
           <label className="matrix__panel-edit-label">
@@ -4420,23 +4702,6 @@ function MetricLimitItem({
                 className="matrix__panel-overage-input"
               />
             </div>
-            <span className="matrix__panel-overage-separator">/</span>
-            <select
-              value={editUnitPriceBillingCycle}
-              onChange={(e) =>
-                setEditUnitPriceBillingCycle(
-                  (e.target.value as BillingCycle) || "",
-                )
-              }
-              className="matrix__panel-overage-select"
-            >
-              <option value="">No overage</option>
-              {RECURRING_BILLING_CYCLES.map((cycle) => (
-                <option key={cycle} value={cycle}>
-                  {BILLING_CYCLE_SHORT_LABELS[cycle]}
-                </option>
-              ))}
-            </select>
             <span className="matrix__panel-overage-label">
               per {editUnitName || "unit"}
             </span>
@@ -4469,8 +4734,15 @@ function MetricLimitItem({
         <div className="matrix__panel-limit-metric">{limit.metric}</div>
         <div className="matrix__panel-limit-value-group">
           <div className="matrix__panel-limit-value">
-            {limit.limit ?? limit.notes ?? "—"}
+            {limit.freeLimit != null
+              ? `Free: ${limit.freeLimit}${limit.paidLimit != null ? ` / Paid: ${limit.paidLimit}` : ""}`
+              : (limit.notes ?? "—")}
           </div>
+          {limit.resetCycle && (
+            <div style={{ fontSize: "0.6875rem", color: "#64748b" }}>
+              Resets {limit.resetCycle.toLowerCase()}
+            </div>
+          )}
           {overageDisplay && (
             <div className="matrix__panel-limit-overage">{overageDisplay}</div>
           )}

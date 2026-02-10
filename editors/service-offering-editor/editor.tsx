@@ -4,21 +4,13 @@ import { useSelectedServiceOfferingDocument } from "../../document-models/servic
 import { OfferingProgress } from "./components/OfferingProgress.js";
 import type { TabId } from "./components/TabNavigation.js";
 import { ResourceTemplateSelector } from "./components/ResourceTemplateSelector.js";
-import {
-  ServiceCatalog,
-  type GroupMetadata,
-} from "./components/ServiceCatalog.js";
+import { ServiceCatalog } from "./components/ServiceCatalog.js";
 import { TierDefinition } from "./components/TierDefinition.js";
 import { TheMatrix } from "./components/TheMatrix.js";
 
 export default function ServiceOfferingEditor() {
   const [document, dispatch] = useSelectedServiceOfferingDocument();
   const [activeTab, setActiveTab] = useState<TabId>("scope-facets");
-
-  // Centralized group metadata state shared between ServiceCatalog and TheMatrix
-  const [groupMetadata, setGroupMetadata] = useState<
-    Record<string, GroupMetadata>
-  >({});
 
   if (!document) {
     return (
@@ -50,14 +42,6 @@ export default function ServiceOfferingEditor() {
     );
   }
 
-  // Derive groupSetupFees for TheMatrix from groupMetadata
-  const groupSetupFees: Record<string, number | null> = {};
-  Object.entries(groupMetadata).forEach(([groupId, meta]) => {
-    if (meta.isSetupFormation) {
-      groupSetupFees[groupId] = meta.setupFee;
-    }
-  });
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "scope-facets":
@@ -65,24 +49,11 @@ export default function ServiceOfferingEditor() {
           <ResourceTemplateSelector document={document} dispatch={dispatch} />
         );
       case "service-catalog":
-        return (
-          <ServiceCatalog
-            document={document}
-            dispatch={dispatch}
-            groupMetadata={groupMetadata}
-            setGroupMetadata={setGroupMetadata}
-          />
-        );
+        return <ServiceCatalog document={document} dispatch={dispatch} />;
       case "tier-definition":
         return <TierDefinition document={document} dispatch={dispatch} />;
       case "the-matrix":
-        return (
-          <TheMatrix
-            document={document}
-            dispatch={dispatch}
-            groupSetupFees={groupSetupFees}
-          />
-        );
+        return <TheMatrix document={document} dispatch={dispatch} />;
       default:
         return null;
     }

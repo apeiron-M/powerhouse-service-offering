@@ -31,9 +31,8 @@ type ServiceOfferingState {
     status: ServiceStatus!
     lastModified: DateTime!
     targetAudiences: [TargetAudience!]!
-    setupServices: [String!]!
-    recurringServices: [String!]!
     facetTargets: [FacetTarget!]!
+    serviceGroups: [ServiceGroup!]!
     services: [Service!]!
     tiers: [ServiceSubscriptionTier!]!
     optionGroups: [OptionGroup!]!
@@ -59,16 +58,31 @@ type FacetTarget {
     selectedOptions: [String!]!
 }
 
+type ServiceGroup {
+    id: OID!
+    name: String!
+    description: String
+    billingCycle: BillingCycle!
+    displayOrder: Int
+}
+
 type Service {
     id: OID!
     title: String!
     description: String
     displayOrder: Int
-    parentServiceId: OID
+    serviceGroupId: OID
     isSetupFormation: Boolean!
-    isPremiumExclusive: Boolean!
     optionGroupId: OID
+    costType: ServiceCostType
+    price: Amount_Money
+    currency: Currency
     facetBindings: [ResourceFacetBinding!]!
+}
+
+enum ServiceCostType {
+    RECURRING
+    SETUP
 }
 
 type ResourceFacetBinding {
@@ -92,22 +106,13 @@ type ServiceSubscriptionTier {
 type ServicePricing {
     amount: Amount_Money
     currency: Currency!
-    billingCycle: BillingCycle!
-    setupFee: Amount_Money
-    perSeatAmount: Amount_Money
-    perSeatCurrency: Currency
-    perSeatBillingCycle: BillingCycle
-    perSeatLabel: String
 }
 
 type TierPricingOption {
     id: OID!
-    billingCycle: BillingCycle!
     amount: Amount_Money!
     currency: Currency!
-    setupFee: Amount_Money
     isDefault: Boolean!
-    perSeatAmount: Amount_Money
 }
 
 enum BillingCycle {
@@ -123,9 +128,6 @@ type ServiceLevelBinding {
     serviceId: OID!
     level: ServiceLevel!
     customValue: String
-    variations: String
-    annexes: String
-    setupFee: Amount_Money
     optionGroupId: OID
 }
 
@@ -143,22 +145,18 @@ type ServiceUsageLimit {
     serviceId: OID!
     metric: String!
     unitName: String
-    limit: Int
-    resetPeriod: ResetPeriod
+    freeLimit: Int
+    paidLimit: Int
+    resetCycle: UsageResetCycle
     notes: String
     unitPrice: Amount_Money
     unitPriceCurrency: Currency
-    unitPriceBillingCycle: BillingCycle
 }
 
-enum ResetPeriod {
-    HOURLY
+enum UsageResetCycle {
     DAILY
     WEEKLY
     MONTHLY
-    QUARTERLY
-    SEMI_ANNUAL
-    ANNUAL
 }
 
 type OptionGroup {
@@ -167,6 +165,15 @@ type OptionGroup {
     description: String
     isAddOn: Boolean!
     defaultSelected: Boolean!
+    costType: GroupCostType
+    billingCycle: BillingCycle
+    price: Amount_Money
+    currency: Currency
+}
+
+enum GroupCostType {
+    RECURRING
+    SETUP
 }
 
 # Service Management
@@ -175,11 +182,13 @@ input AddServiceInput {
     id: OID!
     title: String!
     description: String
-    parentServiceId: OID
+    serviceGroupId: OID
     displayOrder: Int
     isSetupFormation: Boolean
-    isPremiumExclusive: Boolean
     optionGroupId: OID
+    costType: ServiceCostType
+    price: Amount_Money
+    currency: Currency
     lastModified: DateTime!
 }
 
@@ -187,11 +196,13 @@ input UpdateServiceInput {
     id: OID!
     title: String
     description: String
-    parentServiceId: OID
+    serviceGroupId: OID
     displayOrder: Int
     isSetupFormation: Boolean
-    isPremiumExclusive: Boolean
     optionGroupId: OID
+    costType: ServiceCostType
+    price: Amount_Money
+    currency: Currency
     lastModified: DateTime!
 }
 
@@ -223,12 +234,6 @@ input AddTierInput {
     description: String
     amount: Amount_Money
     currency: Currency!
-    billingCycle: BillingCycle!
-    setupFee: Amount_Money
-    perSeatAmount: Amount_Money
-    perSeatCurrency: Currency
-    perSeatBillingCycle: BillingCycle
-    perSeatLabel: String
     isCustomPricing: Boolean
     lastModified: DateTime!
 }
@@ -245,12 +250,6 @@ input UpdateTierPricingInput {
     tierId: OID!
     amount: Amount_Money
     currency: Currency
-    billingCycle: BillingCycle
-    setupFee: Amount_Money
-    perSeatAmount: Amount_Money
-    perSeatCurrency: Currency
-    perSeatBillingCycle: BillingCycle
-    perSeatLabel: String
     lastModified: DateTime!
 }
 
@@ -262,11 +261,8 @@ input DeleteTierInput {
 input AddTierPricingOptionInput {
     tierId: OID!
     pricingOptionId: OID!
-    billingCycle: BillingCycle!
     amount: Amount_Money!
     currency: Currency!
-    setupFee: Amount_Money
-    perSeatAmount: Amount_Money
     isDefault: Boolean
     lastModified: DateTime!
 }
@@ -276,8 +272,6 @@ input UpdateTierPricingOptionInput {
     pricingOptionId: OID!
     amount: Amount_Money
     currency: Currency
-    setupFee: Amount_Money
-    perSeatAmount: Amount_Money
     isDefault: Boolean
     lastModified: DateTime!
 }
@@ -294,10 +288,7 @@ input AddServiceLevelInput {
     serviceId: OID!
     level: ServiceLevel!
     optionGroupId: OID
-    variations: String
-    annexes: String
     customValue: String
-    setupFee: Amount_Money
     lastModified: DateTime!
 }
 
@@ -306,10 +297,7 @@ input UpdateServiceLevelInput {
     serviceLevelId: OID!
     level: ServiceLevel
     optionGroupId: OID
-    variations: String
-    annexes: String
     customValue: String
-    setupFee: Amount_Money
     lastModified: DateTime!
 }
 
@@ -325,12 +313,12 @@ input AddUsageLimitInput {
     serviceId: OID!
     metric: String!
     unitName: String
-    limit: Int
-    resetPeriod: ResetPeriod
+    freeLimit: Int
+    paidLimit: Int
+    resetCycle: UsageResetCycle
     notes: String
     unitPrice: Amount_Money
     unitPriceCurrency: Currency
-    unitPriceBillingCycle: BillingCycle
     lastModified: DateTime!
 }
 
@@ -339,12 +327,12 @@ input UpdateUsageLimitInput {
     limitId: OID!
     metric: String
     unitName: String
-    limit: Int
-    resetPeriod: ResetPeriod
+    freeLimit: Int
+    paidLimit: Int
+    resetCycle: UsageResetCycle
     notes: String
     unitPrice: Amount_Money
     unitPriceCurrency: Currency
-    unitPriceBillingCycle: BillingCycle
     lastModified: DateTime!
 }
 
@@ -417,16 +405,6 @@ input RemoveFacetOptionInput {
     lastModified: DateTime!
 }
 
-input SetSetupServicesInput {
-    services: [String!]!
-    lastModified: DateTime!
-}
-
-input SetRecurringServicesInput {
-    services: [String!]!
-    lastModified: DateTime!
-}
-
 input SelectResourceTemplateInput {
     resourceTemplateId: PHID!
     lastModified: DateTime!
@@ -446,6 +424,10 @@ input AddOptionGroupInput {
     description: String
     isAddOn: Boolean!
     defaultSelected: Boolean!
+    costType: GroupCostType
+    billingCycle: BillingCycle
+    price: Amount_Money
+    currency: Currency
     lastModified: DateTime!
 }
 
@@ -455,10 +437,44 @@ input UpdateOptionGroupInput {
     description: String
     isAddOn: Boolean
     defaultSelected: Boolean
+    costType: GroupCostType
+    billingCycle: BillingCycle
+    price: Amount_Money
+    currency: Currency
     lastModified: DateTime!
 }
 
 input DeleteOptionGroupInput {
     id: OID!
+    lastModified: DateTime!
+}
+
+# Service Group Management
+
+input AddServiceGroupInput {
+    id: OID!
+    name: String!
+    description: String
+    billingCycle: BillingCycle!
+    displayOrder: Int
+    lastModified: DateTime!
+}
+
+input UpdateServiceGroupInput {
+    id: OID!
+    name: String
+    description: String
+    billingCycle: BillingCycle
+    displayOrder: Int
+    lastModified: DateTime!
+}
+
+input DeleteServiceGroupInput {
+    id: OID!
+    lastModified: DateTime!
+}
+
+input ReorderServiceGroupsInput {
+    order: [OID!]!
     lastModified: DateTime!
 }

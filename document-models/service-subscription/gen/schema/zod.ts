@@ -2,19 +2,22 @@ import * as z from "zod";
 import type {
   ActivateSubscriptionInput,
   AddAddonInput,
+  BillingCycle,
   CancelSubscriptionInput,
   ChangeTierInput,
+  ExpireSubscriptionInput,
   FacetSelection,
   InitializeSubscriptionInput,
   RemoveAddonInput,
   RemoveFacetSelectionInput,
-  RenewSubscriptionInput,
   SelectedAddon,
   ServiceSubscriptionState,
+  SetCachedSnippetsInput,
   SetFacetSelectionInput,
   SetPricingInput,
   SubscriptionPricing,
-  UpdateSubscriptionStatusInput,
+  SubscriptionStatus,
+  UpdateBillingProjectionInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -40,9 +43,7 @@ export const BillingCycleSchema = z.enum([
 
 export const SubscriptionStatusSchema = z.enum([
   "ACTIVE",
-  "CANCELLED",
   "EXPIRED",
-  "PAUSED",
   "PENDING",
 ]);
 
@@ -70,6 +71,7 @@ export function CancelSubscriptionInputSchema(): z.ZodObject<
   Properties<CancelSubscriptionInput>
 > {
   return z.object({
+    cancelEffectiveDate: z.string().datetime().nullish(),
     cancelledAt: z.string().datetime(),
     lastModified: z.string().datetime(),
     reason: z.string().nullish(),
@@ -82,6 +84,14 @@ export function ChangeTierInputSchema(): z.ZodObject<
   return z.object({
     lastModified: z.string().datetime(),
     newTierId: z.string(),
+  });
+}
+
+export function ExpireSubscriptionInputSchema(): z.ZodObject<
+  Properties<ExpireSubscriptionInput>
+> {
+  return z.object({
+    lastModified: z.string().datetime(),
   });
 }
 
@@ -102,11 +112,13 @@ export function InitializeSubscriptionInputSchema(): z.ZodObject<
   return z.object({
     createdAt: z.string().datetime(),
     customerId: z.string(),
+    customerName: z.string().nullish(),
     id: z.string(),
     lastModified: z.string().datetime(),
     resourceTemplateId: z.string(),
     selectedTierId: z.string(),
     serviceOfferingId: z.string(),
+    serviceOfferingTitle: z.string().nullish(),
   });
 }
 
@@ -128,16 +140,6 @@ export function RemoveFacetSelectionInputSchema(): z.ZodObject<
   });
 }
 
-export function RenewSubscriptionInputSchema(): z.ZodObject<
-  Properties<RenewSubscriptionInput>
-> {
-  return z.object({
-    lastModified: z.string().datetime(),
-    periodEnd: z.string().datetime(),
-    periodStart: z.string().datetime(),
-  });
-}
-
 export function SelectedAddonSchema(): z.ZodObject<Properties<SelectedAddon>> {
   return z.object({
     __typename: z.literal("SelectedAddon").optional(),
@@ -152,22 +154,39 @@ export function ServiceSubscriptionStateSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceSubscriptionState").optional(),
+    autoRenew: z.boolean(),
+    cancelEffectiveDate: z.string().datetime().nullish(),
     cancellationReason: z.string().nullish(),
     cancelledAt: z.string().datetime().nullish(),
     createdAt: z.string().datetime(),
     currentPeriodEnd: z.string().datetime().nullish(),
     currentPeriodStart: z.string().datetime().nullish(),
     customerId: z.string(),
+    customerName: z.string().nullish(),
     facetSelections: z.array(z.lazy(() => FacetSelectionSchema())),
     id: z.string(),
     lastModified: z.string().datetime(),
+    nextBillingDate: z.string().datetime().nullish(),
     pricing: z.lazy(() => SubscriptionPricingSchema().nullish()),
+    projectedBillAmount: z.number().nullish(),
+    projectedBillCurrency: z.string().nullish(),
     resourceTemplateId: z.string(),
     selectedAddons: z.array(z.lazy(() => SelectedAddonSchema())),
     selectedTierId: z.string(),
     serviceOfferingId: z.string(),
+    serviceOfferingTitle: z.string().nullish(),
     startDate: z.string().datetime().nullish(),
     status: SubscriptionStatusSchema,
+  });
+}
+
+export function SetCachedSnippetsInputSchema(): z.ZodObject<
+  Properties<SetCachedSnippetsInput>
+> {
+  return z.object({
+    customerName: z.string().nullish(),
+    lastModified: z.string().datetime(),
+    serviceOfferingTitle: z.string().nullish(),
   });
 }
 
@@ -206,11 +225,13 @@ export function SubscriptionPricingSchema(): z.ZodObject<
   });
 }
 
-export function UpdateSubscriptionStatusInputSchema(): z.ZodObject<
-  Properties<UpdateSubscriptionStatusInput>
+export function UpdateBillingProjectionInputSchema(): z.ZodObject<
+  Properties<UpdateBillingProjectionInput>
 > {
   return z.object({
     lastModified: z.string().datetime(),
-    status: SubscriptionStatusSchema,
+    nextBillingDate: z.string().datetime().nullish(),
+    projectedBillAmount: z.number().nullish(),
+    projectedBillCurrency: z.string().nullish(),
   });
 }

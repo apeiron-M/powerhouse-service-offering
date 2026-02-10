@@ -18,3 +18,4 @@ export * from "./service-management/operations.js";
 export * from "./tier-management/operations.js";
 export * from "./offering-management/operations.js";
 export * from "./option-group-management/operations.js";
+export * from "./service-group-management/operations.js";

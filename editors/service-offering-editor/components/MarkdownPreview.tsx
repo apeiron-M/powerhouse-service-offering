@@ -129,10 +129,7 @@ export function MarkdownPreview({
         `}
       </style>
       <div className="markdown-preview-content" data-color-mode="light">
-        <MarkdownRenderer
-          source={displayContent}
-          disableCopy={true}
-        />
+        <MarkdownRenderer source={displayContent} disableCopy={true} />
       </div>
       <ExpandButton />
     </div>
