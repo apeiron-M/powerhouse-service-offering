@@ -95,16 +95,23 @@ export function SubscriptionHeader({
           <span className="si-header__stat-value">{state.services.length}</span>
           <span className="si-header__stat-label">Services</span>
         </div>
-        <div className="si-header__stat">
-          <span className="si-header__stat-value">{state.invoices.length}</span>
-          <span className="si-header__stat-label">Invoices</span>
-        </div>
-        {mode === "operator" && (
+        {state.projectedBillAmount != null && (
           <div className="si-header__stat">
             <span className="si-header__stat-value">
-              {state.invoices.filter((i) => i.status === "OVERDUE").length}
+              {new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: state.projectedBillCurrency || "USD",
+              }).format(state.projectedBillAmount)}
             </span>
-            <span className="si-header__stat-label">Overdue</span>
+            <span className="si-header__stat-label">Next Bill</span>
+          </div>
+        )}
+        {state.nextBillingDate && (
+          <div className="si-header__stat">
+            <span className="si-header__stat-value">
+              {formatDate(state.nextBillingDate)}
+            </span>
+            <span className="si-header__stat-label">Due Date</span>
           </div>
         )}
       </div>

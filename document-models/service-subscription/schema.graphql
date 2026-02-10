@@ -22,10 +22,13 @@ scalar Upload
 type ServiceSubscriptionState {
     id: PHID!
     customerId: PHID!
+    customerName: String
     serviceOfferingId: PHID!
+    serviceOfferingTitle: String
     resourceTemplateId: PHID!
     selectedTierId: OID!
     status: SubscriptionStatus!
+    autoRenew: Boolean!
     pricing: SubscriptionPricing
     selectedAddons: [SelectedAddon!]!
     facetSelections: [FacetSelection!]!
@@ -34,6 +37,10 @@ type ServiceSubscriptionState {
     currentPeriodEnd: DateTime
     cancelledAt: DateTime
     cancellationReason: String
+    cancelEffectiveDate: DateTime
+    nextBillingDate: DateTime
+    projectedBillAmount: Amount_Money
+    projectedBillCurrency: Currency
     createdAt: DateTime!
     lastModified: DateTime!
 }
@@ -41,8 +48,6 @@ type ServiceSubscriptionState {
 enum SubscriptionStatus {
     PENDING
     ACTIVE
-    PAUSED
-    CANCELLED
     EXPIRED
 }
 
@@ -78,15 +83,12 @@ type FacetSelection {
 input InitializeSubscriptionInput {
     id: PHID!
     customerId: PHID!
+    customerName: String
     serviceOfferingId: PHID!
+    serviceOfferingTitle: String
     resourceTemplateId: PHID!
     selectedTierId: OID!
     createdAt: DateTime!
-    lastModified: DateTime!
-}
-
-input UpdateSubscriptionStatusInput {
-    status: SubscriptionStatus!
     lastModified: DateTime!
 }
 
@@ -99,13 +101,12 @@ input ActivateSubscriptionInput {
 
 input CancelSubscriptionInput {
     cancelledAt: DateTime!
+    cancelEffectiveDate: DateTime
     reason: String
     lastModified: DateTime!
 }
 
-input RenewSubscriptionInput {
-    periodStart: DateTime!
-    periodEnd: DateTime!
+input ExpireSubscriptionInput {
     lastModified: DateTime!
 }
 
@@ -149,5 +150,20 @@ input SetFacetSelectionInput {
 
 input RemoveFacetSelectionInput {
     categoryKey: String!
+    lastModified: DateTime!
+}
+
+# Billing Projection
+
+input UpdateBillingProjectionInput {
+    nextBillingDate: DateTime
+    projectedBillAmount: Amount_Money
+    projectedBillCurrency: Currency
+    lastModified: DateTime!
+}
+
+input SetCachedSnippetsInput {
+    customerName: String
+    serviceOfferingTitle: String
     lastModified: DateTime!
 }

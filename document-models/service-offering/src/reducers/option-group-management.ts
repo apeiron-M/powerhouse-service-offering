@@ -9,6 +9,10 @@ export const serviceOfferingOptionGroupManagementOperations: ServiceOfferingOpti
         description: action.input.description || null,
         isAddOn: action.input.isAddOn,
         defaultSelected: action.input.defaultSelected,
+        costType: action.input.costType || null,
+        billingCycle: action.input.billingCycle || null,
+        price: action.input.price || null,
+        currency: action.input.currency || null,
       });
       state.lastModified = action.input.lastModified;
     },
@@ -37,6 +41,18 @@ export const serviceOfferingOptionGroupManagementOperations: ServiceOfferingOpti
           action.input.defaultSelected !== null
         ) {
           optionGroup.defaultSelected = action.input.defaultSelected;
+        }
+        if (action.input.costType !== undefined) {
+          optionGroup.costType = action.input.costType || null;
+        }
+        if (action.input.billingCycle !== undefined) {
+          optionGroup.billingCycle = action.input.billingCycle || null;
+        }
+        if (action.input.price !== undefined) {
+          optionGroup.price = action.input.price || null;
+        }
+        if (action.input.currency !== undefined) {
+          optionGroup.currency = action.input.currency || null;
         }
       }
       state.lastModified = action.input.lastModified;

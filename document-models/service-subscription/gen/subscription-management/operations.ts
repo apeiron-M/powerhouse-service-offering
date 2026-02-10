@@ -1,10 +1,9 @@
 import { type SignalDispatch } from "document-model";
 import type {
   InitializeSubscriptionAction,
-  UpdateSubscriptionStatusAction,
   ActivateSubscriptionAction,
   CancelSubscriptionAction,
-  RenewSubscriptionAction,
+  ExpireSubscriptionAction,
 } from "./actions.js";
 import type { ServiceSubscriptionState } from "../types.js";
 
@@ -12,11 +11,6 @@ export interface ServiceSubscriptionSubscriptionManagementOperations {
   initializeSubscriptionOperation: (
     state: ServiceSubscriptionState,
     action: InitializeSubscriptionAction,
-    dispatch?: SignalDispatch,
-  ) => void;
-  updateSubscriptionStatusOperation: (
-    state: ServiceSubscriptionState,
-    action: UpdateSubscriptionStatusAction,
     dispatch?: SignalDispatch,
   ) => void;
   activateSubscriptionOperation: (
@@ -29,9 +23,9 @@ export interface ServiceSubscriptionSubscriptionManagementOperations {
     action: CancelSubscriptionAction,
     dispatch?: SignalDispatch,
   ) => void;
-  renewSubscriptionOperation: (
+  expireSubscriptionOperation: (
     state: ServiceSubscriptionState,
-    action: RenewSubscriptionAction,
+    action: ExpireSubscriptionAction,
     dispatch?: SignalDispatch,
   ) => void;
 }

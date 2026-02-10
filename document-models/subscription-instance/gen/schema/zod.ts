@@ -1,31 +1,20 @@
 import * as z from "zod";
 import type {
   ActivateSubscriptionInput,
-  AddCommunicationChannelInput,
-  AddInvoiceLineItemInput,
   AddServiceGroupInput,
   AddServiceInput,
   AddServiceMetricInput,
   AddServiceToGroupInput,
+  BillingCycle,
   BudgetCategory,
-  CancelInvoiceInput,
   CancelSubscriptionInput,
-  CommunicationChannel,
-  CreateInvoiceInput,
+  CustomerType,
   DecrementMetricUsageInput,
   IncrementMetricUsageInput,
   InitializeSubscriptionInput,
-  Invoice,
-  InvoiceLineItem,
-  InvoicePayment,
-  MarkInvoiceOverdueInput,
   PauseSubscriptionInput,
-  RecordInvoicePaymentInput,
   RecurringCost,
-  RefundInvoiceInput,
   RemoveBudgetCategoryInput,
-  RemoveCommunicationChannelInput,
-  RemoveInvoiceLineItemInput,
   RemoveServiceFromGroupInput,
   RemoveServiceGroupInput,
   RemoveServiceInput,
@@ -33,9 +22,9 @@ import type {
   RenewExpiringSubscriptionInput,
   ReportRecurringPaymentInput,
   ReportSetupPaymentInput,
+  ResetPeriod,
   ResourceDocument,
   ResumeSubscriptionInput,
-  SendInvoiceInput,
   Service,
   ServiceGroup,
   ServiceMetric,
@@ -43,17 +32,14 @@ import type {
   SetBudgetCategoryInput,
   SetCustomerTypeInput,
   SetExpiringInput,
-  SetInvoiceTaxInput,
   SetOperatorNotesInput,
-  SetPrimaryCommunicationChannelInput,
   SetRenewalDateInput,
   SetResourceDocumentInput,
   SetupCost,
   SubscriptionInstanceState,
+  SubscriptionStatus,
+  UpdateBillingProjectionInput,
   UpdateCustomerInfoInput,
-  UpdateCustomerWalletInput,
-  UpdateInvoiceStatusInput,
-  UpdateKycStatusInput,
   UpdateMetricInput,
   UpdateMetricUsageInput,
   UpdateServiceInfoInput,
@@ -62,7 +48,6 @@ import type {
   UpdateSubscriptionStatusInput,
   UpdateTeamMemberCountInput,
   UpdateTierInfoInput,
-  VerifyCommunicationChannelInput,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -86,41 +71,7 @@ export const BillingCycleSchema = z.enum([
   "SEMI_ANNUAL",
 ]);
 
-export const CommunicationChannelTypeSchema = z.enum([
-  "DISCORD",
-  "EMAIL",
-  "SLACK",
-  "TELEGRAM",
-  "WHATSAPP",
-]);
-
 export const CustomerTypeSchema = z.enum(["INDIVIDUAL", "TEAM"]);
-
-export const InvoiceStatusSchema = z.enum([
-  "CANCELLED",
-  "DRAFT",
-  "OVERDUE",
-  "PAID",
-  "PARTIALLY_PAID",
-  "REFUNDED",
-  "SENT",
-]);
-
-export const KycStatusSchema = z.enum([
-  "NOT_REQUIRED",
-  "NOT_STARTED",
-  "PENDING",
-  "REJECTED",
-  "VERIFIED",
-]);
-
-export const PaymentMethodSchema = z.enum([
-  "BANK_TRANSFER",
-  "CREDIT_CARD",
-  "CRYPTO",
-  "OTHER",
-  "PAYPAL",
-]);
 
 export const ResetPeriodSchema = z.enum([
   "ANNUAL",
@@ -145,32 +96,6 @@ export function ActivateSubscriptionInputSchema(): z.ZodObject<
 > {
   return z.object({
     activatedSince: z.string().datetime(),
-  });
-}
-
-export function AddCommunicationChannelInputSchema(): z.ZodObject<
-  Properties<AddCommunicationChannelInput>
-> {
-  return z.object({
-    channelId: z.string(),
-    identifier: z.string(),
-    isPrimary: z.boolean(),
-    type: CommunicationChannelTypeSchema,
-    verifiedAt: z.string().datetime().nullish(),
-  });
-}
-
-export function AddInvoiceLineItemInputSchema(): z.ZodObject<
-  Properties<AddInvoiceLineItemInput>
-> {
-  return z.object({
-    description: z.string(),
-    invoiceId: z.string(),
-    lineItemId: z.string(),
-    metricId: z.string().nullish(),
-    quantity: z.number(),
-    serviceId: z.string().nullish(),
-    unitPrice: z.number(),
   });
 }
 
@@ -253,49 +178,12 @@ export function BudgetCategorySchema(): z.ZodObject<
   });
 }
 
-export function CancelInvoiceInputSchema(): z.ZodObject<
-  Properties<CancelInvoiceInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-    reason: z.string().nullish(),
-  });
-}
-
 export function CancelSubscriptionInputSchema(): z.ZodObject<
   Properties<CancelSubscriptionInput>
 > {
   return z.object({
     cancellationReason: z.string().nullish(),
     cancelledSince: z.string().datetime(),
-  });
-}
-
-export function CommunicationChannelSchema(): z.ZodObject<
-  Properties<CommunicationChannel>
-> {
-  return z.object({
-    __typename: z.literal("CommunicationChannel").optional(),
-    id: z.string(),
-    identifier: z.string(),
-    isPrimary: z.boolean(),
-    type: CommunicationChannelTypeSchema,
-    verifiedAt: z.string().datetime().nullish(),
-  });
-}
-
-export function CreateInvoiceInputSchema(): z.ZodObject<
-  Properties<CreateInvoiceInput>
-> {
-  return z.object({
-    currency: z.string(),
-    dueDate: z.string().datetime(),
-    invoiceId: z.string(),
-    invoiceNumber: z.string(),
-    issueDate: z.string().datetime(),
-    notes: z.string().nullish(),
-    periodEnd: z.string().datetime(),
-    periodStart: z.string().datetime(),
   });
 }
 
@@ -339,97 +227,11 @@ export function InitializeSubscriptionInputSchema(): z.ZodObject<
   });
 }
 
-export function InvoiceSchema(): z.ZodObject<Properties<Invoice>> {
-  return z.object({
-    __typename: z.literal("Invoice").optional(),
-    currency: z.string(),
-    dueDate: z.string().datetime(),
-    id: z.string(),
-    invoiceNumber: z.string(),
-    issueDate: z.string().datetime(),
-    lineItems: z.array(z.lazy(() => InvoiceLineItemSchema())),
-    notes: z.string().nullish(),
-    paidDate: z.string().datetime().nullish(),
-    payments: z.array(z.lazy(() => InvoicePaymentSchema())),
-    periodEnd: z.string().datetime(),
-    periodStart: z.string().datetime(),
-    status: InvoiceStatusSchema,
-    subtotal: z.number(),
-    tax: z.number().nullish(),
-    total: z.number(),
-  });
-}
-
-export function InvoiceLineItemSchema(): z.ZodObject<
-  Properties<InvoiceLineItem>
-> {
-  return z.object({
-    __typename: z.literal("InvoiceLineItem").optional(),
-    description: z.string(),
-    id: z.string(),
-    metricId: z.string().nullish(),
-    quantity: z.number(),
-    serviceId: z.string().nullish(),
-    total: z.number(),
-    unitPrice: z.number(),
-  });
-}
-
-export function InvoicePaymentSchema(): z.ZodObject<
-  Properties<InvoicePayment>
-> {
-  return z.object({
-    __typename: z.literal("InvoicePayment").optional(),
-    amount: z.number(),
-    currency: z.string(),
-    id: z.string(),
-    paymentDate: z.string().datetime(),
-    paymentMethod: PaymentMethodSchema,
-    reference: z.string().nullish(),
-    transactionHash: z.string().nullish(),
-    walletAddress: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      })
-      .nullish(),
-  });
-}
-
-export function MarkInvoiceOverdueInputSchema(): z.ZodObject<
-  Properties<MarkInvoiceOverdueInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-  });
-}
-
 export function PauseSubscriptionInputSchema(): z.ZodObject<
   Properties<PauseSubscriptionInput>
 > {
   return z.object({
     pausedSince: z.string().datetime(),
-  });
-}
-
-export function RecordInvoicePaymentInputSchema(): z.ZodObject<
-  Properties<RecordInvoicePaymentInput>
-> {
-  return z.object({
-    amount: z.number(),
-    currency: z.string(),
-    invoiceId: z.string(),
-    paymentDate: z.string().datetime(),
-    paymentId: z.string(),
-    paymentMethod: PaymentMethodSchema,
-    reference: z.string().nullish(),
-    transactionHash: z.string().nullish(),
-    walletAddress: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      })
-      .nullish(),
   });
 }
 
@@ -444,38 +246,11 @@ export function RecurringCostSchema(): z.ZodObject<Properties<RecurringCost>> {
   });
 }
 
-export function RefundInvoiceInputSchema(): z.ZodObject<
-  Properties<RefundInvoiceInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-    reason: z.string().nullish(),
-    refundDate: z.string().datetime(),
-  });
-}
-
 export function RemoveBudgetCategoryInputSchema(): z.ZodObject<
   Properties<RemoveBudgetCategoryInput>
 > {
   return z.object({
     budgetId: z.string(),
-  });
-}
-
-export function RemoveCommunicationChannelInputSchema(): z.ZodObject<
-  Properties<RemoveCommunicationChannelInput>
-> {
-  return z.object({
-    channelId: z.string(),
-  });
-}
-
-export function RemoveInvoiceLineItemInputSchema(): z.ZodObject<
-  Properties<RemoveInvoiceLineItemInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-    lineItemId: z.string(),
   });
 }
 
@@ -559,15 +334,6 @@ export function ResumeSubscriptionInputSchema(): z.ZodObject<
   });
 }
 
-export function SendInvoiceInputSchema(): z.ZodObject<
-  Properties<SendInvoiceInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-    sentDate: z.string().datetime(),
-  });
-}
-
 export function ServiceSchema(): z.ZodObject<Properties<Service>> {
   return z.object({
     __typename: z.literal("Service").optional(),
@@ -638,28 +404,11 @@ export function SetExpiringInputSchema(): z.ZodObject<
   });
 }
 
-export function SetInvoiceTaxInputSchema(): z.ZodObject<
-  Properties<SetInvoiceTaxInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-    tax: z.number(),
-  });
-}
-
 export function SetOperatorNotesInputSchema(): z.ZodObject<
   Properties<SetOperatorNotesInput>
 > {
   return z.object({
     operatorNotes: z.string().nullish(),
-  });
-}
-
-export function SetPrimaryCommunicationChannelInputSchema(): z.ZodObject<
-  Properties<SetPrimaryCommunicationChannelInput>
-> {
-  return z.object({
-    channelId: z.string(),
   });
 }
 
@@ -701,24 +450,18 @@ export function SubscriptionInstanceStateSchema(): z.ZodObject<
     budget: z.lazy(() => BudgetCategorySchema().nullish()),
     cancellationReason: z.string().nullish(),
     cancelledSince: z.string().datetime().nullish(),
-    communications: z.array(z.lazy(() => CommunicationChannelSchema())),
     createdAt: z.string().datetime().nullish(),
     customerEmail: z.string().email().nullish(),
     customerId: z.string().nullish(),
     customerName: z.string().nullish(),
     customerType: CustomerTypeSchema.nullish(),
-    customerWalletAddress: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      })
-      .nullish(),
     expiringSince: z.string().datetime().nullish(),
-    invoices: z.array(z.lazy(() => InvoiceSchema())),
-    kycStatus: KycStatusSchema.nullish(),
+    nextBillingDate: z.string().datetime().nullish(),
     operatorId: z.string().nullish(),
     operatorNotes: z.string().nullish(),
     pausedSince: z.string().datetime().nullish(),
+    projectedBillAmount: z.number().nullish(),
+    projectedBillCurrency: z.string().nullish(),
     renewalDate: z.string().datetime().nullish(),
     resource: z.lazy(() => ResourceDocumentSchema().nullish()),
     serviceGroups: z.array(z.lazy(() => ServiceGroupSchema())),
@@ -731,6 +474,16 @@ export function SubscriptionInstanceStateSchema(): z.ZodObject<
   });
 }
 
+export function UpdateBillingProjectionInputSchema(): z.ZodObject<
+  Properties<UpdateBillingProjectionInput>
+> {
+  return z.object({
+    nextBillingDate: z.string().datetime().nullish(),
+    projectedBillAmount: z.number().nullish(),
+    projectedBillCurrency: z.string().nullish(),
+  });
+}
+
 export function UpdateCustomerInfoInputSchema(): z.ZodObject<
   Properties<UpdateCustomerInfoInput>
 > {
@@ -738,37 +491,6 @@ export function UpdateCustomerInfoInputSchema(): z.ZodObject<
     customerEmail: z.string().email().nullish(),
     customerId: z.string().nullish(),
     customerName: z.string().nullish(),
-  });
-}
-
-export function UpdateCustomerWalletInputSchema(): z.ZodObject<
-  Properties<UpdateCustomerWalletInput>
-> {
-  return z.object({
-    walletAddress: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, {
-        message: "Invalid Ethereum address format",
-      })
-      .nullish(),
-  });
-}
-
-export function UpdateInvoiceStatusInputSchema(): z.ZodObject<
-  Properties<UpdateInvoiceStatusInput>
-> {
-  return z.object({
-    invoiceId: z.string(),
-    paidDate: z.string().datetime().nullish(),
-    status: InvoiceStatusSchema,
-  });
-}
-
-export function UpdateKycStatusInputSchema(): z.ZodObject<
-  Properties<UpdateKycStatusInput>
-> {
-  return z.object({
-    kycStatus: KycStatusSchema,
   });
 }
 
@@ -854,14 +576,5 @@ export function UpdateTierInfoInputSchema(): z.ZodObject<
   return z.object({
     tierName: z.string().nullish(),
     tierPricingOptionId: z.string().nullish(),
-  });
-}
-
-export function VerifyCommunicationChannelInputSchema(): z.ZodObject<
-  Properties<VerifyCommunicationChannelInput>
-> {
-  return z.object({
-    channelId: z.string(),
-    verifiedAt: z.string().datetime(),
   });
 }

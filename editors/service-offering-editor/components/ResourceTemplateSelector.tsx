@@ -593,7 +593,10 @@ function TemplateDetailView({
               <h3 className="rtd-card__title">Description</h3>
             </div>
           </div>
-          <MarkdownPreview content={globalState.description} className="rtd-card__text" />
+          <MarkdownPreview
+            content={globalState.description}
+            className="rtd-card__text"
+          />
         </section>
       )}
 

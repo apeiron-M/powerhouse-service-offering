@@ -34,9 +34,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "add-service",
               name: "ADD_SERVICE",
               reducer:
-                "state.services.push({\n    id: action.input.id,\n    title: action.input.title,\n    description: action.input.description || null,\n    parentServiceId: action.input.parentServiceId || null,\n    displayOrder: action.input.displayOrder || null,\n    isSetupFormation: action.input.isSetupFormation || false,\n    isPremiumExclusive: action.input.isPremiumExclusive || false,\n    optionGroupId: action.input.optionGroupId || null,\n    facetBindings: []\n});\nstate.lastModified = action.input.lastModified;",
+                "state.services.push({\n    id: action.input.id,\n    title: action.input.title,\n    description: action.input.description || null,\n    serviceGroupId: action.input.serviceGroupId || null,\n    displayOrder: action.input.displayOrder || null,\n    isSetupFormation: action.input.isSetupFormation || false,\n    optionGroupId: action.input.optionGroupId || null,\n    costType: action.input.costType || null,\n    price: action.input.price || null,\n    currency: action.input.currency || null,\n    facetBindings: []\n});\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddServiceInput {\n    id: OID!\n    title: String!\n    description: String\n    parentServiceId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    isPremiumExclusive: Boolean\n    optionGroupId: OID\n    lastModified: DateTime!\n}",
+                "input AddServiceInput {\n    id: OID!\n    title: String!\n    description: String\n    serviceGroupId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    optionGroupId: OID\n    costType: ServiceCostType\n    price: Amount_Money\n    currency: Currency\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Adds a new service to the offering",
             },
@@ -55,9 +55,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-service",
               name: "UPDATE_SERVICE",
               reducer:
-                "const service = state.services.find(s => s.id === action.input.id);\nif (service) {\n    if (action.input.title) {\n        service.title = action.input.title;\n    }\n    if (action.input.description !== undefined && action.input.description !== null) {\n        service.description = action.input.description;\n    }\n    if (action.input.parentServiceId !== undefined) {\n        service.parentServiceId = action.input.parentServiceId || null;\n    }\n    if (action.input.displayOrder !== undefined && action.input.displayOrder !== null) {\n        service.displayOrder = action.input.displayOrder;\n    }\n    if (action.input.isSetupFormation !== undefined && action.input.isSetupFormation !== null) {\n        service.isSetupFormation = action.input.isSetupFormation;\n    }\n    if (action.input.isPremiumExclusive !== undefined && action.input.isPremiumExclusive !== null) {\n        service.isPremiumExclusive = action.input.isPremiumExclusive;\n    }\n    if (action.input.optionGroupId !== undefined) {\n        service.optionGroupId = action.input.optionGroupId || null;\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                "const service = state.services.find(s => s.id === action.input.id);\nif (service) {\n    if (action.input.title) {\n        service.title = action.input.title;\n    }\n    if (action.input.description !== undefined && action.input.description !== null) {\n        service.description = action.input.description;\n    }\n    if (action.input.serviceGroupId !== undefined) {\n        service.serviceGroupId = action.input.serviceGroupId || null;\n    }\n    if (action.input.displayOrder !== undefined && action.input.displayOrder !== null) {\n        service.displayOrder = action.input.displayOrder;\n    }\n    if (action.input.isSetupFormation !== undefined && action.input.isSetupFormation !== null) {\n        service.isSetupFormation = action.input.isSetupFormation;\n    }\n    if (action.input.optionGroupId !== undefined) {\n        service.optionGroupId = action.input.optionGroupId || null;\n    }\n    if (action.input.costType !== undefined) {\n        service.costType = action.input.costType || null;\n    }\n    if (action.input.price !== undefined) {\n        service.price = action.input.price || null;\n    }\n    if (action.input.currency !== undefined) {\n        service.currency = action.input.currency || null;\n    }\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateServiceInput {\n    id: OID!\n    title: String\n    description: String\n    parentServiceId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    isPremiumExclusive: Boolean\n    optionGroupId: OID\n    lastModified: DateTime!\n}",
+                "input UpdateServiceInput {\n    id: OID!\n    title: String\n    description: String\n    serviceGroupId: OID\n    displayOrder: Int\n    isSetupFormation: Boolean\n    optionGroupId: OID\n    costType: ServiceCostType\n    price: Amount_Money\n    currency: Currency\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Updates an existing service",
             },
@@ -161,9 +161,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "add-tier",
               name: "ADD_TIER",
               reducer:
-                "state.tiers.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    serviceLevels: [],\n    usageLimits: [],\n    pricing: {\n        amount: action.input.amount || null,\n        currency: action.input.currency,\n        billingCycle: action.input.billingCycle,\n        setupFee: action.input.setupFee || null,\n        perSeatAmount: action.input.perSeatAmount || null,\n        perSeatCurrency: action.input.perSeatCurrency || null,\n        perSeatBillingCycle: action.input.perSeatBillingCycle || null,\n        perSeatLabel: action.input.perSeatLabel || null\n    },\n    pricingOptions: [],\n    isCustomPricing: action.input.isCustomPricing || false\n});\nstate.lastModified = action.input.lastModified;",
+                "state.tiers.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    serviceLevels: [],\n    usageLimits: [],\n    pricing: {\n        amount: action.input.amount || null,\n        currency: action.input.currency\n    },\n    pricingOptions: [],\n    isCustomPricing: action.input.isCustomPricing || false\n});\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddTierInput {\n    id: OID!\n    name: String!\n    description: String\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    perSeatCurrency: Currency\n    perSeatBillingCycle: BillingCycle\n    perSeatLabel: String\n    isCustomPricing: Boolean\n    lastModified: DateTime!\n}",
+                "input AddTierInput {\n    id: OID!\n    name: String!\n    description: String\n    amount: Amount_Money\n    currency: Currency!\n    isCustomPricing: Boolean\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Adds a new subscription tier",
             },
@@ -203,9 +203,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-tier-pricing",
               name: "UPDATE_TIER_PRICING",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    if (action.input.amount !== undefined) {\n        tier.pricing.amount = action.input.amount;\n    }\n    if (action.input.currency) {\n        tier.pricing.currency = action.input.currency;\n    }\n    if (action.input.billingCycle) {\n        tier.pricing.billingCycle = action.input.billingCycle;\n    }\n    if (action.input.setupFee !== undefined) {\n        tier.pricing.setupFee = action.input.setupFee;\n    }\n    if (action.input.perSeatAmount !== undefined) {\n        tier.pricing.perSeatAmount = action.input.perSeatAmount;\n    }\n    if (action.input.perSeatCurrency !== undefined) {\n        tier.pricing.perSeatCurrency = action.input.perSeatCurrency || null;\n    }\n    if (action.input.perSeatBillingCycle !== undefined) {\n        tier.pricing.perSeatBillingCycle = action.input.perSeatBillingCycle || null;\n    }\n    if (action.input.perSeatLabel !== undefined) {\n        tier.pricing.perSeatLabel = action.input.perSeatLabel || null;\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    if (action.input.amount !== undefined) {\n        tier.pricing.amount = action.input.amount;\n    }\n    if (action.input.currency) {\n        tier.pricing.currency = action.input.currency;\n    }\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateTierPricingInput {\n    tierId: OID!\n    amount: Amount_Money\n    currency: Currency\n    billingCycle: BillingCycle\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    perSeatCurrency: Currency\n    perSeatBillingCycle: BillingCycle\n    perSeatLabel: String\n    lastModified: DateTime!\n}",
+                "input UpdateTierPricingInput {\n    tierId: OID!\n    amount: Amount_Money\n    currency: Currency\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Updates pricing for a tier",
             },
@@ -241,22 +241,14 @@ export const documentModel: DocumentModelGlobalState = {
                   name: "AddPricingOptionTierNotFoundError",
                   template: "",
                 },
-                {
-                  code: "DUPLICATE_BILLING_CYCLE",
-                  description:
-                    "A pricing option with this billing cycle already exists for this tier",
-                  id: "duplicate-billing-cycle",
-                  name: "DuplicateBillingCycleError",
-                  template: "",
-                },
               ],
               examples: [],
               id: "add-tier-pricing-option",
               name: "ADD_TIER_PRICING_OPTION",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (!tier) {\n    throw new AddPricingOptionTierNotFoundError('Tier with the specified ID does not exist');\n}\nconst existingCycle = tier.pricingOptions.find(po => po.billingCycle === action.input.billingCycle);\nif (existingCycle) {\n    throw new DuplicateBillingCycleError('A pricing option with this billing cycle already exists for this tier');\n}\nconst isDefault = action.input.isDefault || tier.pricingOptions.length === 0;\nif (isDefault) {\n    tier.pricingOptions.forEach(po => { po.isDefault = false; });\n}\ntier.pricingOptions.push({\n    id: action.input.pricingOptionId,\n    billingCycle: action.input.billingCycle,\n    amount: action.input.amount,\n    currency: action.input.currency,\n    setupFee: action.input.setupFee || null,\n    perSeatAmount: action.input.perSeatAmount || null,\n    isDefault: isDefault\n});\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (!tier) {\n    throw new AddPricingOptionTierNotFoundError('Tier with the specified ID does not exist');\n}\nconst isDefault = action.input.isDefault || tier.pricingOptions.length === 0;\nif (isDefault) {\n    tier.pricingOptions.forEach(po => { po.isDefault = false; });\n}\ntier.pricingOptions.push({\n    id: action.input.pricingOptionId,\n    amount: action.input.amount,\n    currency: action.input.currency,\n    isDefault: isDefault\n});\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddTierPricingOptionInput {\n    tierId: OID!\n    pricingOptionId: OID!\n    billingCycle: BillingCycle!\n    amount: Amount_Money!\n    currency: Currency!\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    isDefault: Boolean\n    lastModified: DateTime!\n}",
+                "input AddTierPricingOptionInput {\n    tierId: OID!\n    pricingOptionId: OID!\n    amount: Amount_Money!\n    currency: Currency!\n    isDefault: Boolean\n    lastModified: DateTime!\n}",
               scope: "global",
               template:
                 "Adds a pricing option with a specific billing cycle to a tier",
@@ -284,9 +276,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-tier-pricing-option",
               name: "UPDATE_TIER_PRICING_OPTION",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (!tier) {\n    throw new UpdatePricingOptionTierNotFoundError('Tier with the specified ID does not exist');\n}\nconst pricingOption = tier.pricingOptions.find(po => po.id === action.input.pricingOptionId);\nif (!pricingOption) {\n    throw new PricingOptionNotFoundError('Pricing option with the specified ID does not exist');\n}\nif (action.input.amount !== undefined && action.input.amount !== null) {\n    pricingOption.amount = action.input.amount;\n}\nif (action.input.currency) {\n    pricingOption.currency = action.input.currency;\n}\nif (action.input.setupFee !== undefined) {\n    pricingOption.setupFee = action.input.setupFee || null;\n}\nif (action.input.perSeatAmount !== undefined) {\n    pricingOption.perSeatAmount = action.input.perSeatAmount || null;\n}\nif (action.input.isDefault === true) {\n    tier.pricingOptions.forEach(po => { po.isDefault = false; });\n    pricingOption.isDefault = true;\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (!tier) {\n    throw new UpdatePricingOptionTierNotFoundError('Tier with the specified ID does not exist');\n}\nconst pricingOption = tier.pricingOptions.find(po => po.id === action.input.pricingOptionId);\nif (!pricingOption) {\n    throw new PricingOptionNotFoundError('Pricing option with the specified ID does not exist');\n}\nif (action.input.amount !== undefined && action.input.amount !== null) {\n    pricingOption.amount = action.input.amount;\n}\nif (action.input.currency) {\n    pricingOption.currency = action.input.currency;\n}\nif (action.input.isDefault === true) {\n    tier.pricingOptions.forEach(po => { po.isDefault = false; });\n    pricingOption.isDefault = true;\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateTierPricingOptionInput {\n    tierId: OID!\n    pricingOptionId: OID!\n    amount: Amount_Money\n    currency: Currency\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    isDefault: Boolean\n    lastModified: DateTime!\n}",
+                "input UpdateTierPricingOptionInput {\n    tierId: OID!\n    pricingOptionId: OID!\n    amount: Amount_Money\n    currency: Currency\n    isDefault: Boolean\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Updates a pricing option for a tier",
             },
@@ -341,9 +333,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "add-service-level",
               name: "ADD_SERVICE_LEVEL",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    tier.serviceLevels.push({\n        id: action.input.serviceLevelId,\n        serviceId: action.input.serviceId,\n        level: action.input.level,\n        optionGroupId: action.input.optionGroupId || null,\n        variations: action.input.variations || null,\n        annexes: action.input.annexes || null,\n        customValue: action.input.customValue || null,\n        setupFee: action.input.setupFee || null\n    });\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    tier.serviceLevels.push({\n        id: action.input.serviceLevelId,\n        serviceId: action.input.serviceId,\n        level: action.input.level,\n        optionGroupId: action.input.optionGroupId || null,\n        customValue: action.input.customValue || null\n    });\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddServiceLevelInput {\n    tierId: OID!\n    serviceLevelId: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    optionGroupId: OID\n    variations: String\n    annexes: String\n    customValue: String\n    setupFee: Amount_Money\n    lastModified: DateTime!\n}",
+                "input AddServiceLevelInput {\n    tierId: OID!\n    serviceLevelId: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    optionGroupId: OID\n    customValue: String\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Adds a service level binding to a tier",
             },
@@ -370,9 +362,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-service-level",
               name: "UPDATE_SERVICE_LEVEL",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    const serviceLevel = tier.serviceLevels.find(sl => sl.id === action.input.serviceLevelId);\n    if (serviceLevel) {\n        if (action.input.level) {\n            serviceLevel.level = action.input.level;\n        }\n        if (action.input.optionGroupId !== undefined) {\n            serviceLevel.optionGroupId = action.input.optionGroupId || null;\n        }\n        if (action.input.variations !== undefined) {\n            serviceLevel.variations = action.input.variations || null;\n        }\n        if (action.input.annexes !== undefined) {\n            serviceLevel.annexes = action.input.annexes || null;\n        }\n        if (action.input.customValue !== undefined) {\n            serviceLevel.customValue = action.input.customValue || null;\n        }\n        if (action.input.setupFee !== undefined) {\n            serviceLevel.setupFee = action.input.setupFee || null;\n        }\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    const serviceLevel = tier.serviceLevels.find(sl => sl.id === action.input.serviceLevelId);\n    if (serviceLevel) {\n        if (action.input.level) {\n            serviceLevel.level = action.input.level;\n        }\n        if (action.input.optionGroupId !== undefined) {\n            serviceLevel.optionGroupId = action.input.optionGroupId || null;\n        }\n        if (action.input.customValue !== undefined) {\n            serviceLevel.customValue = action.input.customValue || null;\n        }\n    }\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateServiceLevelInput {\n    tierId: OID!\n    serviceLevelId: OID!\n    level: ServiceLevel\n    optionGroupId: OID\n    variations: String\n    annexes: String\n    customValue: String\n    setupFee: Amount_Money\n    lastModified: DateTime!\n}",
+                "input UpdateServiceLevelInput {\n    tierId: OID!\n    serviceLevelId: OID!\n    level: ServiceLevel\n    optionGroupId: OID\n    customValue: String\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Updates a service level binding",
             },
@@ -428,9 +420,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "add-usage-limit",
               name: "ADD_USAGE_LIMIT",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    tier.usageLimits.push({\n        id: action.input.limitId,\n        serviceId: action.input.serviceId,\n        metric: action.input.metric,\n        unitName: action.input.unitName || null,\n        limit: action.input.limit || null,\n        resetPeriod: action.input.resetPeriod || null,\n        notes: action.input.notes || null,\n        unitPrice: action.input.unitPrice || null,\n        unitPriceCurrency: action.input.unitPriceCurrency || null,\n        unitPriceBillingCycle: action.input.unitPriceBillingCycle || null\n    });\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    tier.usageLimits.push({\n        id: action.input.limitId,\n        serviceId: action.input.serviceId,\n        metric: action.input.metric,\n        unitName: action.input.unitName || null,\n        freeLimit: action.input.freeLimit || null,\n        paidLimit: action.input.paidLimit || null,\n        resetCycle: action.input.resetCycle || null,\n        notes: action.input.notes || null,\n        unitPrice: action.input.unitPrice || null,\n        unitPriceCurrency: action.input.unitPriceCurrency || null\n    });\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    serviceId: OID!\n    metric: String!\n    unitName: String\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    unitPriceBillingCycle: BillingCycle\n    lastModified: DateTime!\n}",
+                "input AddUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    serviceId: OID!\n    metric: String!\n    unitName: String\n    freeLimit: Int\n    paidLimit: Int\n    resetCycle: UsageResetCycle\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    lastModified: DateTime!\n}",
               scope: "global",
               template:
                 "Adds a usage limit to a tier with optional overage pricing",
@@ -458,9 +450,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-usage-limit",
               name: "UPDATE_USAGE_LIMIT",
               reducer:
-                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    const usageLimit = tier.usageLimits.find(ul => ul.id === action.input.limitId);\n    if (usageLimit) {\n        if (action.input.metric) {\n            usageLimit.metric = action.input.metric;\n        }\n        if (action.input.unitName !== undefined) {\n            usageLimit.unitName = action.input.unitName || null;\n        }\n        if (action.input.limit !== undefined && action.input.limit !== null) {\n            usageLimit.limit = action.input.limit;\n        }\n        if (action.input.resetPeriod) {\n            usageLimit.resetPeriod = action.input.resetPeriod;\n        }\n        if (action.input.notes !== undefined) {\n            usageLimit.notes = action.input.notes || null;\n        }\n        if (action.input.unitPrice !== undefined) {\n            usageLimit.unitPrice = action.input.unitPrice || null;\n        }\n        if (action.input.unitPriceCurrency !== undefined) {\n            usageLimit.unitPriceCurrency = action.input.unitPriceCurrency || null;\n        }\n        if (action.input.unitPriceBillingCycle !== undefined) {\n            usageLimit.unitPriceBillingCycle = action.input.unitPriceBillingCycle || null;\n        }\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                "const tier = state.tiers.find(t => t.id === action.input.tierId);\nif (tier) {\n    const usageLimit = tier.usageLimits.find(ul => ul.id === action.input.limitId);\n    if (usageLimit) {\n        if (action.input.metric) {\n            usageLimit.metric = action.input.metric;\n        }\n        if (action.input.unitName !== undefined) {\n            usageLimit.unitName = action.input.unitName || null;\n        }\n        if (action.input.freeLimit !== undefined && action.input.freeLimit !== null) {\n            usageLimit.freeLimit = action.input.freeLimit;\n        }\n        if (action.input.paidLimit !== undefined && action.input.paidLimit !== null) {\n            usageLimit.paidLimit = action.input.paidLimit;\n        }\n        if (action.input.resetCycle !== undefined) {\n            usageLimit.resetCycle = action.input.resetCycle || null;\n        }\n        if (action.input.notes !== undefined) {\n            usageLimit.notes = action.input.notes || null;\n        }\n        if (action.input.unitPrice !== undefined) {\n            usageLimit.unitPrice = action.input.unitPrice || null;\n        }\n        if (action.input.unitPriceCurrency !== undefined) {\n            usageLimit.unitPriceCurrency = action.input.unitPriceCurrency || null;\n        }\n    }\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    metric: String\n    unitName: String\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    unitPriceBillingCycle: BillingCycle\n    lastModified: DateTime!\n}",
+                "input UpdateUsageLimitInput {\n    tierId: OID!\n    limitId: OID!\n    metric: String\n    unitName: String\n    freeLimit: Int\n    paidLimit: Int\n    resetCycle: UsageResetCycle\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Updates a usage limit including overage pricing",
             },
@@ -666,32 +658,6 @@ export const documentModel: DocumentModelGlobalState = {
               template: "Removes an option from a facet target",
             },
             {
-              description: "Sets the list of setup services",
-              errors: [],
-              examples: [],
-              id: "set-setup-services",
-              name: "SET_SETUP_SERVICES",
-              reducer:
-                "state.setupServices = action.input.services;\nstate.lastModified = action.input.lastModified;",
-              schema:
-                "input SetSetupServicesInput {\n    services: [String!]!\n    lastModified: DateTime!\n}",
-              scope: "global",
-              template: "Sets the list of setup services",
-            },
-            {
-              description: "Sets the list of recurring services",
-              errors: [],
-              examples: [],
-              id: "set-recurring-services",
-              name: "SET_RECURRING_SERVICES",
-              reducer:
-                "state.recurringServices = action.input.services;\nstate.lastModified = action.input.lastModified;",
-              schema:
-                "input SetRecurringServicesInput {\n    services: [String!]!\n    lastModified: DateTime!\n}",
-              scope: "global",
-              template: "Sets the list of recurring services",
-            },
-            {
               description:
                 "Selects a resource template for this service offering",
               errors: [
@@ -769,9 +735,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "add-option-group",
               name: "ADD_OPTION_GROUP",
               reducer:
-                "state.optionGroups.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    isAddOn: action.input.isAddOn,\n    defaultSelected: action.input.defaultSelected\n});\nstate.lastModified = action.input.lastModified;",
+                "state.optionGroups.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    isAddOn: action.input.isAddOn,\n    defaultSelected: action.input.defaultSelected,\n    costType: action.input.costType || null,\n    billingCycle: action.input.billingCycle || null,\n    price: action.input.price || null,\n    currency: action.input.currency || null\n});\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input AddOptionGroupInput {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n    lastModified: DateTime!\n}",
+                "input AddOptionGroupInput {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n    costType: GroupCostType\n    billingCycle: BillingCycle\n    price: Amount_Money\n    currency: Currency\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Adds a new option group to the offering",
             },
@@ -791,9 +757,9 @@ export const documentModel: DocumentModelGlobalState = {
               id: "update-option-group",
               name: "UPDATE_OPTION_GROUP",
               reducer:
-                "const optionGroup = state.optionGroups.find(og => og.id === action.input.id);\nif (optionGroup) {\n    if (action.input.name) {\n        optionGroup.name = action.input.name;\n    }\n    if (action.input.description !== undefined && action.input.description !== null) {\n        optionGroup.description = action.input.description;\n    }\n    if (action.input.isAddOn !== undefined && action.input.isAddOn !== null) {\n        optionGroup.isAddOn = action.input.isAddOn;\n    }\n    if (action.input.defaultSelected !== undefined && action.input.defaultSelected !== null) {\n        optionGroup.defaultSelected = action.input.defaultSelected;\n    }\n}\nstate.lastModified = action.input.lastModified;",
+                "const optionGroup = state.optionGroups.find(og => og.id === action.input.id);\nif (optionGroup) {\n    if (action.input.name) {\n        optionGroup.name = action.input.name;\n    }\n    if (action.input.description !== undefined && action.input.description !== null) {\n        optionGroup.description = action.input.description;\n    }\n    if (action.input.isAddOn !== undefined && action.input.isAddOn !== null) {\n        optionGroup.isAddOn = action.input.isAddOn;\n    }\n    if (action.input.defaultSelected !== undefined && action.input.defaultSelected !== null) {\n        optionGroup.defaultSelected = action.input.defaultSelected;\n    }\n    if (action.input.costType !== undefined) {\n        optionGroup.costType = action.input.costType || null;\n    }\n    if (action.input.billingCycle !== undefined) {\n        optionGroup.billingCycle = action.input.billingCycle || null;\n    }\n    if (action.input.price !== undefined) {\n        optionGroup.price = action.input.price || null;\n    }\n    if (action.input.currency !== undefined) {\n        optionGroup.currency = action.input.currency || null;\n    }\n}\nstate.lastModified = action.input.lastModified;",
               schema:
-                "input UpdateOptionGroupInput {\n    id: OID!\n    name: String\n    description: String\n    isAddOn: Boolean\n    defaultSelected: Boolean\n    lastModified: DateTime!\n}",
+                "input UpdateOptionGroupInput {\n    id: OID!\n    name: String\n    description: String\n    isAddOn: Boolean\n    defaultSelected: Boolean\n    costType: GroupCostType\n    billingCycle: BillingCycle\n    price: Amount_Money\n    currency: Currency\n    lastModified: DateTime!\n}",
               scope: "global",
               template: "Updates an existing option group",
             },
@@ -821,14 +787,110 @@ export const documentModel: DocumentModelGlobalState = {
             },
           ],
         },
+        {
+          description:
+            "Operations for managing service groups that organize core services with billing cycles",
+          id: "service-group-management",
+          name: "Service Group Management",
+          operations: [
+            {
+              description:
+                "Adds a new service group to organize core services with a billing cycle",
+              errors: [
+                {
+                  code: "DUPLICATE_SERVICE_GROUP_ID",
+                  description: "A service group with this ID already exists",
+                  id: "duplicate-service-group-id",
+                  name: "DuplicateServiceGroupIdError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "add-service-group",
+              name: "ADD_SERVICE_GROUP",
+              reducer:
+                "const existing = state.serviceGroups.find(sg => sg.id === action.input.id);\nif (existing) {\n    throw new DuplicateServiceGroupIdError('A service group with this ID already exists');\n}\nstate.serviceGroups.push({\n    id: action.input.id,\n    name: action.input.name,\n    description: action.input.description || null,\n    billingCycle: action.input.billingCycle,\n    displayOrder: action.input.displayOrder || null\n});\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input AddServiceGroupInput {\n    id: OID!\n    name: String!\n    description: String\n    billingCycle: BillingCycle!\n    displayOrder: Int\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template:
+                "Adds a new service group to organize core services with a billing cycle",
+            },
+            {
+              description: "Updates an existing service group",
+              errors: [
+                {
+                  code: "SERVICE_GROUP_NOT_FOUND",
+                  description:
+                    "Service group with the specified ID does not exist",
+                  id: "service-group-not-found",
+                  name: "ServiceGroupNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "update-service-group",
+              name: "UPDATE_SERVICE_GROUP",
+              reducer:
+                "const serviceGroup = state.serviceGroups.find(sg => sg.id === action.input.id);\nif (!serviceGroup) {\n    throw new ServiceGroupNotFoundError('Service group with the specified ID does not exist');\n}\nif (action.input.name) {\n    serviceGroup.name = action.input.name;\n}\nif (action.input.description !== undefined && action.input.description !== null) {\n    serviceGroup.description = action.input.description;\n}\nif (action.input.billingCycle) {\n    serviceGroup.billingCycle = action.input.billingCycle;\n}\nif (action.input.displayOrder !== undefined && action.input.displayOrder !== null) {\n    serviceGroup.displayOrder = action.input.displayOrder;\n}\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input UpdateServiceGroupInput {\n    id: OID!\n    name: String\n    description: String\n    billingCycle: BillingCycle\n    displayOrder: Int\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template: "Updates an existing service group",
+            },
+            {
+              description: "Removes a service group and unlinks its services",
+              errors: [
+                {
+                  code: "DELETE_SERVICE_GROUP_NOT_FOUND",
+                  description:
+                    "Service group with the specified ID does not exist",
+                  id: "delete-service-group-not-found",
+                  name: "DeleteServiceGroupNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "delete-service-group",
+              name: "DELETE_SERVICE_GROUP",
+              reducer:
+                "const groupIndex = state.serviceGroups.findIndex(sg => sg.id === action.input.id);\nif (groupIndex === -1) {\n    throw new DeleteServiceGroupNotFoundError('Service group with the specified ID does not exist');\n}\nstate.services.forEach(service => {\n    if (service.serviceGroupId === action.input.id) {\n        service.serviceGroupId = null;\n    }\n});\nstate.serviceGroups.splice(groupIndex, 1);\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input DeleteServiceGroupInput {\n    id: OID!\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template: "Removes a service group and unlinks its services",
+            },
+            {
+              description: "Changes the display order of service groups",
+              errors: [
+                {
+                  code: "SERVICE_GROUP_NOT_FOUND_REORDER",
+                  description: "Service group not found during reorder",
+                  id: "reorder-service-group-not-found",
+                  name: "ReorderServiceGroupNotFoundError",
+                  template: "",
+                },
+              ],
+              examples: [],
+              id: "reorder-service-groups",
+              name: "REORDER_SERVICE_GROUPS",
+              reducer:
+                "const reordered = action.input.order.map((id, index) => {\n    const group = state.serviceGroups.find(sg => sg.id === id);\n    if (!group) {\n        throw new ServiceGroupNotFoundError('Service group with ID ' + id + ' not found during reorder');\n    }\n    group.displayOrder = index;\n    return group;\n});\nstate.serviceGroups = reordered;\nstate.lastModified = action.input.lastModified;",
+              schema:
+                "input ReorderServiceGroupsInput {\n    order: [OID!]!\n    lastModified: DateTime!\n}",
+              scope: "global",
+              template: "Changes the display order of service groups",
+            },
+          ],
+        },
       ],
       state: {
         global: {
           examples: [],
           initialValue:
-            '{\n    "id": "",\n    "operatorId": "",\n    "resourceTemplateId": null,\n    "title": "",\n    "summary": "",\n    "description": null,\n    "thumbnailUrl": null,\n    "infoLink": null,\n    "status": "DRAFT",\n    "lastModified": "1970-01-01T00:00:00.000Z",\n    "targetAudiences": [],\n    "setupServices": [],\n    "recurringServices": [],\n    "facetTargets": [],\n    "services": [],\n    "tiers": [],\n    "optionGroups": []\n}',
+            '{\n    "id": "",\n    "operatorId": "",\n    "resourceTemplateId": null,\n    "title": "",\n    "summary": "",\n    "description": null,\n    "thumbnailUrl": null,\n    "infoLink": null,\n    "status": "DRAFT",\n    "lastModified": "1970-01-01T00:00:00.000Z",\n    "targetAudiences": [],\n    "facetTargets": [],\n    "serviceGroups": [],\n    "services": [],\n    "tiers": [],\n    "optionGroups": []\n}',
           schema:
-            "type ServiceOfferingState {\n    id: PHID!\n    operatorId: PHID!\n    resourceTemplateId: PHID\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: ServiceStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    setupServices: [String!]!\n    recurringServices: [String!]!\n    facetTargets: [FacetTarget!]!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    parentServiceId: OID\n    isSetupFormation: Boolean!\n    isPremiumExclusive: Boolean!\n    optionGroupId: OID\n    facetBindings: [ResourceFacetBinding!]!\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    isCustomPricing: Boolean!\n    pricing: ServicePricing!\n    pricingOptions: [TierPricingOption!]!\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n    billingCycle: BillingCycle!\n    setupFee: Amount_Money\n    perSeatAmount: Amount_Money\n    perSeatCurrency: Currency\n    perSeatBillingCycle: BillingCycle\n    perSeatLabel: String\n}\n\ntype TierPricingOption {\n    id: OID!\n    billingCycle: BillingCycle!\n    amount: Amount_Money!\n    currency: Currency!\n    setupFee: Amount_Money\n    isDefault: Boolean!\n    perSeatAmount: Amount_Money\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    customValue: String\n    variations: String\n    annexes: String\n    setupFee: Amount_Money\n    optionGroupId: OID\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    CUSTOM\n    VARIABLE\n    NOT_APPLICABLE\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    unitName: String\n    limit: Int\n    resetPeriod: ResetPeriod\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n    unitPriceBillingCycle: BillingCycle\n}\n\nenum ResetPeriod {\n    HOURLY\n    DAILY\n    WEEKLY\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n}",
+            "type ServiceOfferingState {\n    id: PHID!\n    operatorId: PHID!\n    resourceTemplateId: PHID\n    title: String!\n    summary: String!\n    description: String\n    thumbnailUrl: URL\n    infoLink: URL\n    status: ServiceStatus!\n    lastModified: DateTime!\n    targetAudiences: [TargetAudience!]!\n    facetTargets: [FacetTarget!]!\n    serviceGroups: [ServiceGroup!]!\n    services: [Service!]!\n    tiers: [ServiceSubscriptionTier!]!\n    optionGroups: [OptionGroup!]!\n}\n\nenum ServiceStatus {\n    DRAFT\n    COMING_SOON\n    ACTIVE\n    DEPRECATED\n}\n\ntype TargetAudience {\n    id: OID!\n    label: String!\n    color: String\n}\n\ntype FacetTarget {\n    id: OID!\n    categoryKey: String!\n    categoryLabel: String!\n    selectedOptions: [String!]!\n}\n\ntype ServiceGroup {\n    id: OID!\n    name: String!\n    description: String\n    billingCycle: BillingCycle!\n    displayOrder: Int\n}\n\ntype Service {\n    id: OID!\n    title: String!\n    description: String\n    displayOrder: Int\n    serviceGroupId: OID\n    isSetupFormation: Boolean!\n    optionGroupId: OID\n    costType: ServiceCostType\n    price: Amount_Money\n    currency: Currency\n    facetBindings: [ResourceFacetBinding!]!\n}\n\nenum ServiceCostType {\n    RECURRING\n    SETUP\n}\n\ntype ResourceFacetBinding {\n    id: OID!\n    facetName: String!\n    facetType: PHID!\n    supportedOptions: [OID!]!\n}\n\ntype ServiceSubscriptionTier {\n    id: OID!\n    name: String!\n    description: String\n    isCustomPricing: Boolean!\n    pricing: ServicePricing!\n    pricingOptions: [TierPricingOption!]!\n    serviceLevels: [ServiceLevelBinding!]!\n    usageLimits: [ServiceUsageLimit!]!\n}\n\ntype ServicePricing {\n    amount: Amount_Money\n    currency: Currency!\n}\n\ntype TierPricingOption {\n    id: OID!\n    amount: Amount_Money!\n    currency: Currency!\n    isDefault: Boolean!\n}\n\nenum BillingCycle {\n    MONTHLY\n    QUARTERLY\n    SEMI_ANNUAL\n    ANNUAL\n    ONE_TIME\n}\n\ntype ServiceLevelBinding {\n    id: OID!\n    serviceId: OID!\n    level: ServiceLevel!\n    customValue: String\n    optionGroupId: OID\n}\n\nenum ServiceLevel {\n    INCLUDED\n    NOT_INCLUDED\n    OPTIONAL\n    CUSTOM\n    VARIABLE\n    NOT_APPLICABLE\n}\n\ntype ServiceUsageLimit {\n    id: OID!\n    serviceId: OID!\n    metric: String!\n    unitName: String\n    freeLimit: Int\n    paidLimit: Int\n    resetCycle: UsageResetCycle\n    notes: String\n    unitPrice: Amount_Money\n    unitPriceCurrency: Currency\n}\n\nenum UsageResetCycle {\n    DAILY\n    WEEKLY\n    MONTHLY\n}\n\ntype OptionGroup {\n    id: OID!\n    name: String!\n    description: String\n    isAddOn: Boolean!\n    defaultSelected: Boolean!\n    costType: GroupCostType\n    billingCycle: BillingCycle\n    price: Amount_Money\n    currency: Currency\n}\n\nenum GroupCostType {\n    RECURRING\n    SETUP\n}",
         },
         local: {
           examples: [],

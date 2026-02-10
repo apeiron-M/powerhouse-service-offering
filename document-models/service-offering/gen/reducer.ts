@@ -9,6 +9,7 @@ import { serviceOfferingServiceManagementOperations } from "../src/reducers/serv
 import { serviceOfferingTierManagementOperations } from "../src/reducers/tier-management.js";
 import { serviceOfferingOfferingManagementOperations } from "../src/reducers/offering-management.js";
 import { serviceOfferingOptionGroupManagementOperations } from "../src/reducers/option-group-management.js";
+import { serviceOfferingServiceGroupManagementOperations } from "../src/reducers/service-group-management.js";
 
 import {
   AddServiceInputSchema,
@@ -39,13 +40,15 @@ import {
   RemoveFacetTargetInputSchema,
   AddFacetOptionInputSchema,
   RemoveFacetOptionInputSchema,
-  SetSetupServicesInputSchema,
-  SetRecurringServicesInputSchema,
   SelectResourceTemplateInputSchema,
   ChangeResourceTemplateInputSchema,
   AddOptionGroupInputSchema,
   UpdateOptionGroupInputSchema,
   DeleteOptionGroupInputSchema,
+  AddServiceGroupInputSchema,
+  UpdateServiceGroupInputSchema,
+  DeleteServiceGroupInputSchema,
+  ReorderServiceGroupsInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<ServiceOfferingPHState> = (
@@ -393,30 +396,6 @@ const stateReducer: StateReducer<ServiceOfferingPHState> = (
       break;
     }
 
-    case "SET_SETUP_SERVICES": {
-      SetSetupServicesInputSchema().parse(action.input);
-
-      serviceOfferingOfferingManagementOperations.setSetupServicesOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "SET_RECURRING_SERVICES": {
-      SetRecurringServicesInputSchema().parse(action.input);
-
-      serviceOfferingOfferingManagementOperations.setRecurringServicesOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
     case "SELECT_RESOURCE_TEMPLATE": {
       SelectResourceTemplateInputSchema().parse(action.input);
 
@@ -469,6 +448,54 @@ const stateReducer: StateReducer<ServiceOfferingPHState> = (
       DeleteOptionGroupInputSchema().parse(action.input);
 
       serviceOfferingOptionGroupManagementOperations.deleteOptionGroupOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "ADD_SERVICE_GROUP": {
+      AddServiceGroupInputSchema().parse(action.input);
+
+      serviceOfferingServiceGroupManagementOperations.addServiceGroupOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "UPDATE_SERVICE_GROUP": {
+      UpdateServiceGroupInputSchema().parse(action.input);
+
+      serviceOfferingServiceGroupManagementOperations.updateServiceGroupOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "DELETE_SERVICE_GROUP": {
+      DeleteServiceGroupInputSchema().parse(action.input);
+
+      serviceOfferingServiceGroupManagementOperations.deleteServiceGroupOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "REORDER_SERVICE_GROUPS": {
+      ReorderServiceGroupsInputSchema().parse(action.input);
+
+      serviceOfferingServiceGroupManagementOperations.reorderServiceGroupsOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

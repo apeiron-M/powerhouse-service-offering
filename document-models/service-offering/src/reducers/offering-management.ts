@@ -54,14 +54,6 @@ export const serviceOfferingOfferingManagementOperations: ServiceOfferingOfferin
       }
       state.lastModified = action.input.lastModified;
     },
-    setSetupServicesOperation(state, action) {
-      state.setupServices = action.input.services;
-      state.lastModified = action.input.lastModified;
-    },
-    setRecurringServicesOperation(state, action) {
-      state.recurringServices = action.input.services;
-      state.lastModified = action.input.lastModified;
-    },
     setFacetTargetOperation(state, action) {
       const existingIndex = state.facetTargets.findIndex(
         (ft) => ft.categoryKey === action.input.categoryKey,

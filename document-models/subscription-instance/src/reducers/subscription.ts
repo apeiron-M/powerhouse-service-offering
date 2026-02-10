@@ -108,5 +108,16 @@ export const subscriptionInstanceSubscriptionOperations: SubscriptionInstanceSub
     setRenewalDateOperation(state, action) {
       state.renewalDate = action.input.renewalDate;
     },
-    // Note: setOperatorInfoOperation has been removed from the document model
+
+    updateBillingProjectionOperation(state, action) {
+      if (action.input.nextBillingDate) {
+        state.nextBillingDate = action.input.nextBillingDate;
+      }
+      if (action.input.projectedBillAmount !== undefined) {
+        state.projectedBillAmount = action.input.projectedBillAmount ?? null;
+      }
+      if (action.input.projectedBillCurrency) {
+        state.projectedBillCurrency = action.input.projectedBillCurrency;
+      }
+    },
   };

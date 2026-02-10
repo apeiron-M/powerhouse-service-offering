@@ -9,7 +9,6 @@ import { subscriptionInstanceSubscriptionOperations } from "../src/reducers/subs
 import { subscriptionInstanceServiceOperations } from "../src/reducers/service.js";
 import { subscriptionInstanceServiceGroupOperations } from "../src/reducers/service-group.js";
 import { subscriptionInstanceMetricsOperations } from "../src/reducers/metrics.js";
-import { subscriptionInstanceBillingOperations } from "../src/reducers/billing.js";
 import { subscriptionInstanceCustomerOperations } from "../src/reducers/customer.js";
 
 import {
@@ -29,6 +28,7 @@ import {
   SetOperatorNotesInputSchema,
   SetAutoRenewInputSchema,
   SetRenewalDateInputSchema,
+  UpdateBillingProjectionInputSchema,
   AddServiceInputSchema,
   RemoveServiceInputSchema,
   UpdateServiceSetupCostInputSchema,
@@ -46,24 +46,8 @@ import {
   RemoveServiceMetricInputSchema,
   IncrementMetricUsageInputSchema,
   DecrementMetricUsageInputSchema,
-  CreateInvoiceInputSchema,
-  UpdateInvoiceStatusInputSchema,
-  AddInvoiceLineItemInputSchema,
-  RemoveInvoiceLineItemInputSchema,
-  SetInvoiceTaxInputSchema,
-  RecordInvoicePaymentInputSchema,
-  SendInvoiceInputSchema,
-  CancelInvoiceInputSchema,
-  MarkInvoiceOverdueInputSchema,
-  RefundInvoiceInputSchema,
-  UpdateCustomerWalletInputSchema,
   SetCustomerTypeInputSchema,
   UpdateTeamMemberCountInputSchema,
-  UpdateKycStatusInputSchema,
-  AddCommunicationChannelInputSchema,
-  RemoveCommunicationChannelInputSchema,
-  SetPrimaryCommunicationChannelInputSchema,
-  VerifyCommunicationChannelInputSchema,
 } from "./schema/zod.js";
 
 const stateReducer: StateReducer<SubscriptionInstancePHState> = (
@@ -259,6 +243,18 @@ const stateReducer: StateReducer<SubscriptionInstancePHState> = (
       SetRenewalDateInputSchema().parse(action.input);
 
       subscriptionInstanceSubscriptionOperations.setRenewalDateOperation(
+        (state as any)[action.scope],
+        action as any,
+        dispatch,
+      );
+
+      break;
+    }
+
+    case "UPDATE_BILLING_PROJECTION": {
+      UpdateBillingProjectionInputSchema().parse(action.input);
+
+      subscriptionInstanceSubscriptionOperations.updateBillingProjectionOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,
@@ -471,138 +467,6 @@ const stateReducer: StateReducer<SubscriptionInstancePHState> = (
       break;
     }
 
-    case "CREATE_INVOICE": {
-      CreateInvoiceInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.createInvoiceOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "UPDATE_INVOICE_STATUS": {
-      UpdateInvoiceStatusInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.updateInvoiceStatusOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "ADD_INVOICE_LINE_ITEM": {
-      AddInvoiceLineItemInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.addInvoiceLineItemOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "REMOVE_INVOICE_LINE_ITEM": {
-      RemoveInvoiceLineItemInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.removeInvoiceLineItemOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "SET_INVOICE_TAX": {
-      SetInvoiceTaxInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.setInvoiceTaxOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "RECORD_INVOICE_PAYMENT": {
-      RecordInvoicePaymentInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.recordInvoicePaymentOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "SEND_INVOICE": {
-      SendInvoiceInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.sendInvoiceOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "CANCEL_INVOICE": {
-      CancelInvoiceInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.cancelInvoiceOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "MARK_INVOICE_OVERDUE": {
-      MarkInvoiceOverdueInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.markInvoiceOverdueOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "REFUND_INVOICE": {
-      RefundInvoiceInputSchema().parse(action.input);
-
-      subscriptionInstanceBillingOperations.refundInvoiceOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "UPDATE_CUSTOMER_WALLET": {
-      UpdateCustomerWalletInputSchema().parse(action.input);
-
-      subscriptionInstanceCustomerOperations.updateCustomerWalletOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
     case "SET_CUSTOMER_TYPE": {
       SetCustomerTypeInputSchema().parse(action.input);
 
@@ -619,66 +483,6 @@ const stateReducer: StateReducer<SubscriptionInstancePHState> = (
       UpdateTeamMemberCountInputSchema().parse(action.input);
 
       subscriptionInstanceCustomerOperations.updateTeamMemberCountOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "UPDATE_KYC_STATUS": {
-      UpdateKycStatusInputSchema().parse(action.input);
-
-      subscriptionInstanceCustomerOperations.updateKycStatusOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "ADD_COMMUNICATION_CHANNEL": {
-      AddCommunicationChannelInputSchema().parse(action.input);
-
-      subscriptionInstanceCustomerOperations.addCommunicationChannelOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "REMOVE_COMMUNICATION_CHANNEL": {
-      RemoveCommunicationChannelInputSchema().parse(action.input);
-
-      subscriptionInstanceCustomerOperations.removeCommunicationChannelOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "SET_PRIMARY_COMMUNICATION_CHANNEL": {
-      SetPrimaryCommunicationChannelInputSchema().parse(action.input);
-
-      subscriptionInstanceCustomerOperations.setPrimaryCommunicationChannelOperation(
-        (state as any)[action.scope],
-        action as any,
-        dispatch,
-      );
-
-      break;
-    }
-
-    case "VERIFY_COMMUNICATION_CHANNEL": {
-      VerifyCommunicationChannelInputSchema().parse(action.input);
-
-      subscriptionInstanceCustomerOperations.verifyCommunicationChannelOperation(
         (state as any)[action.scope],
         action as any,
         dispatch,

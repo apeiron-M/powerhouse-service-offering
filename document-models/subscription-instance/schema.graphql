@@ -23,10 +23,8 @@ type SubscriptionInstanceState {
     customerId: PHID
     customerName: String
     customerEmail: EmailAddress
-    customerWalletAddress: EthereumAddress
     customerType: CustomerType
     teamMemberCount: Int
-    kycStatus: KycStatus
     operatorId: PHID
     serviceOfferingId: PHID
     tierName: String
@@ -43,23 +41,16 @@ type SubscriptionInstanceState {
     autoRenew: Boolean!
     operatorNotes: String
     budget: BudgetCategory
+    nextBillingDate: DateTime
+    projectedBillAmount: Amount_Money
+    projectedBillCurrency: Currency
     services: [Service!]!
     serviceGroups: [ServiceGroup!]!
-    invoices: [Invoice!]!
-    communications: [CommunicationChannel!]!
 }
 
 enum CustomerType {
     INDIVIDUAL
     TEAM
-}
-
-enum KycStatus {
-    NOT_REQUIRED
-    NOT_STARTED
-    PENDING
-    VERIFIED
-    REJECTED
 }
 
 type ServiceGroup {
@@ -139,79 +130,6 @@ enum ResetPeriod {
     QUARTERLY
     SEMI_ANNUAL
     ANNUAL
-}
-
-type Invoice {
-    id: OID!
-    invoiceNumber: String!
-    status: InvoiceStatus!
-    periodStart: DateTime!
-    periodEnd: DateTime!
-    issueDate: DateTime!
-    dueDate: DateTime!
-    paidDate: DateTime
-    subtotal: Amount_Money!
-    tax: Amount_Money
-    total: Amount_Money!
-    currency: Currency!
-    lineItems: [InvoiceLineItem!]!
-    payments: [InvoicePayment!]!
-    notes: String
-}
-
-enum InvoiceStatus {
-    DRAFT
-    SENT
-    PAID
-    PARTIALLY_PAID
-    OVERDUE
-    CANCELLED
-    REFUNDED
-}
-
-type InvoiceLineItem {
-    id: OID!
-    description: String!
-    serviceId: OID
-    metricId: OID
-    quantity: Int!
-    unitPrice: Amount_Money!
-    total: Amount_Money!
-}
-
-type InvoicePayment {
-    id: OID!
-    amount: Amount_Money!
-    currency: Currency!
-    paymentMethod: PaymentMethod!
-    paymentDate: DateTime!
-    transactionHash: String
-    walletAddress: EthereumAddress
-    reference: String
-}
-
-enum PaymentMethod {
-    CRYPTO
-    BANK_TRANSFER
-    CREDIT_CARD
-    PAYPAL
-    OTHER
-}
-
-type CommunicationChannel {
-    id: OID!
-    type: CommunicationChannelType!
-    identifier: String!
-    isPrimary: Boolean!
-    verifiedAt: DateTime
-}
-
-enum CommunicationChannelType {
-    EMAIL
-    TELEGRAM
-    DISCORD
-    SLACK
-    WHATSAPP
 }
 
 # Subscription
@@ -296,6 +214,12 @@ input SetAutoRenewInput {
 
 input SetRenewalDateInput {
     renewalDate: DateTime!
+}
+
+input UpdateBillingProjectionInput {
+    nextBillingDate: DateTime
+    projectedBillAmount: Amount_Money
+    projectedBillCurrency: Currency
 }
 
 # Service
@@ -439,82 +363,7 @@ input DecrementMetricUsageInput {
     decrementBy: Int!
 }
 
-# Billing
-
-input CreateInvoiceInput {
-    invoiceId: OID!
-    invoiceNumber: String!
-    periodStart: DateTime!
-    periodEnd: DateTime!
-    issueDate: DateTime!
-    dueDate: DateTime!
-    currency: Currency!
-    notes: String
-}
-
-input UpdateInvoiceStatusInput {
-    invoiceId: OID!
-    status: InvoiceStatus!
-    paidDate: DateTime
-}
-
-input AddInvoiceLineItemInput {
-    invoiceId: OID!
-    lineItemId: OID!
-    description: String!
-    serviceId: OID
-    metricId: OID
-    quantity: Int!
-    unitPrice: Amount_Money!
-}
-
-input RemoveInvoiceLineItemInput {
-    invoiceId: OID!
-    lineItemId: OID!
-}
-
-input SetInvoiceTaxInput {
-    invoiceId: OID!
-    tax: Amount_Money!
-}
-
-input RecordInvoicePaymentInput {
-    invoiceId: OID!
-    paymentId: OID!
-    amount: Amount_Money!
-    currency: Currency!
-    paymentMethod: PaymentMethod!
-    paymentDate: DateTime!
-    transactionHash: String
-    walletAddress: EthereumAddress
-    reference: String
-}
-
-input SendInvoiceInput {
-    invoiceId: OID!
-    sentDate: DateTime!
-}
-
-input CancelInvoiceInput {
-    invoiceId: OID!
-    reason: String
-}
-
-input MarkInvoiceOverdueInput {
-    invoiceId: OID!
-}
-
-input RefundInvoiceInput {
-    invoiceId: OID!
-    refundDate: DateTime!
-    reason: String
-}
-
 # Customer
-
-input UpdateCustomerWalletInput {
-    walletAddress: EthereumAddress
-}
 
 input SetCustomerTypeInput {
     customerType: CustomerType!
@@ -523,29 +372,4 @@ input SetCustomerTypeInput {
 
 input UpdateTeamMemberCountInput {
     teamMemberCount: Int!
-}
-
-input UpdateKycStatusInput {
-    kycStatus: KycStatus!
-}
-
-input AddCommunicationChannelInput {
-    channelId: OID!
-    type: CommunicationChannelType!
-    identifier: String!
-    isPrimary: Boolean!
-    verifiedAt: DateTime
-}
-
-input RemoveCommunicationChannelInput {
-    channelId: OID!
-}
-
-input SetPrimaryCommunicationChannelInput {
-    channelId: OID!
-}
-
-input VerifyCommunicationChannelInput {
-    channelId: OID!
-    verifiedAt: DateTime!
 }

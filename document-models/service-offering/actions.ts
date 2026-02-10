@@ -4,6 +4,7 @@ import {
   tierManagementActions,
   offeringManagementActions,
   optionGroupManagementActions,
+  serviceGroupManagementActions,
 } from "./gen/creators.js";
 
 /** Actions for the ServiceOffering document model */
@@ -14,4 +15,5 @@ export const actions = {
   ...tierManagementActions,
   ...offeringManagementActions,
   ...optionGroupManagementActions,
+  ...serviceGroupManagementActions,
 };

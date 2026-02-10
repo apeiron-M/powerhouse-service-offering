@@ -81,6 +81,7 @@ export type BillingCycle =
   | "SEMI_ANNUAL";
 
 export type CancelSubscriptionInput = {
+  cancelEffectiveDate?: InputMaybe<Scalars["DateTime"]["input"]>;
   cancelledAt: Scalars["DateTime"]["input"];
   lastModified: Scalars["DateTime"]["input"];
   reason?: InputMaybe<Scalars["String"]["input"]>;
@@ -89,6 +90,10 @@ export type CancelSubscriptionInput = {
 export type ChangeTierInput = {
   lastModified: Scalars["DateTime"]["input"];
   newTierId: Scalars["OID"]["input"];
+};
+
+export type ExpireSubscriptionInput = {
+  lastModified: Scalars["DateTime"]["input"];
 };
 
 export type FacetSelection = {
@@ -100,11 +105,13 @@ export type FacetSelection = {
 export type InitializeSubscriptionInput = {
   createdAt: Scalars["DateTime"]["input"];
   customerId: Scalars["PHID"]["input"];
+  customerName?: InputMaybe<Scalars["String"]["input"]>;
   id: Scalars["PHID"]["input"];
   lastModified: Scalars["DateTime"]["input"];
   resourceTemplateId: Scalars["PHID"]["input"];
   selectedTierId: Scalars["OID"]["input"];
   serviceOfferingId: Scalars["PHID"]["input"];
+  serviceOfferingTitle?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type RemoveAddonInput = {
@@ -117,12 +124,6 @@ export type RemoveFacetSelectionInput = {
   lastModified: Scalars["DateTime"]["input"];
 };
 
-export type RenewSubscriptionInput = {
-  lastModified: Scalars["DateTime"]["input"];
-  periodEnd: Scalars["DateTime"]["input"];
-  periodStart: Scalars["DateTime"]["input"];
-};
-
 export type SelectedAddon = {
   addedAt: Scalars["DateTime"]["output"];
   id: Scalars["OID"]["output"];
@@ -130,22 +131,35 @@ export type SelectedAddon = {
 };
 
 export type ServiceSubscriptionState = {
+  autoRenew: Scalars["Boolean"]["output"];
+  cancelEffectiveDate: Maybe<Scalars["DateTime"]["output"]>;
   cancellationReason: Maybe<Scalars["String"]["output"]>;
   cancelledAt: Maybe<Scalars["DateTime"]["output"]>;
   createdAt: Scalars["DateTime"]["output"];
   currentPeriodEnd: Maybe<Scalars["DateTime"]["output"]>;
   currentPeriodStart: Maybe<Scalars["DateTime"]["output"]>;
   customerId: Scalars["PHID"]["output"];
+  customerName: Maybe<Scalars["String"]["output"]>;
   facetSelections: Array<FacetSelection>;
   id: Scalars["PHID"]["output"];
   lastModified: Scalars["DateTime"]["output"];
+  nextBillingDate: Maybe<Scalars["DateTime"]["output"]>;
   pricing: Maybe<SubscriptionPricing>;
+  projectedBillAmount: Maybe<Scalars["Amount_Money"]["output"]>;
+  projectedBillCurrency: Maybe<Scalars["Currency"]["output"]>;
   resourceTemplateId: Scalars["PHID"]["output"];
   selectedAddons: Array<SelectedAddon>;
   selectedTierId: Scalars["OID"]["output"];
   serviceOfferingId: Scalars["PHID"]["output"];
+  serviceOfferingTitle: Maybe<Scalars["String"]["output"]>;
   startDate: Maybe<Scalars["DateTime"]["output"]>;
   status: SubscriptionStatus;
+};
+
+export type SetCachedSnippetsInput = {
+  customerName?: InputMaybe<Scalars["String"]["input"]>;
+  lastModified: Scalars["DateTime"]["input"];
+  serviceOfferingTitle?: InputMaybe<Scalars["String"]["input"]>;
 };
 
 export type SetFacetSelectionInput = {
@@ -170,14 +184,11 @@ export type SubscriptionPricing = {
   setupFee: Maybe<Scalars["Amount_Money"]["output"]>;
 };
 
-export type SubscriptionStatus =
-  | "ACTIVE"
-  | "CANCELLED"
-  | "EXPIRED"
-  | "PAUSED"
-  | "PENDING";
+export type SubscriptionStatus = "ACTIVE" | "EXPIRED" | "PENDING";
 
-export type UpdateSubscriptionStatusInput = {
+export type UpdateBillingProjectionInput = {
   lastModified: Scalars["DateTime"]["input"];
-  status: SubscriptionStatus;
+  nextBillingDate?: InputMaybe<Scalars["DateTime"]["input"]>;
+  projectedBillAmount?: InputMaybe<Scalars["Amount_Money"]["input"]>;
+  projectedBillCurrency?: InputMaybe<Scalars["Currency"]["input"]>;
 };

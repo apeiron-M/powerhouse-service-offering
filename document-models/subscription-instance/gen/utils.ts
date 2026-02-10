@@ -24,10 +24,8 @@ export const initialGlobalState: SubscriptionInstanceGlobalState = {
   customerId: null,
   customerName: null,
   customerEmail: null,
-  customerWalletAddress: null,
   customerType: null,
   teamMemberCount: null,
-  kycStatus: null,
   operatorId: null,
   serviceOfferingId: null,
   tierName: null,
@@ -44,10 +42,11 @@ export const initialGlobalState: SubscriptionInstanceGlobalState = {
   autoRenew: false,
   operatorNotes: null,
   budget: null,
+  nextBillingDate: null,
+  projectedBillAmount: null,
+  projectedBillCurrency: null,
   services: [],
   serviceGroups: [],
-  invoices: [],
-  communications: [],
 };
 export const initialLocalState: SubscriptionInstanceLocalState = {};
 

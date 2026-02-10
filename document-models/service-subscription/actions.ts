@@ -4,6 +4,7 @@ import {
   tierSelectionActions,
   addOnManagementActions,
   facetSelectionActions,
+  billingProjectionActions,
 } from "./gen/creators.js";
 
 /** Actions for the ServiceSubscription document model */
@@ -14,4 +15,5 @@ export const actions = {
   ...tierSelectionActions,
   ...addOnManagementActions,
   ...facetSelectionActions,
+  ...billingProjectionActions,
 };

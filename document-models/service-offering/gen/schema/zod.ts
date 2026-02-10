@@ -3,17 +3,21 @@ import type {
   AddFacetBindingInput,
   AddFacetOptionInput,
   AddOptionGroupInput,
+  AddServiceGroupInput,
   AddServiceInput,
   AddServiceLevelInput,
   AddTargetAudienceInput,
   AddTierInput,
   AddTierPricingOptionInput,
   AddUsageLimitInput,
+  BillingCycle,
   ChangeResourceTemplateInput,
   DeleteOptionGroupInput,
+  DeleteServiceGroupInput,
   DeleteServiceInput,
   DeleteTierInput,
   FacetTarget,
+  GroupCostType,
   OptionGroup,
   RemoveFacetBindingInput,
   RemoveFacetOptionInput,
@@ -22,30 +26,35 @@ import type {
   RemoveTargetAudienceInput,
   RemoveTierPricingOptionInput,
   RemoveUsageLimitInput,
+  ReorderServiceGroupsInput,
   ResourceFacetBinding,
   SelectResourceTemplateInput,
   Service,
+  ServiceCostType,
+  ServiceGroup,
+  ServiceLevel,
   ServiceLevelBinding,
   ServiceOfferingState,
   ServicePricing,
+  ServiceStatus,
   ServiceSubscriptionTier,
   ServiceUsageLimit,
   SetFacetTargetInput,
   SetOfferingIdInput,
   SetOperatorInput,
-  SetRecurringServicesInput,
-  SetSetupServicesInput,
   TargetAudience,
   TierPricingOption,
   UpdateOfferingInfoInput,
   UpdateOfferingStatusInput,
   UpdateOptionGroupInput,
+  UpdateServiceGroupInput,
   UpdateServiceInput,
   UpdateServiceLevelInput,
   UpdateTierInput,
   UpdateTierPricingInput,
   UpdateTierPricingOptionInput,
   UpdateUsageLimitInput,
+  UsageResetCycle,
 } from "./types.js";
 
 type Properties<T> = Required<{
@@ -69,15 +78,9 @@ export const BillingCycleSchema = z.enum([
   "SEMI_ANNUAL",
 ]);
 
-export const ResetPeriodSchema = z.enum([
-  "ANNUAL",
-  "DAILY",
-  "HOURLY",
-  "MONTHLY",
-  "QUARTERLY",
-  "SEMI_ANNUAL",
-  "WEEKLY",
-]);
+export const GroupCostTypeSchema = z.enum(["RECURRING", "SETUP"]);
+
+export const ServiceCostTypeSchema = z.enum(["RECURRING", "SETUP"]);
 
 export const ServiceLevelSchema = z.enum([
   "CUSTOM",
@@ -94,6 +97,8 @@ export const ServiceStatusSchema = z.enum([
   "DEPRECATED",
   "DRAFT",
 ]);
+
+export const UsageResetCycleSchema = z.enum(["DAILY", "MONTHLY", "WEEKLY"]);
 
 export function AddFacetBindingInputSchema(): z.ZodObject<
   Properties<AddFacetBindingInput>
@@ -122,10 +127,27 @@ export function AddOptionGroupInputSchema(): z.ZodObject<
   Properties<AddOptionGroupInput>
 > {
   return z.object({
+    billingCycle: BillingCycleSchema.nullish(),
+    costType: GroupCostTypeSchema.nullish(),
+    currency: z.string().nullish(),
     defaultSelected: z.boolean(),
     description: z.string().nullish(),
     id: z.string(),
     isAddOn: z.boolean(),
+    lastModified: z.string().datetime(),
+    name: z.string(),
+    price: z.number().nullish(),
+  });
+}
+
+export function AddServiceGroupInputSchema(): z.ZodObject<
+  Properties<AddServiceGroupInput>
+> {
+  return z.object({
+    billingCycle: BillingCycleSchema,
+    description: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    id: z.string(),
     lastModified: z.string().datetime(),
     name: z.string(),
   });
@@ -135,14 +157,16 @@ export function AddServiceInputSchema(): z.ZodObject<
   Properties<AddServiceInput>
 > {
   return z.object({
+    costType: ServiceCostTypeSchema.nullish(),
+    currency: z.string().nullish(),
     description: z.string().nullish(),
     displayOrder: z.number().nullish(),
     id: z.string(),
-    isPremiumExclusive: z.boolean().nullish(),
     isSetupFormation: z.boolean().nullish(),
     lastModified: z.string().datetime(),
     optionGroupId: z.string().nullish(),
-    parentServiceId: z.string().nullish(),
+    price: z.number().nullish(),
+    serviceGroupId: z.string().nullish(),
     title: z.string(),
   });
 }
@@ -151,16 +175,13 @@ export function AddServiceLevelInputSchema(): z.ZodObject<
   Properties<AddServiceLevelInput>
 > {
   return z.object({
-    annexes: z.string().nullish(),
     customValue: z.string().nullish(),
     lastModified: z.string().datetime(),
     level: ServiceLevelSchema,
     optionGroupId: z.string().nullish(),
     serviceId: z.string(),
     serviceLevelId: z.string(),
-    setupFee: z.number().nullish(),
     tierId: z.string(),
-    variations: z.string().nullish(),
   });
 }
 
@@ -178,18 +199,12 @@ export function AddTargetAudienceInputSchema(): z.ZodObject<
 export function AddTierInputSchema(): z.ZodObject<Properties<AddTierInput>> {
   return z.object({
     amount: z.number().nullish(),
-    billingCycle: BillingCycleSchema,
     currency: z.string(),
     description: z.string().nullish(),
     id: z.string(),
     isCustomPricing: z.boolean().nullish(),
     lastModified: z.string().datetime(),
     name: z.string(),
-    perSeatAmount: z.number().nullish(),
-    perSeatBillingCycle: BillingCycleSchema.nullish(),
-    perSeatCurrency: z.string().nullish(),
-    perSeatLabel: z.string().nullish(),
-    setupFee: z.number().nullish(),
   });
 }
 
@@ -198,13 +213,10 @@ export function AddTierPricingOptionInputSchema(): z.ZodObject<
 > {
   return z.object({
     amount: z.number(),
-    billingCycle: BillingCycleSchema,
     currency: z.string(),
     isDefault: z.boolean().nullish(),
     lastModified: z.string().datetime(),
-    perSeatAmount: z.number().nullish(),
     pricingOptionId: z.string(),
-    setupFee: z.number().nullish(),
     tierId: z.string(),
   });
 }
@@ -213,17 +225,17 @@ export function AddUsageLimitInputSchema(): z.ZodObject<
   Properties<AddUsageLimitInput>
 > {
   return z.object({
+    freeLimit: z.number().nullish(),
     lastModified: z.string().datetime(),
-    limit: z.number().nullish(),
     limitId: z.string(),
     metric: z.string(),
     notes: z.string().nullish(),
-    resetPeriod: ResetPeriodSchema.nullish(),
+    paidLimit: z.number().nullish(),
+    resetCycle: UsageResetCycleSchema.nullish(),
     serviceId: z.string(),
     tierId: z.string(),
     unitName: z.string().nullish(),
     unitPrice: z.number().nullish(),
-    unitPriceBillingCycle: BillingCycleSchema.nullish(),
     unitPriceCurrency: z.string().nullish(),
   });
 }
@@ -240,6 +252,15 @@ export function ChangeResourceTemplateInputSchema(): z.ZodObject<
 
 export function DeleteOptionGroupInputSchema(): z.ZodObject<
   Properties<DeleteOptionGroupInput>
+> {
+  return z.object({
+    id: z.string(),
+    lastModified: z.string().datetime(),
+  });
+}
+
+export function DeleteServiceGroupInputSchema(): z.ZodObject<
+  Properties<DeleteServiceGroupInput>
 > {
   return z.object({
     id: z.string(),
@@ -278,11 +299,15 @@ export function FacetTargetSchema(): z.ZodObject<Properties<FacetTarget>> {
 export function OptionGroupSchema(): z.ZodObject<Properties<OptionGroup>> {
   return z.object({
     __typename: z.literal("OptionGroup").optional(),
+    billingCycle: BillingCycleSchema.nullish(),
+    costType: GroupCostTypeSchema.nullish(),
+    currency: z.string().nullish(),
     defaultSelected: z.boolean(),
     description: z.string().nullish(),
     id: z.string(),
     isAddOn: z.boolean(),
     name: z.string(),
+    price: z.number().nullish(),
   });
 }
 
@@ -354,6 +379,15 @@ export function RemoveUsageLimitInputSchema(): z.ZodObject<
   });
 }
 
+export function ReorderServiceGroupsInputSchema(): z.ZodObject<
+  Properties<ReorderServiceGroupsInput>
+> {
+  return z.object({
+    lastModified: z.string().datetime(),
+    order: z.array(z.string()),
+  });
+}
+
 export function ResourceFacetBindingSchema(): z.ZodObject<
   Properties<ResourceFacetBinding>
 > {
@@ -378,15 +412,28 @@ export function SelectResourceTemplateInputSchema(): z.ZodObject<
 export function ServiceSchema(): z.ZodObject<Properties<Service>> {
   return z.object({
     __typename: z.literal("Service").optional(),
+    costType: ServiceCostTypeSchema.nullish(),
+    currency: z.string().nullish(),
     description: z.string().nullish(),
     displayOrder: z.number().nullish(),
     facetBindings: z.array(z.lazy(() => ResourceFacetBindingSchema())),
     id: z.string(),
-    isPremiumExclusive: z.boolean(),
     isSetupFormation: z.boolean(),
     optionGroupId: z.string().nullish(),
-    parentServiceId: z.string().nullish(),
+    price: z.number().nullish(),
+    serviceGroupId: z.string().nullish(),
     title: z.string(),
+  });
+}
+
+export function ServiceGroupSchema(): z.ZodObject<Properties<ServiceGroup>> {
+  return z.object({
+    __typename: z.literal("ServiceGroup").optional(),
+    billingCycle: BillingCycleSchema,
+    description: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    id: z.string(),
+    name: z.string(),
   });
 }
 
@@ -395,14 +442,11 @@ export function ServiceLevelBindingSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceLevelBinding").optional(),
-    annexes: z.string().nullish(),
     customValue: z.string().nullish(),
     id: z.string(),
     level: ServiceLevelSchema,
     optionGroupId: z.string().nullish(),
     serviceId: z.string(),
-    setupFee: z.number().nullish(),
-    variations: z.string().nullish(),
   });
 }
 
@@ -418,10 +462,9 @@ export function ServiceOfferingStateSchema(): z.ZodObject<
     lastModified: z.string().datetime(),
     operatorId: z.string(),
     optionGroups: z.array(z.lazy(() => OptionGroupSchema())),
-    recurringServices: z.array(z.string()),
     resourceTemplateId: z.string().nullish(),
+    serviceGroups: z.array(z.lazy(() => ServiceGroupSchema())),
     services: z.array(z.lazy(() => ServiceSchema())),
-    setupServices: z.array(z.string()),
     status: ServiceStatusSchema,
     summary: z.string(),
     targetAudiences: z.array(z.lazy(() => TargetAudienceSchema())),
@@ -437,13 +480,7 @@ export function ServicePricingSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("ServicePricing").optional(),
     amount: z.number().nullish(),
-    billingCycle: BillingCycleSchema,
     currency: z.string(),
-    perSeatAmount: z.number().nullish(),
-    perSeatBillingCycle: BillingCycleSchema.nullish(),
-    perSeatCurrency: z.string().nullish(),
-    perSeatLabel: z.string().nullish(),
-    setupFee: z.number().nullish(),
   });
 }
 
@@ -468,15 +505,15 @@ export function ServiceUsageLimitSchema(): z.ZodObject<
 > {
   return z.object({
     __typename: z.literal("ServiceUsageLimit").optional(),
+    freeLimit: z.number().nullish(),
     id: z.string(),
-    limit: z.number().nullish(),
     metric: z.string(),
     notes: z.string().nullish(),
-    resetPeriod: ResetPeriodSchema.nullish(),
+    paidLimit: z.number().nullish(),
+    resetCycle: UsageResetCycleSchema.nullish(),
     serviceId: z.string(),
     unitName: z.string().nullish(),
     unitPrice: z.number().nullish(),
-    unitPriceBillingCycle: BillingCycleSchema.nullish(),
     unitPriceCurrency: z.string().nullish(),
   });
 }
@@ -511,24 +548,6 @@ export function SetOperatorInputSchema(): z.ZodObject<
   });
 }
 
-export function SetRecurringServicesInputSchema(): z.ZodObject<
-  Properties<SetRecurringServicesInput>
-> {
-  return z.object({
-    lastModified: z.string().datetime(),
-    services: z.array(z.string()),
-  });
-}
-
-export function SetSetupServicesInputSchema(): z.ZodObject<
-  Properties<SetSetupServicesInput>
-> {
-  return z.object({
-    lastModified: z.string().datetime(),
-    services: z.array(z.string()),
-  });
-}
-
 export function TargetAudienceSchema(): z.ZodObject<
   Properties<TargetAudience>
 > {
@@ -546,12 +565,9 @@ export function TierPricingOptionSchema(): z.ZodObject<
   return z.object({
     __typename: z.literal("TierPricingOption").optional(),
     amount: z.number(),
-    billingCycle: BillingCycleSchema,
     currency: z.string(),
     id: z.string(),
     isDefault: z.boolean(),
-    perSeatAmount: z.number().nullish(),
-    setupFee: z.number().nullish(),
   });
 }
 
@@ -581,10 +597,27 @@ export function UpdateOptionGroupInputSchema(): z.ZodObject<
   Properties<UpdateOptionGroupInput>
 > {
   return z.object({
+    billingCycle: BillingCycleSchema.nullish(),
+    costType: GroupCostTypeSchema.nullish(),
+    currency: z.string().nullish(),
     defaultSelected: z.boolean().nullish(),
     description: z.string().nullish(),
     id: z.string(),
     isAddOn: z.boolean().nullish(),
+    lastModified: z.string().datetime(),
+    name: z.string().nullish(),
+    price: z.number().nullish(),
+  });
+}
+
+export function UpdateServiceGroupInputSchema(): z.ZodObject<
+  Properties<UpdateServiceGroupInput>
+> {
+  return z.object({
+    billingCycle: BillingCycleSchema.nullish(),
+    description: z.string().nullish(),
+    displayOrder: z.number().nullish(),
+    id: z.string(),
     lastModified: z.string().datetime(),
     name: z.string().nullish(),
   });
@@ -594,14 +627,16 @@ export function UpdateServiceInputSchema(): z.ZodObject<
   Properties<UpdateServiceInput>
 > {
   return z.object({
+    costType: ServiceCostTypeSchema.nullish(),
+    currency: z.string().nullish(),
     description: z.string().nullish(),
     displayOrder: z.number().nullish(),
     id: z.string(),
-    isPremiumExclusive: z.boolean().nullish(),
     isSetupFormation: z.boolean().nullish(),
     lastModified: z.string().datetime(),
     optionGroupId: z.string().nullish(),
-    parentServiceId: z.string().nullish(),
+    price: z.number().nullish(),
+    serviceGroupId: z.string().nullish(),
     title: z.string().nullish(),
   });
 }
@@ -610,15 +645,12 @@ export function UpdateServiceLevelInputSchema(): z.ZodObject<
   Properties<UpdateServiceLevelInput>
 > {
   return z.object({
-    annexes: z.string().nullish(),
     customValue: z.string().nullish(),
     lastModified: z.string().datetime(),
     level: ServiceLevelSchema.nullish(),
     optionGroupId: z.string().nullish(),
     serviceLevelId: z.string(),
-    setupFee: z.number().nullish(),
     tierId: z.string(),
-    variations: z.string().nullish(),
   });
 }
 
@@ -639,14 +671,8 @@ export function UpdateTierPricingInputSchema(): z.ZodObject<
 > {
   return z.object({
     amount: z.number().nullish(),
-    billingCycle: BillingCycleSchema.nullish(),
     currency: z.string().nullish(),
     lastModified: z.string().datetime(),
-    perSeatAmount: z.number().nullish(),
-    perSeatBillingCycle: BillingCycleSchema.nullish(),
-    perSeatCurrency: z.string().nullish(),
-    perSeatLabel: z.string().nullish(),
-    setupFee: z.number().nullish(),
     tierId: z.string(),
   });
 }
@@ -659,9 +685,7 @@ export function UpdateTierPricingOptionInputSchema(): z.ZodObject<
     currency: z.string().nullish(),
     isDefault: z.boolean().nullish(),
     lastModified: z.string().datetime(),
-    perSeatAmount: z.number().nullish(),
     pricingOptionId: z.string(),
-    setupFee: z.number().nullish(),
     tierId: z.string(),
   });
 }
@@ -670,16 +694,16 @@ export function UpdateUsageLimitInputSchema(): z.ZodObject<
   Properties<UpdateUsageLimitInput>
 > {
   return z.object({
+    freeLimit: z.number().nullish(),
     lastModified: z.string().datetime(),
-    limit: z.number().nullish(),
     limitId: z.string(),
     metric: z.string().nullish(),
     notes: z.string().nullish(),
-    resetPeriod: ResetPeriodSchema.nullish(),
+    paidLimit: z.number().nullish(),
+    resetCycle: UsageResetCycleSchema.nullish(),
     tierId: z.string(),
     unitName: z.string().nullish(),
     unitPrice: z.number().nullish(),
-    unitPriceBillingCycle: BillingCycleSchema.nullish(),
     unitPriceCurrency: z.string().nullish(),
   });
 }

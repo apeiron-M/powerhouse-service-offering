@@ -6,3 +6,5 @@ export * from "./offering-management/creators.js";
 export * as offeringManagementActions from "./offering-management/creators.js";
 export * from "./option-group-management/creators.js";
 export * as optionGroupManagementActions from "./option-group-management/creators.js";
+export * from "./service-group-management/creators.js";
+export * as serviceGroupManagementActions from "./service-group-management/creators.js";

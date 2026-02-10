@@ -10,8 +10,6 @@ import {
   RemoveFacetTargetInputSchema,
   AddFacetOptionInputSchema,
   RemoveFacetOptionInputSchema,
-  SetSetupServicesInputSchema,
-  SetRecurringServicesInputSchema,
   SelectResourceTemplateInputSchema,
   ChangeResourceTemplateInputSchema,
 } from "../schema/zod.js";
@@ -26,8 +24,6 @@ import type {
   RemoveFacetTargetInput,
   AddFacetOptionInput,
   RemoveFacetOptionInput,
-  SetSetupServicesInput,
-  SetRecurringServicesInput,
   SelectResourceTemplateInput,
   ChangeResourceTemplateInput,
 } from "../types.js";
@@ -42,8 +38,6 @@ import type {
   RemoveFacetTargetAction,
   AddFacetOptionAction,
   RemoveFacetOptionAction,
-  SetSetupServicesAction,
-  SetRecurringServicesAction,
   SelectResourceTemplateAction,
   ChangeResourceTemplateAction,
 } from "./actions.js";
@@ -135,24 +129,6 @@ export const removeFacetOption = (input: RemoveFacetOptionInput) =>
     { ...input },
     undefined,
     RemoveFacetOptionInputSchema,
-    "global",
-  );
-
-export const setSetupServices = (input: SetSetupServicesInput) =>
-  createAction<SetSetupServicesAction>(
-    "SET_SETUP_SERVICES",
-    { ...input },
-    undefined,
-    SetSetupServicesInputSchema,
-    "global",
-  );
-
-export const setRecurringServices = (input: SetRecurringServicesInput) =>
-  createAction<SetRecurringServicesAction>(
-    "SET_RECURRING_SERVICES",
-    { ...input },
-    undefined,
-    SetRecurringServicesInputSchema,
     "global",
   );
 

@@ -6,7 +6,6 @@ import type {
 } from "@powerhousedao/contributor-billing/document-models/subscription-instance";
 import type { ViewMode } from "../types.js";
 import {
-  setAutoRenew,
   activateSubscription,
   pauseSubscription,
   resumeSubscription,
@@ -103,10 +102,6 @@ export function SubscriptionActions({
   >(null);
   const [reason, setReason] = useState("");
 
-  const handleToggleAutoRenew = useCallback(() => {
-    dispatch(setAutoRenew({ autoRenew: !state.autoRenew }));
-  }, [dispatch, state.autoRenew]);
-
   // Operator direct actions
   const handleActivate = useCallback(() => {
     dispatch(
@@ -197,22 +192,6 @@ export function SubscriptionActions({
   return (
     <>
       <div className="si-actions">
-        {/* Auto-renew toggle - both modes */}
-        <div className="si-actions__row">
-          <span className="si-actions__label">Auto-renew</span>
-          <button
-            type="button"
-            className={`si-toggle ${state.autoRenew ? "si-toggle--active" : ""}`}
-            onClick={handleToggleAutoRenew}
-            role="switch"
-            aria-checked={state.autoRenew}
-          >
-            <span className="si-toggle__track">
-              <span className="si-toggle__thumb" />
-            </span>
-          </button>
-        </div>
-
         {/* Status Actions - contextual based on current status */}
         {mode === "operator" && (
           <div className="si-actions__buttons">

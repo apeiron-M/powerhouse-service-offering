@@ -18,5 +18,4 @@ export * from "./subscription/operations.js";
 export * from "./service/operations.js";
 export * from "./service-group/operations.js";
 export * from "./metrics/operations.js";
-export * from "./billing/operations.js";
 export * from "./customer/operations.js";

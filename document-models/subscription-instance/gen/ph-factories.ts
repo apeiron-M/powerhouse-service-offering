@@ -16,10 +16,8 @@ export function defaultGlobalState(): SubscriptionInstanceGlobalState {
     customerId: null,
     customerName: null,
     customerEmail: null,
-    customerWalletAddress: null,
     customerType: null,
     teamMemberCount: null,
-    kycStatus: null,
     operatorId: null,
     serviceOfferingId: null,
     tierName: null,
@@ -36,10 +34,11 @@ export function defaultGlobalState(): SubscriptionInstanceGlobalState {
     autoRenew: false,
     operatorNotes: null,
     budget: null,
+    nextBillingDate: null,
+    projectedBillAmount: null,
+    projectedBillCurrency: null,
     services: [],
     serviceGroups: [],
-    invoices: [],
-    communications: [],
   };
 }
 

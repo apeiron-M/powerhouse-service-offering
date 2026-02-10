@@ -4,18 +4,13 @@ import type { DocumentDispatch } from "@powerhousedao/reactor-browser";
 import type {
   ServiceOfferingAction,
   TierPricingOption,
-  BillingCycle,
 } from "@powerhousedao/contributor-billing/document-models/service-offering";
 import {
   addTierPricingOption,
   updateTierPricingOption,
   removeTierPricingOption,
 } from "../../../document-models/service-offering/gen/creators.js";
-import {
-  formatMonthlyEquivalentDisplay,
-  RECURRING_BILLING_CYCLES,
-  BILLING_CYCLE_SHORT_LABELS,
-} from "./pricing-utils.js";
+import { formatPrice } from "./pricing-utils.js";
 
 interface TierPricingOptionsPanelProps {
   tierId: string;
@@ -352,24 +347,16 @@ export function TierPricingOptionsPanel({
 }: TierPricingOptionsPanelProps) {
   const [isAdding, setIsAdding] = useState(false);
   const [newOption, setNewOption] = useState({
-    billingCycle: "MONTHLY" as BillingCycle,
     amount: "",
   });
 
-  // Get cycles that are not already used
-  const usedCycles = new Set(pricingOptions.map((po) => po.billingCycle));
-  const availableCycles = RECURRING_BILLING_CYCLES.filter(
-    (cycle) => !usedCycles.has(cycle),
-  );
-
   const handleAddOption = () => {
-    if (!newOption.amount || !newOption.billingCycle) return;
+    if (!newOption.amount) return;
 
     dispatch(
       addTierPricingOption({
         tierId,
         pricingOptionId: generateId(),
-        billingCycle: newOption.billingCycle,
         amount: parseFloat(newOption.amount),
         currency: "USD",
         isDefault: pricingOptions.length === 0,
@@ -377,7 +364,7 @@ export function TierPricingOptionsPanel({
       }),
     );
 
-    setNewOption({ billingCycle: availableCycles[0] ?? "MONTHLY", amount: "" });
+    setNewOption({ amount: "" });
     setIsAdding(false);
   };
 
@@ -434,15 +421,12 @@ export function TierPricingOptionsPanel({
                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            Billing Cycle Options
+            Pricing Options
           </span>
-          {availableCycles.length > 0 && !isAdding && (
+          {!isAdding && (
             <button
               onClick={() => {
-                setNewOption((prev) => ({
-                  ...prev,
-                  billingCycle: availableCycles[0],
-                }));
+                setNewOption({ amount: "" });
                 setIsAdding(true);
               }}
               className="pricing-options-panel__add-btn"
@@ -455,7 +439,7 @@ export function TierPricingOptionsPanel({
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              Add Cycle
+              Add Option
             </button>
           )}
         </div>
@@ -489,22 +473,6 @@ export function TierPricingOptionsPanel({
 
           {isAdding && (
             <div className="pricing-option-add-form">
-              <select
-                value={newOption.billingCycle}
-                onChange={(e) =>
-                  setNewOption({
-                    ...newOption,
-                    billingCycle: e.target.value as BillingCycle,
-                  })
-                }
-                className="pricing-option-add-form__cycle-select"
-              >
-                {availableCycles.map((cycle) => (
-                  <option key={cycle} value={cycle}>
-                    {BILLING_CYCLE_SHORT_LABELS[cycle]}
-                  </option>
-                ))}
-              </select>
               <div className="pricing-option-add-form__amount-group">
                 <span className="pricing-option-add-form__currency">$</span>
                 <input
@@ -532,10 +500,7 @@ export function TierPricingOptionsPanel({
                 <button
                   onClick={() => {
                     setIsAdding(false);
-                    setNewOption({
-                      billingCycle: availableCycles[0] ?? "MONTHLY",
-                      amount: "",
-                    });
+                    setNewOption({ amount: "" });
                   }}
                   className="pricing-option-add-form__btn pricing-option-add-form__btn--cancel"
                 >
@@ -569,9 +534,8 @@ function PricingOptionRow({
     option.amount?.toString() ?? "",
   );
 
-  const monthlyDisplay = formatMonthlyEquivalentDisplay(
+  const priceDisplay = formatPrice(
     option.amount ?? 0,
-    option.billingCycle,
     option.currency ?? "USD",
   );
 
@@ -579,9 +543,7 @@ function PricingOptionRow({
     <div
       className={`pricing-option-row ${option.isDefault ? "pricing-option-row--default" : ""}`}
     >
-      <span className="pricing-option-row__cycle">
-        {BILLING_CYCLE_SHORT_LABELS[option.billingCycle]}
-      </span>
+      <span className="pricing-option-row__cycle">Option</span>
       <div className="pricing-option-row__amount-group">
         <span className="pricing-option-row__currency">$</span>
         <input
@@ -597,7 +559,7 @@ function PricingOptionRow({
           className="pricing-option-row__amount-input"
         />
       </div>
-      <span className="pricing-option-row__monthly">{monthlyDisplay}</span>
+      <span className="pricing-option-row__monthly">{priceDisplay}</span>
       <div className="pricing-option-row__actions">
         {option.isDefault ? (
           <span className="pricing-option-row__default-badge">Default</span>

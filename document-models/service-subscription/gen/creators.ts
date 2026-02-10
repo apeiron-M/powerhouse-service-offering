@@ -6,3 +6,5 @@ export * from "./add-on-management/creators.js";
 export * as addOnManagementActions from "./add-on-management/creators.js";
 export * from "./facet-selection/creators.js";
 export * as facetSelectionActions from "./facet-selection/creators.js";
+export * from "./billing-projection/creators.js";
+export * as billingProjectionActions from "./billing-projection/creators.js";

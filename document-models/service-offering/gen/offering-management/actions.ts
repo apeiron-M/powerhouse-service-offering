@@ -10,8 +10,6 @@ import type {
   RemoveFacetTargetInput,
   AddFacetOptionInput,
   RemoveFacetOptionInput,
-  SetSetupServicesInput,
-  SetRecurringServicesInput,
   SelectResourceTemplateInput,
   ChangeResourceTemplateInput,
 } from "../types.js";
@@ -56,14 +54,6 @@ export type RemoveFacetOptionAction = Action & {
   type: "REMOVE_FACET_OPTION";
   input: RemoveFacetOptionInput;
 };
-export type SetSetupServicesAction = Action & {
-  type: "SET_SETUP_SERVICES";
-  input: SetSetupServicesInput;
-};
-export type SetRecurringServicesAction = Action & {
-  type: "SET_RECURRING_SERVICES";
-  input: SetRecurringServicesInput;
-};
 export type SelectResourceTemplateAction = Action & {
   type: "SELECT_RESOURCE_TEMPLATE";
   input: SelectResourceTemplateInput;
@@ -84,7 +74,5 @@ export type ServiceOfferingOfferingManagementAction =
   | RemoveFacetTargetAction
   | AddFacetOptionAction
   | RemoveFacetOptionAction
-  | SetSetupServicesAction
-  | SetRecurringServicesAction
   | SelectResourceTemplateAction
   | ChangeResourceTemplateAction;

@@ -7,11 +7,13 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         id: action.input.id,
         title: action.input.title,
         description: action.input.description || null,
-        parentServiceId: action.input.parentServiceId || null,
+        serviceGroupId: action.input.serviceGroupId || null,
         displayOrder: action.input.displayOrder ?? null,
         isSetupFormation: action.input.isSetupFormation || false,
-        isPremiumExclusive: action.input.isPremiumExclusive || false,
         optionGroupId: action.input.optionGroupId || null,
+        costType: action.input.costType || null,
+        price: action.input.price || null,
+        currency: action.input.currency || null,
         facetBindings: [],
       });
       state.lastModified = action.input.lastModified;
@@ -28,8 +30,8 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         ) {
           service.description = action.input.description;
         }
-        if (action.input.parentServiceId !== undefined) {
-          service.parentServiceId = action.input.parentServiceId || null;
+        if (action.input.serviceGroupId !== undefined) {
+          service.serviceGroupId = action.input.serviceGroupId || null;
         }
         if (
           action.input.displayOrder !== undefined &&
@@ -43,14 +45,17 @@ export const serviceOfferingServiceManagementOperations: ServiceOfferingServiceM
         ) {
           service.isSetupFormation = action.input.isSetupFormation;
         }
-        if (
-          action.input.isPremiumExclusive !== undefined &&
-          action.input.isPremiumExclusive !== null
-        ) {
-          service.isPremiumExclusive = action.input.isPremiumExclusive;
-        }
         if (action.input.optionGroupId !== undefined) {
           service.optionGroupId = action.input.optionGroupId || null;
+        }
+        if (action.input.costType !== undefined) {
+          service.costType = action.input.costType || null;
+        }
+        if (action.input.price !== undefined) {
+          service.price = action.input.price || null;
+        }
+        if (action.input.currency !== undefined) {
+          service.currency = action.input.currency || null;
         }
       }
       state.lastModified = action.input.lastModified;
